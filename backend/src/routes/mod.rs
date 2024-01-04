@@ -1,6 +1,6 @@
 mod users;
 mod auth;
-use actix_web::web::ServiceConfig;
+use actix_web::{web::ServiceConfig};
 use serde::{Serialize, Deserialize};
 use users::users;
 use auth::auth;
@@ -17,6 +17,9 @@ impl ErrorResponse {
     }
     pub fn internal_server_error(err: &str) -> Self {
         ErrorResponse {code: 500, message: format!("INTERNAL SERVER ERROR: {err}")}
+    }
+    pub fn bad_request(reason: &str) -> Self {
+        ErrorResponse {code: 400, message: format!("ERROR: {reason}")}
     }
 }
 

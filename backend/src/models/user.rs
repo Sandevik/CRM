@@ -15,7 +15,7 @@ pub struct User {
 
 impl User {
     
-    pub async fn get_by_username(username: &String, data: web::Data<AppState>) -> Result<Option<User>, Error> {
+    pub async fn get_by_username(username: &str, data: web::Data<AppState>) -> Result<Option<User>, Error> {
         let res = sqlx::query("SELECT * FROM users WHERE username = ?").bind(username).fetch_optional(&data.pool).await;
         match res {
             Err(err) => return Err(err),
