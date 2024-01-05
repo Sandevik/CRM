@@ -62,7 +62,7 @@ impl User {
         }
     } 
 
-    pub async fn insert_user(email: &String, phone_number: String, password: String, data: &web::Data<AppState>) -> Result<sqlx::mysql::MySqlQueryResult, Error> {
+    pub async fn insert_user(email: &String, phone_number: &String, password: &String, data: &web::Data<AppState>) -> Result<sqlx::mysql::MySqlQueryResult, Error> {
         let result = sqlx::query("INSERT INTO users (uuid, email, phone_number, p_hash, admin, joined, last_sign_in) VALUES (uuid(),?,?,?,0,?,?)")
             .bind(email)
             .bind(phone_number)

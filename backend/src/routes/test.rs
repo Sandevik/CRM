@@ -17,5 +17,5 @@ async fn index() -> impl Responder {
 #[get("/generate-hash")]
 async fn generate_hash() -> impl Responder {
     
-    HttpResponse::Ok().json(Hashing::hash("test".to_string()))
+    HttpResponse::Ok().json(Hashing::hash(&"test".to_string()))
 }

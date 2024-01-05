@@ -3,8 +3,7 @@ use chrono::{Utc, Days};
 use jsonwebtoken::{encode, Header, EncodingKey, errors::Error};
 use serde::{Serialize, Deserialize};
 use crate::{models::user::User, AppState, controllers::hashing::Hashing};
-
-use super::ErrorResponse;
+use super::Response;
 
 pub fn auth() -> Scope {
     let scope = web::scope("/auth")
@@ -16,49 +15,44 @@ pub fn auth() -> Scope {
     scope
 }
 
-
-
-
 #[derive(Serialize, Deserialize)]
 struct Claims {
     user: User,
     exp: usize,
 }
 
-
-
-
-
 async fn index() -> impl Responder {
     HttpResponse::Ok().body("auth route")
 } 
 
+
+#[derive(Serialize, Deserialize)]
+struct DecodeSignIn {
+    email: String,
+    password: String,
+}
+
 #[post("/sign-in")]
-async fn sign_in(secret: web::Data<String>, data: web::Data<AppState>) -> impl Responder {
+async fn sign_in(body: web::Json<DecodeSignIn>, secret: web::Data<String>, data: web::Data<AppState>) -> impl Responder {
 
-
-    // get username, password from request
-    let email = "simon.sandevik@outlook.com";
-    let password = "superhemligtlösenord";
-    
-    let db_result: Result<Option<User>, sqlx::Error> = User::get_by_email(email, &data).await;
+    let db_result: Result<Option<User>, sqlx::Error> = User::get_by_email(&body.email, &data).await;
 
     match db_result {
-        Err(err) => HttpResponse::InternalServerError().json(ErrorResponse::internal_server_error(&err.to_string())),
+        Err(err) => HttpResponse::InternalServerError().json(Response::internal_server_error(&err.to_string())),
         Ok(user) => {
             match user {
-                None => HttpResponse::BadRequest().json(ErrorResponse::bad_request("Email or password is incorrect")),
+                None => HttpResponse::BadRequest().json(Response::bad_request("Email or password is incorrect")),
                 Some(user) => {
-                        match Hashing::verify(password.to_string(), &user.p_hash) {
-                        Err(_) => HttpResponse::BadRequest().json(ErrorResponse::bad_request("Email or password is incorrect")),
+                        match Hashing::verify(body.password.to_string(), &user.p_hash) {
+                        Err(_) => HttpResponse::BadRequest().json(Response::bad_request("Email or password is incorrect")),
                         Ok(_) => {
                             let u = user.update_last_sign_in(&data).await; // ignore the result as it is not essential for the program.
                             println!("{}", user.uuid);
                             println!("{:?}", u);
                             let jwt = create_jwt(&user, &secret);
                             match jwt {
-                                Err(err) => HttpResponse::InternalServerError().json(ErrorResponse::internal_server_error(&err.to_string())),
-                                Ok(token) => HttpResponse::Ok().json(token)
+                                Err(err) => HttpResponse::InternalServerError().json(Response::internal_server_error(&err.to_string())),
+                                Ok(token) => HttpResponse::Ok().json(Response::ok("Success", Some(token)))
                             }
                         }
                     }
@@ -70,29 +64,31 @@ async fn sign_in(secret: web::Data<String>, data: web::Data<AppState>) -> impl R
 }
 
 
+#[derive(Serialize, Deserialize)]
+struct DecodeSignUp {
+    email: String,
+    password: String,
+    phone_number: String,
+}
+
 #[post("/sign-up")]
-async fn sign_up(secret: web::Data<String>, data: web::Data<AppState>) -> impl Responder {
+async fn sign_up(body: web::Json<DecodeSignUp>, secret: web::Data<String>, data: web::Data<AppState>) -> impl Responder {
 
-    //get data from request
-    let email = "simon.sandevik@outlook.com".to_string();
-    let phone_number = "03847384738".to_string();
-    let password = "superhemligtlösenord".to_string();
-
-    let db_result = User::insert_user(&email, phone_number, password, &data).await;
+    let db_result = User::insert_user(&body.email, &body.phone_number, &body.password, &data).await;
 
     match db_result {
-        Err(err) => HttpResponse::InternalServerError().json(ErrorResponse::internal_server_error(&err.to_string())),
+        Err(_err) => HttpResponse::InternalServerError().json(Response::internal_server_error("User already exists.")),
         Ok(_) => {
-            match User::get_by_email(&email, &data).await {
-                Err(err) => HttpResponse::InternalServerError().json(ErrorResponse::internal_server_error(&err.to_string())),
+            match User::get_by_email(&body.email, &data).await {
+                Err(err) => HttpResponse::InternalServerError().json(Response::internal_server_error(&err.to_string())),
                 Ok(user) => {
                     match user {
-                        None => HttpResponse::BadRequest().json(ErrorResponse::bad_request("Could not fetch user")),
+                        None => HttpResponse::BadRequest().json(Response::bad_request("Could not fetch user")),
                         Some(user) => {
                             let jwt = create_jwt(&user, &secret);
                             match jwt {
                                 Err(err) => HttpResponse::InternalServerError().json(&err.to_string()),
-                                Ok(token) => HttpResponse::Created().json(token)
+                                Ok(token) => HttpResponse::Created().json(Response::ok("Success", Some(token)))
                             }
                         }
                     }

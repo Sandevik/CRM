@@ -9,7 +9,7 @@ pub struct Hashing ();
 
 impl Hashing {
 
-    pub fn hash(password: String) -> String {
+    pub fn hash(password: &String) -> String {
         let salt = SaltString::generate(&mut OsRng);
         Pbkdf2.hash_password(password.as_bytes(), &salt).expect("ERROR: Could not hash password").to_string()
     }

@@ -2,7 +2,7 @@ use actix_web::{web::{self}, get,  Responder, HttpResponse, Scope};
 
 use crate::{AppState, models::user::User};
 
-use super::ErrorResponse;
+use super::Response;
 
 pub fn users() -> Scope {
     let scope = web::scope("/users")
@@ -25,10 +25,10 @@ async fn user_by_uuid(path: web::Path<String>, data: web::Data<AppState>) -> imp
         Ok(optn) => {
             match optn {
                 Some(user) => HttpResponse::Found().json(user),
-                None => HttpResponse::NotFound().json(ErrorResponse::not_found("User"))
+                None => HttpResponse::NotFound().json(Response::not_found("User"))
             }
         }
-        Err(err) => HttpResponse::InternalServerError().json(ErrorResponse::internal_server_error(&err.to_string()))
+        Err(err) => HttpResponse::InternalServerError().json(Response::internal_server_error(&err.to_string()))
     }
 }
 
@@ -39,10 +39,10 @@ async fn user_by_username(path: web::Path<String>, data: web::Data<AppState>) ->
         Ok(optn) => {
             match optn {
                 Some(user) => HttpResponse::Found().json(user),
-                None => HttpResponse::NotFound().json(ErrorResponse::not_found("User"))
+                None => HttpResponse::NotFound().json(Response::not_found("User"))
             }
         }
-        Err(err) => HttpResponse::InternalServerError().json(ErrorResponse::internal_server_error(&err.to_string()))
+        Err(err) => HttpResponse::InternalServerError().json(Response::internal_server_error(&err.to_string()))
     }
 }
 

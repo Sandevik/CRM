@@ -1,9 +1,7 @@
 use actix_web::web;
 use sqlx::{mysql::MySqlQueryResult, Pool, MySql};
 use uuid::Uuid;
-
 use crate::AppState;
-
 pub struct Database ();
 
 impl Database {
@@ -42,13 +40,4 @@ impl Database {
 
         sqlx::query(create_table_customers_query).bind(table_name).execute(&data.pool).await
     }
-
-
-
-
-
-
-
-
-
 }
