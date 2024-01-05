@@ -2,7 +2,6 @@ use actix_web::{post, HttpResponse, Responder, Scope, web};
 use chrono::{Utc, Days};
 use jsonwebtoken::{encode, Header, EncodingKey, errors::Error};
 use serde::{Serialize, Deserialize};
-use uuid::Uuid;
 use crate::{models::user::User, AppState, hashing::Hashing};
 
 use super::ErrorResponse;
@@ -11,7 +10,8 @@ pub fn auth() -> Scope {
     let scope = web::scope("/auth")
         .route("", web::get().to(index))
         .route("/", web::get().to(index))
-        .service(login);
+        .service(sign_in)
+        .service(sign_up);
         
     scope
 }
@@ -30,18 +30,18 @@ struct Claims {
 
 
 async fn index() -> impl Responder {
-    HttpResponse::Ok().body("login route")
+    HttpResponse::Ok().body("auth route")
 } 
 
-#[post("/login")]
-async fn login(secret: web::Data<String>, data: web::Data<AppState>) -> impl Responder {
+#[post("/sign-in")]
+async fn sign_in(secret: web::Data<String>, data: web::Data<AppState>) -> impl Responder {
 
 
     // get username, password from request
-    let username = "simon";
+    let email = "simon@test.com";
     let password = "test";
     
-    let db_result: Result<Option<User>, sqlx::Error> = User::get_by_username(username, data).await;
+    let db_result: Result<Option<User>, sqlx::Error> = User::get_by_email(email, &data).await;
 
     match db_result {
         Err(err) => HttpResponse::InternalServerError().json(ErrorResponse::internal_server_error(&err.to_string())),
@@ -67,17 +67,37 @@ async fn login(secret: web::Data<String>, data: web::Data<AppState>) -> impl Res
 }
 
 
-/* #[post("/signup")]
-async fn sign_up(data: web::Data<AppState>) -> impl Responder {
+#[post("/sign-up")]
+async fn sign_up(secret: web::Data<String>, data: web::Data<AppState>) -> impl Responder {
 
-    let username = "simon2";
-    let password = "test2";
+    //get data from request
+    let email = "simon2".to_string();
+    let phone_number = "03847384738".to_string();
+    let password = "test2".to_string();
 
+    let db_result = User::insert_user(&email, phone_number, password, &data).await;
 
-
-
-
-} */
+    match db_result {
+        Err(err) => HttpResponse::InternalServerError().json(ErrorResponse::internal_server_error(&err.to_string())),
+        Ok(_) => {
+            match User::get_by_email(&email, &data).await {
+                Err(err) => HttpResponse::InternalServerError().json(ErrorResponse::internal_server_error(&err.to_string())),
+                Ok(user) => {
+                    match user {
+                        None => HttpResponse::BadRequest().json(ErrorResponse::bad_request("Could not fetch user")),
+                        Some(user) => {
+                            let jwt = create_jwt(user, secret);
+                            match jwt {
+                                Err(err) => HttpResponse::InternalServerError().json(&err.to_string()),
+                                Ok(token) => HttpResponse::Created().json(token)
+                            }
+                        }
+                    }
+                }
+            } 
+        }
+    }
+}
 
 
 

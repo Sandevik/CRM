@@ -6,7 +6,6 @@ mod routes;
 mod models;
 mod database;
 mod hashing;
-use hashing::Hashing;
 use database::Database;
 use routes::routes;
 

@@ -1,9 +1,13 @@
 mod users;
 mod auth;
-use actix_web::{web::ServiceConfig};
+mod test;
+
+use actix_web::web::ServiceConfig;
 use serde::{Serialize, Deserialize};
+
 use users::users;
 use auth::auth;
+use test::test;
 
 #[derive(Serialize, Deserialize)]
 pub struct ErrorResponse {
@@ -26,4 +30,5 @@ impl ErrorResponse {
 pub fn routes(conf: &mut ServiceConfig) {
     conf.service(auth());
     conf.service(users());
+    conf.service(test());
 }
