@@ -38,8 +38,8 @@ async fn sign_in(secret: web::Data<String>, data: web::Data<AppState>) -> impl R
 
 
     // get username, password from request
-    let email = "simon@test.com";
-    let password = "test";
+    let email = "simon.sandevik@outlook.com";
+    let password = "superhemligtlösenord";
     
     let db_result: Result<Option<User>, sqlx::Error> = User::get_by_email(email, &data).await;
 
@@ -47,12 +47,15 @@ async fn sign_in(secret: web::Data<String>, data: web::Data<AppState>) -> impl R
         Err(err) => HttpResponse::InternalServerError().json(ErrorResponse::internal_server_error(&err.to_string())),
         Ok(user) => {
             match user {
-                None => HttpResponse::BadRequest().json(ErrorResponse::bad_request("Username or password is incorrect")),
+                None => HttpResponse::BadRequest().json(ErrorResponse::bad_request("Email or password is incorrect")),
                 Some(user) => {
                         match Hashing::verify(password.to_string(), &user.p_hash) {
-                        Err(_) => HttpResponse::BadRequest().json(ErrorResponse::bad_request("Username or password is incorrect")),
+                        Err(_) => HttpResponse::BadRequest().json(ErrorResponse::bad_request("Email or password is incorrect")),
                         Ok(_) => {
-                            let jwt = create_jwt(user, secret);
+                            let u = user.update_last_sign_in(&data).await; // ignore the result as it is not essential for the program.
+                            println!("{}", user.uuid);
+                            println!("{:?}", u);
+                            let jwt = create_jwt(&user, &secret);
                             match jwt {
                                 Err(err) => HttpResponse::InternalServerError().json(ErrorResponse::internal_server_error(&err.to_string())),
                                 Ok(token) => HttpResponse::Ok().json(token)
@@ -71,9 +74,9 @@ async fn sign_in(secret: web::Data<String>, data: web::Data<AppState>) -> impl R
 async fn sign_up(secret: web::Data<String>, data: web::Data<AppState>) -> impl Responder {
 
     //get data from request
-    let email = "simon2".to_string();
+    let email = "simon.sandevik@outlook.com".to_string();
     let phone_number = "03847384738".to_string();
-    let password = "test2".to_string();
+    let password = "superhemligtlösenord".to_string();
 
     let db_result = User::insert_user(&email, phone_number, password, &data).await;
 
@@ -86,7 +89,7 @@ async fn sign_up(secret: web::Data<String>, data: web::Data<AppState>) -> impl R
                     match user {
                         None => HttpResponse::BadRequest().json(ErrorResponse::bad_request("Could not fetch user")),
                         Some(user) => {
-                            let jwt = create_jwt(user, secret);
+                            let jwt = create_jwt(&user, &secret);
                             match jwt {
                                 Err(err) => HttpResponse::InternalServerError().json(&err.to_string()),
                                 Ok(token) => HttpResponse::Created().json(token)
@@ -101,8 +104,8 @@ async fn sign_up(secret: web::Data<String>, data: web::Data<AppState>) -> impl R
 
 
 
-fn create_jwt(user: User, secret: web::Data<String>) -> Result<String, Error> {
+fn create_jwt(user: &User, secret: &web::Data<String>) -> Result<String, Error> {
     let exp: usize = Utc::now().checked_add_days(Days::new(7)).unwrap().timestamp() as usize;
-    let token_claim: Claims = Claims { user, exp };
+    let token_claim: Claims = Claims { user: user.clone(), exp };
     encode(&Header::default(), &token_claim, &EncodingKey::from_secret(secret.as_bytes())) 
 }

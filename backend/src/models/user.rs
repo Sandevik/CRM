@@ -5,7 +5,7 @@ use sqlx::{Error, Row};
 use uuid::Uuid;
 use crate::{AppState, hashing::Hashing};
 
-#[derive(sqlx::FromRow, Debug, Serialize, Deserialize)]
+#[derive(sqlx::FromRow, Debug, Serialize, Deserialize, Clone)]
 pub struct User {
     pub uuid: Uuid, 
     pub email: String,
@@ -14,6 +14,7 @@ pub struct User {
     pub phone_number: Option<String>,
     pub admin: bool,
     pub joined: DateTime<Utc>,
+    pub last_sign_in: Option<DateTime<Utc>>,
 }
 
 impl User {
@@ -30,7 +31,8 @@ impl User {
                         phone_number: msql_row.get("phone_number"),
                         p_hash: msql_row.get("p_hash"),
                         admin: msql_row.get("admin"),
-                        joined: msql_row.get("joined")
+                        joined: msql_row.get("joined"),
+                        last_sign_in: msql_row.get("last_sign_in")
                     })),
                     None => return Ok(None),
                 }
@@ -50,7 +52,9 @@ impl User {
                         phone_number: msql_row.get("phone_number"),
                         p_hash: msql_row.get("p_hash"),
                         admin: msql_row.get("admin"),
-                        joined: msql_row.get("joined")
+                        joined: msql_row.get("joined"),
+                        last_sign_in: msql_row.get("last_sign_in")
+
                     })),
                     None => return Ok(None),
                 }
@@ -59,13 +63,22 @@ impl User {
     } 
 
     pub async fn insert_user(email: &String, phone_number: String, password: String, data: &web::Data<AppState>) -> Result<sqlx::mysql::MySqlQueryResult, Error> {
-        let result = sqlx::query("INSERT INTO users (uuid, email, phone_number, p_hash, admin, joined) VALUES (uuid(),?,?,?,0,?)")
+        let result = sqlx::query("INSERT INTO users (uuid, email, phone_number, p_hash, admin, joined, last_sign_in) VALUES (uuid(),?,?,?,0,?,?)")
             .bind(email)
             .bind(phone_number)
             .bind(Hashing::hash(password))
             .bind(Utc::now())
+            .bind(Utc::now())
             .execute(&data.pool)
             .await;
+        result
+    }
+
+    pub async fn update_last_sign_in(&self, data: &web::Data<AppState>) -> Result<sqlx::mysql::MySqlQueryResult, Error> {
+        let result = sqlx::query("UPDATE users SET last_sign_in = ? WHERE uuid = ?")
+            .bind(Utc::now())
+            .bind(self.uuid)
+            .execute(&data.pool).await;
         result
     }
 

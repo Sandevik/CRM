@@ -1,4 +1,4 @@
-use actix_web::{web::{self}, get,  Responder, HttpResponse, Scope, post};
+use actix_web::{web::{self}, get,  Responder, HttpResponse, Scope};
 
 use crate::{AppState, models::user::User};
 
@@ -9,8 +9,8 @@ pub fn users() -> Scope {
         .route("", web::get().to(index))
         .route("/", web::get().to(index))
         .service(user_by_uuid)
-        .service(user_by_username)
-        .service(new_user);
+        .service(user_by_username);
+
     scope
 }
 
@@ -32,7 +32,7 @@ async fn user_by_uuid(path: web::Path<String>, data: web::Data<AppState>) -> imp
     }
 }
 
-#[get("/username/{username}")]
+#[get("/email/{email}")]
 async fn user_by_username(path: web::Path<String>, data: web::Data<AppState>) -> impl Responder {
     let user: Result<Option<User>, sqlx::Error> = User::get_by_email(&path.into_inner(), &data).await;
     match user {
@@ -46,7 +46,7 @@ async fn user_by_username(path: web::Path<String>, data: web::Data<AppState>) ->
     }
 }
 
-#[post("/new")]
+/* #[post("/new")]
 async fn new_user(_path: web::Path<String>, data: web::Data<AppState>) -> impl Responder {
 
     let email = "simon.sandevik@outlook.com".to_string();
@@ -59,4 +59,4 @@ async fn new_user(_path: web::Path<String>, data: web::Data<AppState>) -> impl R
     }
 
 
-}
+} */
