@@ -3,7 +3,7 @@ use chrono::{Utc, DateTime};
 use serde::{self, Serialize, Deserialize};
 use sqlx::{Error, Row};
 use uuid::Uuid;
-use crate::{AppState, hashing::Hashing};
+use crate::{AppState, controllers::hashing::Hashing};
 
 #[derive(sqlx::FromRow, Debug, Serialize, Deserialize, Clone)]
 pub struct User {

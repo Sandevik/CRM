@@ -4,9 +4,9 @@ use actix_web::{web, HttpServer, App};
 use sqlx::{mysql::MySqlPoolOptions, MySql, Pool};
 mod routes;
 mod models;
-mod database;
-mod hashing;
-use database::Database;
+mod controllers;
+
+use controllers::database::Database;
 use routes::routes;
 
 

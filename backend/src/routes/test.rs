@@ -1,6 +1,6 @@
 use actix_web::{Scope, web::{self}, Responder, HttpResponse, get};
 
-use crate::hashing::Hashing;
+use crate::controllers::hashing::Hashing;
 
 pub fn test() -> Scope {
     let scope = web::scope("/test")

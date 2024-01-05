@@ -2,7 +2,7 @@ use actix_web::{post, HttpResponse, Responder, Scope, web};
 use chrono::{Utc, Days};
 use jsonwebtoken::{encode, Header, EncodingKey, errors::Error};
 use serde::{Serialize, Deserialize};
-use crate::{models::user::User, AppState, hashing::Hashing};
+use crate::{models::user::User, AppState, controllers::hashing::Hashing};
 
 use super::ErrorResponse;
 
