@@ -1,6 +1,6 @@
 use actix_web::{post, HttpResponse, Responder, Scope, web};
 use chrono::{Utc, Days};
-use jsonwebtoken::{encode, Header, EncodingKey, errors::Error};
+use jsonwebtoken::{encode, Header, EncodingKey, errors::Error, decode, DecodingKey, Validation, Algorithm, TokenData};
 use serde::{Serialize, Deserialize};
 use crate::{models::user::User, AppState, controllers::hashing::Hashing};
 use super::Response;
@@ -10,7 +10,8 @@ pub fn auth() -> Scope {
         .route("", web::get().to(index))
         .route("/", web::get().to(index))
         .service(sign_in)
-        .service(sign_up);
+        .service(sign_up)
+        .service(validate_token);
         
     scope
 }
@@ -99,9 +100,26 @@ async fn sign_up(body: web::Json<DecodeSignUp>, secret: web::Data<String>, data:
 }
 
 
+#[derive(Serialize, Deserialize)]
+struct DecodeValidateToken {
+    token: String
+}
+
+#[post("/validate-token")]
+async fn validate_token(body: web::Json<DecodeValidateToken>, secret: web::Data<String>) -> impl Responder {
+    match decode_jwt(&body.token, &secret) {
+        Err(err) => HttpResponse::BadRequest().json(Response::bad_request(&err.to_string())),
+        Ok(_) => HttpResponse::Ok().json(Response::ok("Authorized", None))
+    }
+}
 
 fn create_jwt(user: &User, secret: &web::Data<String>) -> Result<String, Error> {
     let exp: usize = Utc::now().checked_add_days(Days::new(7)).unwrap().timestamp() as usize;
     let token_claim: Claims = Claims { user: user.clone(), exp };
     encode(&Header::default(), &token_claim, &EncodingKey::from_secret(secret.as_bytes())) 
 }
+
+fn decode_jwt(raw_token: &String, secret: &web::Data<String>) -> Result<TokenData<Claims>, Error> {
+    decode(&raw_token, &DecodingKey::from_secret(secret.as_bytes()), &Validation::new(Algorithm::HS256))
+}
+

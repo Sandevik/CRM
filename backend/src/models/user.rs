@@ -9,7 +9,7 @@ use crate::{AppState, controllers::hashing::Hashing};
 pub struct User {
     pub uuid: Uuid, 
     pub email: String,
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing, skip_deserializing)]
     pub p_hash: String,
     pub phone_number: Option<String>,
     pub admin: bool,

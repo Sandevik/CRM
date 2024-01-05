@@ -32,10 +32,6 @@ impl Response {
     }
 }
 
-fn token_not_exist(response: &Response) -> bool {
-    response.token.is_none()
-}
-
 pub fn routes(conf: &mut ServiceConfig) {
     conf.service(auth());
     conf.service(users());
