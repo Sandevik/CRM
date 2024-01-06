@@ -17,3 +17,4 @@ jsonwebtoken = "9.2.0"
 sha2 = "0.10.8"
 pbkdf2 = { version = "0.12", features = ["simple"] }
 rand_core = { version = "0.6", features = ["std"] }
+futures-util = "0.3.30"

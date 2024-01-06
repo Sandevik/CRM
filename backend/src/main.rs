@@ -5,6 +5,7 @@ use sqlx::{mysql::MySqlPoolOptions, MySql, Pool};
 mod routes;
 mod models;
 mod controllers;
+mod extractors;
 
 use controllers::database::Database;
 use routes::routes;

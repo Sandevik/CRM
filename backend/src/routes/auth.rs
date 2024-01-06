@@ -1,9 +1,9 @@
 use actix_web::{post, HttpResponse, Responder, Scope, web};
-use chrono::{Utc, Days};
-use jsonwebtoken::{encode, Header, EncodingKey, errors::Error, decode, DecodingKey, Validation, Algorithm, TokenData};
 use serde::{Serialize, Deserialize};
 use crate::{models::user::User, AppState, controllers::hashing::Hashing};
 use super::Response;
+use crate::controllers::jwt::JWT;
+
 
 pub fn auth() -> Scope {
     let scope = web::scope("/auth")
@@ -16,15 +16,10 @@ pub fn auth() -> Scope {
     scope
 }
 
-#[derive(Serialize, Deserialize)]
-struct Claims {
-    user: User,
-    exp: usize,
-}
-
 async fn index() -> impl Responder {
     HttpResponse::Ok().body("auth route")
 } 
+
 
 
 #[derive(Serialize, Deserialize)]
@@ -50,10 +45,10 @@ async fn sign_in(body: web::Json<DecodeSignIn>, secret: web::Data<String>, data:
                             let u = user.update_last_sign_in(&data).await; // ignore the result as it is not essential for the program.
                             println!("{}", user.uuid);
                             println!("{:?}", u);
-                            let jwt = create_jwt(&user, &secret);
+                            let jwt = JWT::create_jwt(&user, &secret);
                             match jwt {
                                 Err(err) => HttpResponse::InternalServerError().json(Response::internal_server_error(&err.to_string())),
-                                Ok(token) => HttpResponse::Ok().json(Response::ok("Success", Some(token)))
+                                Ok(token) => HttpResponse::Ok().json(Response::ok("Success", Some(token), None))
                             }
                         }
                     }
@@ -86,10 +81,10 @@ async fn sign_up(body: web::Json<DecodeSignUp>, secret: web::Data<String>, data:
                     match user {
                         None => HttpResponse::BadRequest().json(Response::bad_request("Could not fetch user")),
                         Some(user) => {
-                            let jwt = create_jwt(&user, &secret);
+                            let jwt = JWT::create_jwt(&user, &secret);
                             match jwt {
                                 Err(err) => HttpResponse::InternalServerError().json(&err.to_string()),
-                                Ok(token) => HttpResponse::Created().json(Response::ok("Success", Some(token)))
+                                Ok(token) => HttpResponse::Created().json(Response::ok("Success", Some(token), None))
                             }
                         }
                     }
@@ -107,19 +102,11 @@ struct DecodeValidateToken {
 
 #[post("/validate-token")]
 async fn validate_token(body: web::Json<DecodeValidateToken>, secret: web::Data<String>) -> impl Responder {
-    match decode_jwt(&body.token, &secret) {
+    match JWT::decode_jwt(&body.token, &secret) {
         Err(err) => HttpResponse::BadRequest().json(Response::bad_request(&err.to_string())),
-        Ok(_) => HttpResponse::Ok().json(Response::ok("Authorized", None))
+        Ok(token_claim) => HttpResponse::Ok().json(Response::ok("Authorized", None, Some(token_claim.claims.user)))
     }
 }
 
-fn create_jwt(user: &User, secret: &web::Data<String>) -> Result<String, Error> {
-    let exp: usize = Utc::now().checked_add_days(Days::new(7)).unwrap().timestamp() as usize;
-    let token_claim: Claims = Claims { user: user.clone(), exp };
-    encode(&Header::default(), &token_claim, &EncodingKey::from_secret(secret.as_bytes())) 
-}
 
-fn decode_jwt(raw_token: &String, secret: &web::Data<String>) -> Result<TokenData<Claims>, Error> {
-    decode(&raw_token, &DecodingKey::from_secret(secret.as_bytes()), &Validation::new(Algorithm::HS256))
-}
 
