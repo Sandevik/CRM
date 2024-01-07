@@ -9,7 +9,7 @@ pub struct JWT;
 
 impl JWT {
     pub fn create_jwt(user: &User, secret: &web::Data<String>) -> Result<String, Error> {
-        let exp: usize = Utc::now().checked_add_days(Days::new(7)).unwrap().timestamp() as usize;
+        let exp: u64 = Utc::now().checked_add_days(Days::new(7)).unwrap().timestamp() as u64;
         let token_claim: Claims = Claims { user: user.clone(), exp };
         encode(&Header::default(), &token_claim, &EncodingKey::from_secret(secret.as_bytes())) 
     }
@@ -22,5 +22,5 @@ impl JWT {
 #[derive(Serialize, Deserialize)]
 pub struct Claims {
     pub user: User,
-    pub exp: usize,
+    pub exp: u64,
 }

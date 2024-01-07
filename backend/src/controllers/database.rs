@@ -1,7 +1,7 @@
 use actix_web::web;
 use sqlx::{mysql::MySqlQueryResult, Pool, MySql};
 use uuid::Uuid;
-use crate::AppState;
+use crate::{AppState, models::user::User};
 pub struct Database ();
 
 impl Database {
@@ -23,21 +23,35 @@ impl Database {
     }
 
     // Uses a logged in user's uuid to create a personal customers table like "81caabab-7e86-4547-beee-d2da511237c4-customers"
-    pub async fn setup_customers_table(user_uuid: Uuid, data: web::Data<AppState>) -> Result<MySqlQueryResult, sqlx::Error>{
-        let mut table_name = user_uuid.as_hyphenated().to_string();
+    pub async fn setup_customers_table(user: &User, data: web::Data<AppState>) -> Result<MySqlQueryResult, sqlx::Error>{
+        let mut table_name = String::from("crm.");
+        table_name.push_str(user.uuid.as_hyphenated().to_string().as_str());
         table_name.push_str("-customers");
 
         let create_table_customers_query: &str = r#"
-        CREATE TABLE IF NOT EXISTS `crm`.`?` ( 
-            `uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL ,
-            `firstname` VARCHAR(40) NOT NULL,
-            `email` TEXT,
-            `lastname` TEXT,
-            `note` TEXT,
-        PRIMARY KEY (`uuid`(36)), UNIQUE (`username`(40))
-        ) ENGINE = InnoDB;
+        CREATE TABLE IF NOT EXISTS ? ( 
+            `uuid` VARCHAR(36) NOT NULL, 
+            `first_name` TEXT, 
+            `last_name` TEXT,
+            `email` TEXT, 
+            `phone_number` VARCHAR, 
+            `note` TEXT, 
+            PRIMARY KEY (`uuid`)) ENGINE = InnoDB;
         "#;
 
         sqlx::query(create_table_customers_query).bind(table_name).execute(&data.pool).await
     }
+
+    pub fn setup_customers_table_delimeter() {
+        let query = r#"DELIMITER //
+        CREATE PROCEDURE procedure_name ( IN | OUT | INOUT parameter_name parameter_datatype (length), … )
+        BEGIN    
+            SQL statements
+        END //
+        DELIMITER ;"#;
+    }
+
+
+
+
 }

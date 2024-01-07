@@ -1,18 +1,17 @@
 use std::future::{Ready, ready};
 
 use actix_web::{FromRequest, Error as ActixWebError, http::{self, header::HeaderValue}, error::ErrorUnauthorized, web};
-use chrono::Utc;
 use jsonwebtoken::TokenData;
 use serde::{Serialize, Deserialize};
 
 use crate::{models::user::User, controllers::jwt::{JWT, Claims}};
 
 #[derive(Serialize, Deserialize)]
-pub struct AuthenticationToken {
+pub struct AdminAuthenticationToken {
     pub user: User,
 }
 
-impl FromRequest for AuthenticationToken {
+impl FromRequest for AdminAuthenticationToken {
     type Error = ActixWebError;
     type Future = Ready<Result<Self, Self::Error>>;
 
@@ -34,10 +33,10 @@ impl FromRequest for AuthenticationToken {
                 match decoded {
                     Err(_err) => ready(Err(ErrorUnauthorized(r#"{"code": 401, "message": "Unauthorized"}"#))),
                     Ok(token_data) => {
-                        if (Utc::now().timestamp() as u64) < token_data.claims.exp {
-                            ready(Ok(AuthenticationToken {user: token_data.claims.user}))
+                        if token_data.claims.user.admin == true {
+                            ready(Ok(AdminAuthenticationToken {user: token_data.claims.user}))
                         } else {
-                            ready(Err(ErrorUnauthorized(r#"{"code": 401, "message": "Token expired"}"#)))
+                            ready(Err(ErrorUnauthorized(r#"{"code": 401, "message": "Unauthorized"}"#)))
                         }
                     }
                 }

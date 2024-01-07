@@ -1,3 +1,4 @@
+use actix_cors::Cors;
 use dotenvy::dotenv;
 use std::env;
 use actix_web::{web, HttpServer, App};
@@ -34,6 +35,7 @@ async fn main() -> std::io::Result<()> {
     println!("Server running on http://{}:{}", server_address, server_port);
     HttpServer::new(move|| {
         App::new()
+        .wrap(Cors::permissive())
         .app_data(web::Data::new(AppState {
             pool: pool.clone()
         }))
