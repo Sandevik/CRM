@@ -8,5 +8,9 @@ html {
   --gray: #67697C;
   --blue: #D6EFFF;
   --pink: #EF798A;
+}
 
+.custom-shadow{
+  box-shadow:  37px 37px 74px #bebebe,
+             -37px -37px 74px #ffffff;
 }
