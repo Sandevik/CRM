@@ -1,6 +1,5 @@
 use actix_web::web;
 use sqlx::{mysql::MySqlQueryResult, Pool, MySql};
-use uuid::Uuid;
 use crate::{AppState, models::user::User};
 pub struct Database ();
 
@@ -13,11 +12,11 @@ impl Database {
             `uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
             `email` VARCHAR(50) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL, 
             `p_hash` TEXT CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL, 
-            `phone_number` TEXT NOT NULL, 
+            `phone_number` VARCHAR(15) NOT NULL, 
             `admin` BOOLEAN NOT NULL DEFAULT FALSE, 
             `joined` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             `last_sign_in` TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
-            PRIMARY KEY (`uuid`(36)), UNIQUE (`email`(50))) ENGINE = InnoDB;
+            PRIMARY KEY (`uuid`(36)), UNIQUE (`email`(50), `phone_number`(15))) ENGINE = InnoDB;
         "#;
         sqlx::query(create_table_users_query).execute(pool).await
     }

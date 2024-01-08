@@ -24,14 +24,15 @@ async fn index() -> impl Responder {
 
 #[derive(Serialize, Deserialize)]
 struct DecodeSignIn {
-    email: String,
+    #[serde(rename(deserialize = "emailOrPhoneNumber"))]
+    email_or_phone_number: String,
     password: String,
 }
 
 #[post("/sign-in")]
 async fn sign_in(body: web::Json<DecodeSignIn>, secret: web::Data<String>, data: web::Data<AppState>) -> impl Responder {
 
-    let db_result: Result<Option<User>, sqlx::Error> = User::get_by_email(&body.email, &data).await;
+    let db_result: Result<Option<User>, sqlx::Error> = User::get_by_email_or_phone_number(&body.email_or_phone_number, &data).await;
 
     match db_result {
         Err(err) => HttpResponse::InternalServerError().json(Response::internal_server_error(&err.to_string())),
@@ -48,7 +49,7 @@ async fn sign_in(body: web::Json<DecodeSignIn>, secret: web::Data<String>, data:
                             let jwt = JWT::create_jwt(&user, &secret);
                             match jwt {
                                 Err(err) => HttpResponse::InternalServerError().json(Response::internal_server_error(&err.to_string())),
-                                Ok(token) => HttpResponse::Ok().json(Response::ok("Success", Some(token), None))
+                                Ok(token) => HttpResponse::Ok().json(Response::ok("Success", Some(token), Some(user)))
                             }
                         }
                     }
@@ -64,6 +65,7 @@ async fn sign_in(body: web::Json<DecodeSignIn>, secret: web::Data<String>, data:
 struct DecodeSignUp {
     email: String,
     password: String,
+    #[serde(rename(deserialize = "phoneNumber", serialize = "phoneNumber"))]
     phone_number: String,
 }
 
@@ -84,7 +86,7 @@ async fn sign_up(body: web::Json<DecodeSignUp>, secret: web::Data<String>, data:
                             let jwt = JWT::create_jwt(&user, &secret);
                             match jwt {
                                 Err(err) => HttpResponse::InternalServerError().json(&err.to_string()),
-                                Ok(token) => HttpResponse::Created().json(Response::ok("Success", Some(token), None))
+                                Ok(token) => HttpResponse::Created().json(Response::ok("Success", Some(token), Some(user)))
                             }
                         }
                     }
