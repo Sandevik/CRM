@@ -17,7 +17,7 @@ pub fn users() -> Scope {
 }
 
 async fn index(_admin_auth_token: AdminAuthenticationToken) -> impl Responder {
-    HttpResponse::Ok().body("users")
+    HttpResponse::Ok().json(r#"{"users": []}"#) // make something of this
 }
 
 #[get("/uuid/{uuid}")]

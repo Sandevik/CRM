@@ -8,10 +8,11 @@ interface Context {
 export interface JWTData {
     user: User | null,
     exp: number,
+    token: string | null
 }
 
 
-export const AuthContext = React.createContext<Context>({data: {user: null, exp: 0}, setData: () => {}});
+export const AuthContext = React.createContext<Context>({data: {user: null, exp: 0, token: null}, setData: () => {}});
 
 export const AuthContextProvider = ({children}: {children: React.ReactNode}) => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -27,6 +28,7 @@ export const AuthContextProvider = ({children}: {children: React.ReactNode}) => 
                 return setData(null)
             };
             const data = JSON.parse(jwtString) as JWTData;
+            data.token = localStorage.getItem("auth_token");
             if (data.exp < Number((Date.now() / 1000).toFixed(0))){
                 localStorage.removeItem("auth_token");
                 setData(null);

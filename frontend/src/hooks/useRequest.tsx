@@ -1,37 +1,37 @@
+import { AuthContext } from '@/context/AuthContext';
 import request from '@/utils/request';
 import { useRouter } from 'next/navigation';
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 
 export default function useRequest<T extends {code: number}, U extends Object = Object>(endPoint: string, data: InputData<U>, method: HTTPMETHOD = "GET") {
+    const {data: authData, setData: setAuthData} = useContext(AuthContext);
     const router = useRouter();
     const [loading, setLoading] = useState<boolean>(false);
     const [result, setResult] = useState<T | null>(null);
 
-    useCallback(() => {
-        (async () => {
-            setLoading(true);
+    useEffect(() => {
+        fetch();
+    }, [])
+
+    async function fetch() {
+        setLoading(true);
+        if (authData?.exp && authData.exp < Number((Date.now() / 1000).toFixed(0))) {
+            localStorage.removeItem("auth_token");
+            setAuthData(null);
+            router.push("/sign-in");
+            return;
+        } else {
             const result = await request<T>(endPoint, data, method);
-            if (result.code >= 400) {
-                setLoading(false);
-                router.push("/auth/sign-in");
-            }else{
-                setResult(result)
-                setLoading(false);
-            }
-        })();
-    }, [endPoint, data, method])
+            console.log(result)
+        if (result.code >= 400) {
+            /* setLoading(false);
+            router.push("/sign-in"); */
+        }else{
+            setResult(result)
+            setLoading(false);
+        }
+        }
+    }
 
-
-    // check if auth_token exists
-    useEffect(()=>{
-        (() => {
-            if (!localStorage.getItem("auth_token")) router.push("/sign-in");
-        })();
-    },[])
-
-
-    // check if auth_token has expired
-    // todo!
-
-    return {data}
+    return {data: result, loading, refetch: fetch}
 }
