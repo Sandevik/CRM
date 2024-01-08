@@ -58,7 +58,7 @@ export default function SignInForm() {
     }
 
   return (
-    <div className="bg-[var(--dark-green)] w-full h-full justify-center items-center p-4 custom-shadow-right z-10">
+    <form className="bg-[var(--dark-green)] w-full h-full justify-center items-center p-4 custom-shadow-right z-10">
         <div className='max-w-[20em] m-auto flex flex-col gap-6 justify-center h-full mt-4'>
         <h1 className="text-3xl flex justify-center font-semibold text-[var(--light-green)]">SIGN IN</h1>
         <div className="h-14 flex gap-4 justify-center w-full items-center">
@@ -71,7 +71,7 @@ export default function SignInForm() {
         </div>
         <input type="text" value={credetials.emailOrPhoneNumber} onChange={(e) => setCredentials({...credetials, emailOrPhoneNumber: e.target.value})} placeholder='Email or phone number' className={`p-2 text-lg rounded-md ${error ? "ring-2 ring-[var(--pink)]": ""}`}/>
         <input type="password" value={credetials.password} onChange={(e) => setCredentials({...credetials, password: e.target.value})} placeholder='Password'  className={`p-2 text-lg rounded-md ${error ? "ring-2 ring-[var(--pink)]": ""}`}/>
-        <button className="bg-[var(--blue)] p-2 rounded-md h-9 flex items-center justify-center font-semibold mt-7 " onClick={(e) => handleSignIn(e)}>{isLoading ? <ImSpinner2 className="w-full animate-spin text-xl" /> : "Sign in"}</button>
+        <button type='submit' className="bg-[var(--blue)] p-2 rounded-md h-9 flex items-center justify-center font-semibold mt-7 " onClick={(e) => handleSignIn(e)}>{isLoading ? <ImSpinner2 className="w-full animate-spin text-xl" /> : "Sign in"}</button>
         <div className="flex flex-col items-center justify-center gap-6 w-full">
             <div className="flex w-full justify-between">
                 <Link href={"#"} className="text-[var(--light-green)] underline">Forgot password</Link>
@@ -79,6 +79,6 @@ export default function SignInForm() {
             </div>
         </div>
        </div>
-    </div>
+    </form>
   )
 }
