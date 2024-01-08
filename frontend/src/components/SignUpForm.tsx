@@ -1,8 +1,9 @@
 import Link from 'next/link'
 import {ImSpinner2} from "react-icons/im";
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import request from '@/utils/request';
 import { useRouter } from 'next/navigation';
+import { AuthContext, JWTData, decodeJWTPayload } from '@/context/AuthContext';
 
 interface Credentials {
     email: string,
@@ -13,6 +14,7 @@ interface SignInData {
     code: number,
     message: string,
     token: string,
+    user: User,
 }
 
 
@@ -20,6 +22,7 @@ interface SignInData {
 export default function SignInForm() {
 
     const router = useRouter();
+    const {setData} = useContext(AuthContext);
     const [credetials, setCredentials] = useState<Credentials>({email: "", phoneNumber: "", password: ""});
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -32,6 +35,13 @@ export default function SignInForm() {
         }, "POST")
         if (res.code === 200) {
             localStorage.setItem("auth_token", res.token || "");
+            const payloadData = decodeJWTPayload(res.token);
+            if (!payloadData) {
+                setData(null);
+            } else {
+                const parsed = JSON.parse(payloadData)
+                setData(parsed as JWTData);
+            }
             router.push("/dashboard")
         }
         if (res.code >= 400) {
