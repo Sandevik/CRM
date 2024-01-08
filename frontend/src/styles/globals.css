@@ -10,7 +10,12 @@ html {
   --pink: #EF798A;
 }
 
-.custom-shadow{
+.custom-shadow-right {
   box-shadow:  37px 37px 74px #bebebe,
              -37px -37px 74px #ffffff;
+}
+
+.custom-shadow-left {
+  box-shadow:  -7px 7px 14px #bebebe,
+             7px -7px 14px #ffffff;
 }
