@@ -49,7 +49,7 @@ async fn sign_in(body: web::Json<DecodeSignIn>, secret: web::Data<String>, data:
                             let jwt = JWT::create_jwt(&user, &secret);
                             match jwt {
                                 Err(err) => HttpResponse::InternalServerError().json(Response::internal_server_error(&err.to_string())),
-                                Ok(token) => HttpResponse::Ok().json(Response::ok("Success", Some(token), Some(user)))
+                                Ok(token) => HttpResponse::Ok().json(Response::ok("Success", Some(token), None))
                             }
                         }
                     }
@@ -86,7 +86,7 @@ async fn sign_up(body: web::Json<DecodeSignUp>, secret: web::Data<String>, data:
                             let jwt = JWT::create_jwt(&user, &secret);
                             match jwt {
                                 Err(err) => HttpResponse::InternalServerError().json(&err.to_string()),
-                                Ok(token) => HttpResponse::Created().json(Response::ok("Success", Some(token), Some(user)))
+                                Ok(token) => HttpResponse::Created().json(Response::ok("Success", Some(token), None))
                             }
                         }
                     }
