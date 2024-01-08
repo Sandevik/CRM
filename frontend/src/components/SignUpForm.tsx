@@ -17,7 +17,7 @@ interface SignInData {
 
 
 
-export default function SignUpForm() {
+export default function SignInForm() {
 
     const router = useRouter();
     const [credetials, setCredentials] = useState<Credentials>({email: "", phoneNumber: "", password: ""});
@@ -25,14 +25,14 @@ export default function SignUpForm() {
 
     const handleSignIn = async () => {
         setIsLoading(true);
-        let res = await request<SignInData>("/auth/sign-up", {
+        let res = await request<SignInData>("/auth/sign-in", {
             email: credetials.email,
             phoneNumber: credetials.phoneNumber,
             password: credetials.password
         }, "POST")
         if (res.code === 200) {
             localStorage.setItem("auth_token", res.token || "");
-            router.push("/")
+            router.push("/dashboard")
         }
         if (res.code >= 400) {
             alert(res.message);
@@ -53,17 +53,17 @@ export default function SignUpForm() {
 
 
   return (
-    <div className="bg-[var(--dark-green)] w-full h-full justify-center items-center relative p-4 custom-shadow-left">
-        <h1 className="text-3xl absolute w-full top-40 flex justify-center font-semibold text-[var(--light-green)]">SIGN UP</h1>
+    <div className="bg-[var(--dark-green)] w-full h-full justify-center items-center p-4 custom-shadow-right z-10">
         <div className='max-w-[20em] m-auto flex flex-col gap-6 justify-center h-full mt-4'>
+        <h1 className="text-3xl mb-20 flex justify-center font-semibold text-[var(--light-green)]">SIGN UP</h1>
         <input type="text" value={credetials.email} onChange={(e) => setCredentials({...credetials, email: e.target.value})} placeholder='Email' className="p-2 text-lg rounded-md"/>
         <input type="text" value={credetials.phoneNumber} onChange={(e) => setCredentials({...credetials, phoneNumber: e.target.value})} placeholder='Phone number' className="p-2 text-lg rounded-md"/>
         <input type="password" value={credetials.password} onChange={(e) => setCredentials({...credetials, password: e.target.value})} placeholder='Password'  className="p-2 text-lg rounded-md"/>
         <button className="bg-[var(--blue)] p-2 rounded-md h-9 flex items-center justify-center font-semibold mt-7 " onClick={() => handleSignIn()}>{isLoading ? <ImSpinner2 className="w-full animate-spin text-xl" /> : "Sign up"}</button>
         <div className="flex flex-col items-center justify-center gap-6 w-full">
             <div className="flex w-full justify-between">
-                <Link href={"/sign-in"} className="text-[var(--light-green)] underline">Sign in</Link>
                 <Link href={"#"} className="text-[var(--light-green)] underline">Forgot password</Link>
+                <Link href={"/sign-in"} className="text-[var(--light-green)] underline">Sign in</Link>
             </div>
         </div>
        </div>

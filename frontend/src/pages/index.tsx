@@ -11,9 +11,7 @@ export default function Home() {
 
   return (
     <main className={``}>
-      You are now logged in
-      <br />
-      data: {JSON.stringify(data)}
+      Landing page
     </main>
   )
 }
