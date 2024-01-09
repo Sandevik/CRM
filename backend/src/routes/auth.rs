@@ -64,6 +64,10 @@ async fn sign_in(body: web::Json<DecodeSignIn>, secret: web::Data<String>, data:
 #[derive(Serialize, Deserialize)]
 struct DecodeSignUp {
     email: String,
+    #[serde(rename(deserialize = "firstName", serialize = "firstName"))]
+    first_name: String,
+    #[serde(rename(deserialize = "lastName", serialize = "lastName"))]
+    last_name: String,
     password: String,
     #[serde(rename(deserialize = "phoneNumber", serialize = "phoneNumber"))]
     phone_number: String,
@@ -72,7 +76,7 @@ struct DecodeSignUp {
 #[post("/sign-up")]
 async fn sign_up(body: web::Json<DecodeSignUp>, secret: web::Data<String>, data: web::Data<AppState>) -> impl Responder {
 
-    let db_result = User::insert_user(&body.email, &body.phone_number, &body.password, &data).await;
+    let db_result: Result<sqlx::mysql::MySqlQueryResult, sqlx::Error> = User::insert_user(&body.email, &body.first_name, &body.last_name, &body.phone_number, &body.password, &data).await;
 
     match db_result {
         Err(_err) => HttpResponse::InternalServerError().json(Response::internal_server_error("User already exists.")),

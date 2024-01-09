@@ -8,6 +8,8 @@ import { AuthContext, JWTData, decodeJWTPayload } from '@/context/AuthContext';
 
 interface Credentials {
     email: string,
+    firstName: string,
+    lastName: string,
     phoneNumber: string,
     password: string,
     retypedPassword: string,
@@ -23,7 +25,7 @@ export default function SignInForm() {
 
     const router = useRouter();
     const {setData} = useContext(AuthContext);
-    const [credetials, setCredentials] = useState<Credentials>({email: "", phoneNumber: "", password: "", retypedPassword: ""});
+    const [credetials, setCredentials] = useState<Credentials>({email: "", firstName: "", lastName: "", phoneNumber: "", password: "", retypedPassword: ""});
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<number | null>(null);
 
@@ -31,8 +33,10 @@ export default function SignInForm() {
         e.preventDefault();
         setIsLoading(true);
         try {
-            let res = await request<SignInData>("/auth/sign-in", {
+            let res = await request<SignInData>("/auth/sign-up", {
                 email: credetials.email,
+                firstName: credetials.firstName,
+                lastName: credetials.lastName,
                 phoneNumber: credetials.phoneNumber,
                 password: credetials.password
             }, "POST")
@@ -49,6 +53,7 @@ export default function SignInForm() {
             }
             if (res.code >= 400) {
                 setIsLoading(false);
+                console.log(res.message)
             }
         } catch {
             setError(400);
@@ -69,6 +74,8 @@ export default function SignInForm() {
         </div>
         }
         </div>
+        <input type="text" required value={credetials.firstName} onChange={(e) => setCredentials({...credetials, firstName: e.target.value})} placeholder='First name' className={`p-2 text-lg rounded-md ${error ? "ring-2 ring-[var(--pink)]": ""}`}/>
+        <input type="text" required value={credetials.lastName} onChange={(e) => setCredentials({...credetials, lastName: e.target.value})} placeholder='Last name' className={`p-2 text-lg rounded-md ${error ? "ring-2 ring-[var(--pink)]": ""}`}/>
         <input type="email" required value={credetials.email} onChange={(e) => setCredentials({...credetials, email: e.target.value})} placeholder='Email' className={`p-2 text-lg rounded-md ${error ? "ring-2 ring-[var(--pink)]": ""}`}/>
         <input type="tel" required value={credetials.phoneNumber} onChange={(e) => setCredentials({...credetials, phoneNumber: e.target.value})} placeholder='Phone number' className={`p-2 text-lg rounded-md ${error ? "ring-2 ring-[var(--pink)]": ""}`}/>
         <input type="password" required value={credetials.password} onChange={(e) => setCredentials({...credetials, password: e.target.value})} placeholder='Password'  className={`p-2 text-lg rounded-md ${(!(credetials.password && credetials.retypedPassword) && error) ? "ring-2 ring-[var(--pink)]": ""}`}/>

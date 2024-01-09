@@ -9,6 +9,10 @@ use crate::{AppState, controllers::hashing::Hashing};
 pub struct User {
     pub uuid: Uuid, 
     pub email: String,
+    #[serde(rename(serialize = "firstName", deserialize = "firstName"))]
+    pub first_name: String,
+    #[serde(rename(serialize = "lastName", deserialize = "lastName"))]
+    pub last_name: String,
     #[serde(skip_serializing, skip_deserializing)]
     pub p_hash: String,
     #[serde(rename(serialize = "phoneNumber", deserialize = "phoneNumber"))]
@@ -17,6 +21,13 @@ pub struct User {
     pub joined: DateTime<Utc>,
     #[serde(rename(serialize = "lastSignIn", deserialize = "lastSignIn"))]
     pub last_sign_in: Option<DateTime<Utc>>,
+    #[serde(rename(serialize = "crmCount", deserialize = "crmCount"))]
+    pub crm_count: u8,
+    #[serde(rename(serialize = "subscriptionEnds", deserialize = "subscriptionEnds"))]
+    pub subscription_ends: Option<DateTime<Utc>>,
+    #[serde(rename(serialize = "LegacyUser", deserialize = "LegacyUser"))]
+    pub legacy_user: bool,
+
 }
 
 impl User {
@@ -45,15 +56,7 @@ impl User {
             Err(err) => return Err(err),
             Ok(row) => {
                 match row {
-                    Some(msql_row) => return Ok(Some(User {
-                        uuid: Uuid::parse_str(msql_row.get("uuid")).expect("ERROR: Could not parse uuid for this user."),
-                        email: msql_row.get("email"),
-                        phone_number: msql_row.get("phone_number"),
-                        p_hash: msql_row.get("p_hash"),
-                        admin: msql_row.get("admin"),
-                        joined: msql_row.get("joined"),
-                        last_sign_in: msql_row.get("last_sign_in")
-                    })),
+                    Some(msql_row) => return Ok(Some(mysql_row_to_user(&msql_row))),
                     None => return Ok(None),
                 }
             }
@@ -86,13 +89,16 @@ impl User {
         }
     } 
 
-    pub async fn insert_user(email: &String, phone_number: &String, password: &String, data: &web::Data<AppState>) -> Result<sqlx::mysql::MySqlQueryResult, Error> {
-        let result = sqlx::query("INSERT INTO users (uuid, email, phone_number, p_hash, admin, joined, last_sign_in) VALUES (uuid(),?,?,?,0,?,?)")
+    pub async fn insert_user(email: &String, first_name: &String, last_name: & String, phone_number: &String, password: &String, data: &web::Data<AppState>) -> Result<sqlx::mysql::MySqlQueryResult, Error> {
+        let result = sqlx::query("INSERT INTO users (uuid, email, first_name, last_name, phone_number, p_hash, admin, joined, last_sign_in, crm_count, subscription_ends, legacy_user) VALUES (uuid(),?,?,?,?,?,0,?,?,?,NULL,false)")
             .bind(email)
+            .bind(first_name)
+            .bind(last_name)
             .bind(phone_number)
             .bind(Hashing::hash(password))
             .bind(Utc::now())
             .bind(Utc::now())
+            .bind(0)
             .execute(&data.pool)
             .await;
         result
@@ -118,7 +124,11 @@ fn mysql_row_to_user(row: &MySqlRow) -> User {
         p_hash: row.get("p_hash"),
         admin: row.get("admin"),
         joined: row.get("joined"),
-        last_sign_in: row.get("last_sign_in")
-
+        last_sign_in: row.get("last_sign_in"),
+        first_name: row.get("first_name"),
+        last_name: row.get("last_name"),
+        legacy_user: row.get("legacy_user"),
+        crm_count: row.get("crm_count"),
+        subscription_ends: row.get("subscription_ends"),   
     }
 }
