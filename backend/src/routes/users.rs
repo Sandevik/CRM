@@ -1,4 +1,4 @@
-use actix_web::{web::{self, to}, get,  Responder, HttpResponse, Scope, post};
+use actix_web::{web::{self}, get,  Responder, HttpResponse, Scope, post};
 
 use crate::{AppState, models::user::User, extractors::admin_authentication::AdminAuthenticationToken, controllers::database::Database};
 use serde::{Serialize, Deserialize};
