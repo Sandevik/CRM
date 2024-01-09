@@ -1,7 +1,7 @@
 use actix_web::web;
 use chrono::{Utc, DateTime};
 use serde::{self, Serialize, Deserialize};
-use sqlx::{Error, Row};
+use sqlx::{Error, Row, mysql::MySqlRow};
 use uuid::Uuid;
 use crate::{AppState, controllers::hashing::Hashing};
 
@@ -21,6 +21,24 @@ pub struct User {
 
 impl User {
     
+    pub async fn get_all_users(amount: u16, offset: u16, data: &web::Data<AppState>) -> Result<Vec<User>, Error> {
+        let res = sqlx::query("SELECT * FROM users LIMIT ? OFFSET ?")
+        .bind(amount)
+        .bind(offset)
+        .fetch_all(&data.pool).await;
+        match res {
+            Err(err) => Err(err),
+            Ok(rows) => {
+                let mut users: Vec<User> = Vec::new();
+                rows.iter().for_each(|row: &MySqlRow| {
+                    users.push(mysql_row_to_user(row))
+                });
+                Ok(users)
+            }
+        }
+    }
+
+
     pub async fn get_by_email(email: &str, data: &web::Data<AppState>) -> Result<Option<User>, Error> {
         let res = sqlx::query("SELECT * FROM users WHERE email = ?").bind(email).fetch_optional(&data.pool).await;
         match res {
@@ -48,15 +66,7 @@ impl User {
             Err(err) => return Err(err),
             Ok(row) => {
                 match row {
-                    Some(msql_row) => return Ok(Some(User {
-                        uuid: Uuid::parse_str(msql_row.get("uuid")).expect("ERROR: Could not parse uuid for this user."),
-                        email: msql_row.get("email"),
-                        phone_number: msql_row.get("phone_number"),
-                        p_hash: msql_row.get("p_hash"),
-                        admin: msql_row.get("admin"),
-                        joined: msql_row.get("joined"),
-                        last_sign_in: msql_row.get("last_sign_in")
-                    })),
+                    Some(msql_row) => return Ok(Some(mysql_row_to_user(&msql_row))),
                     None => return Ok(None),
                 }
             }
@@ -69,16 +79,7 @@ impl User {
             Err(err) => return Err(err),
             Ok(row) => {
                 match row {
-                    Some(msql_row) => return Ok(Some(User {
-                        uuid: Uuid::parse_str(msql_row.get("uuid")).expect("ERROR: Could not parse uuid for this user."),
-                        email: msql_row.get("email"),
-                        phone_number: msql_row.get("phone_number"),
-                        p_hash: msql_row.get("p_hash"),
-                        admin: msql_row.get("admin"),
-                        joined: msql_row.get("joined"),
-                        last_sign_in: msql_row.get("last_sign_in")
-
-                    })),
+                    Some(msql_row) => return Ok(Some(mysql_row_to_user(&msql_row))),
                     None => return Ok(None),
                 }
             }
@@ -106,4 +107,18 @@ impl User {
     }
 
 
+}
+
+
+fn mysql_row_to_user(row: &MySqlRow) -> User {
+    User {
+        uuid: Uuid::parse_str(row.get("uuid")).expect("ERROR: Could not parse uuid for this user."),
+        email: row.get("email"),
+        phone_number: row.get("phone_number"),
+        p_hash: row.get("p_hash"),
+        admin: row.get("admin"),
+        joined: row.get("joined"),
+        last_sign_in: row.get("last_sign_in")
+
+    }
 }
