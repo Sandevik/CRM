@@ -4,6 +4,7 @@ import { MdDashboard } from "react-icons/md";
 import { FiLogIn } from "react-icons/fi";
 import { IoMdHelp } from "react-icons/io";
 import { MdPerson2 } from "react-icons/md";
+import { RiAdminFill } from "react-icons/ri";
 import { AuthContext } from '@/context/AuthContext';
 
 export default function Navbar() {
@@ -14,6 +15,7 @@ export default function Navbar() {
         <span className="font-bold text-2xl">CRM</span>
         <ul className='flex gap-8 items-center '>
             <li><Link href={"/dashboard"} className='flex items-center gap-1 text-[var(--dark-green)] hover:text-[var(--pink)] transition-colors'> <MdDashboard /> Dashboard </Link></li>
+            <li><Link href={"/dashboard/admin"} className='flex items-center gap-1 text-[var(--dark-green)] hover:text-[var(--pink)] transition-colors'> <RiAdminFill /> Admin </Link></li>
             <li>
                 {data?.user ? 
                 <Link href={"/account"} className='flex items-center gap-1 text-[var(--dark-green)] hover:text-[var(--pink)] transition-colors'> <MdPerson2 /> Account</Link> :

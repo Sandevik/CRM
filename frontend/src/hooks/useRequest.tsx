@@ -3,7 +3,8 @@ import request from '@/utils/request';
 import { useRouter } from 'next/navigation';
 import React, { useContext, useEffect, useState } from 'react'
 
-export default function useRequest<T extends {code: number}, U extends Object = Object>(endPoint: string, data: InputData<U>, method: HTTPMETHOD = "GET") {
+export default function useRequest<T extends Object, U extends Object = Object>(endPoint: string, data: InputData<U>, method: HTTPMETHOD = "GET"): {data: T | null, loading: boolean, refetch: () => void} {
+
     const {data: authData, setData: setAuthData} = useContext(AuthContext);
     const router = useRouter();
     const [loading, setLoading] = useState<boolean>(false);
@@ -11,7 +12,7 @@ export default function useRequest<T extends {code: number}, U extends Object = 
 
     useEffect(() => {
         fetch();
-    }, [])
+    }, [endPoint, data, method])
 
     async function fetch() {
         setLoading(true);
@@ -22,14 +23,13 @@ export default function useRequest<T extends {code: number}, U extends Object = 
             return;
         } else {
             const result = await request<T>(endPoint, data, method);
-            console.log(result)
-        if (result.code >= 400) {
-            /* setLoading(false);
-            router.push("/sign-in"); */
-        }else{
-            setResult(result)
-            setLoading(false);
-        }
+            if (result.code >= 400) {
+                /* setLoading(false);
+                router.push("/sign-in"); */
+            }else{
+                setResult(result as T);
+                setLoading(false);
+            }
         }
     }
 

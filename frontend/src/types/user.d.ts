@@ -3,6 +3,6 @@ interface User {
     email: string,
     phoneNumber: string,
     admin: boolean,
-    joined: Date,
-    lastSignIn: Date
+    joined: string,
+    lastSignIn: string
 }
