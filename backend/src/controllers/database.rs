@@ -5,36 +5,7 @@ pub struct Database ();
 
 impl Database {
 
-    pub async fn setup_tables(pool: &Pool<MySql>) -> Result<MySqlQueryResult, sqlx::Error> {
-        let query: &str = r#"
-        CREATE TABLE IF NOT EXISTS `crm`.`users` (
-            `uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
-            `email` VARCHAR(50) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
-            `first_name` VARCHAR(30) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci,
-            `last_name` VARCHAR(30) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci,
-            `p_hash` TEXT CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
-            `phone_number` VARCHAR(15) NOT NULL,
-            `admin` BOOLEAN NOT NULL DEFAULT FALSE,
-            `joined` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            `last_sign_in` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            `crm_count` BOOLEAN NOT NULL DEFAULT FALSE,
-            `subscription_ends` TIMESTAMP,
-            `legacy_user` BOOLEAN NOT NULL DEFAULT FALSE,
-            PRIMARY KEY (`uuid`(36)),
-            UNIQUE (`email`(50), `phone_number`(15))
-          ) ENGINE = InnoDB;
-
-        CREATE TABLE IF NOT EXISTS `crm`.`crm_users` (
-            `uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
-            `user_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
-            `crm_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
-            PRIMARY KEY (`uuid`(36))
-          ) ENGINE = InnoDB;
-        "#;
-        sqlx::query(query).execute(pool).await
-    }
-
-    // Sets up the inital users table for people who've signed up
+    // Sets up the inital users table for people who sign up
     pub async fn setup_users_table(pool: &Pool<MySql>) -> Result<MySqlQueryResult, sqlx::Error> {
         let create_table_users_query: &str = r#"
             CREATE TABLE IF NOT EXISTS `crm`.`users` (
@@ -57,6 +28,7 @@ impl Database {
         sqlx::query(create_table_users_query).execute(pool).await
     }
 
+    // Sets up the connection table between a user and a crm system, so a user can have multiple crms.
     pub async fn setup_crm_users_table(pool: &Pool<MySql>) -> Result<MySqlQueryResult, sqlx::Error> {
         let create_table_crm_query: &str = r#"
         CREATE TABLE IF NOT EXISTS `crm`.`crm_users` (

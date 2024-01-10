@@ -11,7 +11,8 @@ pub fn users() -> Scope {
         .route("/", web::post().to(index))
         .service(user_by_uuid)
         .service(user_by_username)
-        .service(setup_customers_table);
+        .service(setup_customers_table)
+        .service(count);
 
     scope
 }
@@ -29,6 +30,22 @@ async fn index(body: web::Json<DecodeAllUsersOptions>, data: web::Data<AppState>
         Ok(users) => HttpResponse::Ok().json(users)
     }
 }
+
+
+#[derive(Serialize, Deserialize)]
+struct CountResponse {
+    count: i32
+}
+
+#[get("/count")]
+async fn count(data: web::Data<AppState>, _auth_token: AdminAuthenticationToken) -> impl Responder {
+    let count = User::get_users_count(&data).await;
+    match count {
+        Err(err) => HttpResponse::InternalServerError().json(Response::internal_server_error(&err.to_string())),
+        Ok(count) => HttpResponse::Ok().json(CountResponse {count})
+    }
+}
+
 
 #[get("/uuid/{uuid}")]
 async fn user_by_uuid(path: web::Path<String>, data: web::Data<AppState>, _auth_token: AdminAuthenticationToken) -> impl Responder {

@@ -1,7 +1,7 @@
 use actix_web::web;
 use chrono::{Utc, DateTime};
 use serde::{self, Serialize, Deserialize};
-use sqlx::{Error, Row, mysql::MySqlRow};
+use sqlx::{Error, Row, mysql::{MySqlRow, MySqlQueryResult}};
 use uuid::Uuid;
 use crate::{AppState, controllers::hashing::Hashing};
 
@@ -47,6 +47,16 @@ impl User {
                 Ok(users)
             }
         }
+    }
+
+    pub async fn get_users_count(data: &web::Data<AppState>) -> Result<i32, Error> {
+        let res = sqlx::query("SELECT COUNT(*) AS count from users").fetch_one(&data.pool).await;
+
+        match res {
+            Err(err) => Err(err),
+            Ok(mysql_resp) => Ok(mysql_resp.get("count"))
+        }
+
     }
 
 

@@ -1,5 +1,6 @@
 mod users;
 mod auth;
+mod crm;
 mod test;
 
 use actix_web::web::ServiceConfig;
@@ -7,6 +8,7 @@ use serde::{Serialize, Deserialize};
 
 use users::users;
 use auth::auth;
+use crm::crm;
 use test::test;
 
 use crate::models::user::User;
@@ -43,5 +45,6 @@ impl Response {
 pub fn routes(conf: &mut ServiceConfig) {
     conf.service(auth());
     conf.service(users());
+    conf.service(crm());
     conf.service(test());
 }
