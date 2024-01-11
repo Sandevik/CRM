@@ -7,7 +7,7 @@ export default async function <T extends Object, U extends Object = Object>(apiE
         headers: {
             "Content-Type": "application/json",
             "Access-Control-Allow-Origin": "*",
-            "Authorization": localStorage.getItem("auth_token") || "",
+            "Authorization": "Bearer " + localStorage.getItem("auth_token") || "",
         }
     })
     return await result.json() as ResultData<T>;

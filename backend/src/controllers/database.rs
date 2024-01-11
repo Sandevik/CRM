@@ -1,6 +1,7 @@
 use actix_web::web;
 use sqlx::{mysql::MySqlQueryResult, Pool, MySql};
-use crate::{AppState, models::user::User};
+use uuid::Uuid;
+use crate::AppState;
 pub struct Database ();
 
 impl Database {
@@ -9,17 +10,21 @@ impl Database {
     pub async fn setup_users_table(pool: &Pool<MySql>) -> Result<MySqlQueryResult, sqlx::Error> {
         let create_table_users_query: &str = r#"
             CREATE TABLE IF NOT EXISTS `crm`.`users` (
-                `uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
+                `uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL UNIQUE,
                 `email` VARCHAR(50) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
                 `first_name` VARCHAR(30) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci,
                 `last_name` VARCHAR(30) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci,
+                `address` TEXT,
+                `zip_code` TEXT,
+                `city` TEXT,
+                `country` TEXT,
                 `p_hash` TEXT CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
                 `phone_number` VARCHAR(15) NOT NULL,
                 `admin` BOOLEAN NOT NULL DEFAULT FALSE,
-                `joined` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                `last_sign_in` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                `joined` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                `last_sign_in` DATETIME DEFAULT CURRENT_TIMESTAMP,
                 `crm_count` TINYINT UNSIGNED NOT NULL,
-                `subscription_ends` TIMESTAMP,
+                `subscription_ends` DATETIME,
                 `legacy_user` BOOLEAN NOT NULL DEFAULT FALSE,
                 PRIMARY KEY (`uuid`(36)),
                 UNIQUE (`email`(50), `phone_number`(15))
@@ -32,46 +37,91 @@ impl Database {
     pub async fn setup_crm_users_table(pool: &Pool<MySql>) -> Result<MySqlQueryResult, sqlx::Error> {
         let create_table_crm_query: &str = r#"
         CREATE TABLE IF NOT EXISTS `crm`.`crm_users` (
-            `uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
             `user_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
-            `crm_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
-            PRIMARY KEY (`uuid`(36))
+            `crm_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL UNIQUE,
+            `name` VARCHAR(40) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL DEFAULT "CRM",
+            `added` DATETIME
           ) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;
         "#;
-
         sqlx::query(create_table_crm_query).execute(pool).await
     }
 
-    // Uses a logged in user's uuid to create a personal customers table like "81caabab-7e86-4547-beee-d2da511237c4-customers"
-    pub async fn setup_customers_table(user: &User, data: web::Data<AppState>) -> Result<MySqlQueryResult, sqlx::Error>{
-        let mut table_name = String::from("crm.");
-        table_name.push_str(user.uuid.as_hyphenated().to_string().as_str());
-        table_name.push_str("-customers");
-
-        let create_table_customers_query: &str = r#"
-        CREATE TABLE IF NOT EXISTS ? ( 
-            `uuid` VARCHAR(36) NOT NULL, 
-            `first_name` TEXT, 
+    pub async fn setup_customers_table(crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<MySqlQueryResult, sqlx::Error> {
+        let query: String = format!(r#"CREATE TABLE IF NOT EXISTS `{}-customers` (
+            `uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL UNIQUE,
+            `first_name` TEXT,
             `last_name` TEXT,
-            `email` TEXT, 
-            `phone_number` VARCHAR, 
-            `note` TEXT, 
-            PRIMARY KEY (`uuid`)) ENGINE = InnoDB;
-        "#;
-
-        sqlx::query(create_table_customers_query).bind(table_name).execute(&data.pool).await
+            `date_of_birth` DATE,
+            `email` VARCHAR(50) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
+            `address` TEXT,
+            `zip_code` TEXT,
+            `city` TEXT,
+            `country` TEXT,
+            `company` TEXT,
+            `phone_number` TEXT,
+            `news_letter` BOOLEAN NOT NULL DEFAULT FALSE,
+            `added` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            `updated` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;       
+        "#, crm_uuid.hyphenated().to_string());
+        sqlx::query(&query).execute(&data.pool).await
     }
 
-    pub fn setup_customers_table_delimeter() {
-        let query = r#"DELIMITER //
-        CREATE PROCEDURE procedure_name ( IN | OUT | INOUT parameter_name parameter_datatype (length), … )
-        BEGIN    
-            SQL statements
-        END //
-        DELIMITER ;"#;
+    pub async fn setup_entries_table(crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<MySqlQueryResult, sqlx::Error> {
+        let query: String = format!(r#"CREATE TABLE IF NOT EXISTS `{}-entries` (
+            `id` INT NOT NULL UNIQUE AUTO_INCREMENT,
+            `added` DATETIME,
+            `added_at_meeting` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
+            `updated` DATETIME,
+            `content` TEXT
+        ) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;       
+        "#, crm_uuid.hyphenated().to_string());
+        sqlx::query(&query).execute(&data.pool).await
+    }
+    
+    pub async fn setup_meetings_table(crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<MySqlQueryResult, sqlx::Error> {
+        let query: String = format!(r#"CREATE TABLE IF NOT EXISTS `{}-meetings` (
+            `customer_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
+            `from` DATETIME,
+            `to` DATETIME,
+            `added` DATETIME,
+            `updated` DATETIME,
+            `entry_id` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL
+        ) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;       
+        "#, crm_uuid.hyphenated().to_string());
+        sqlx::query(&query).execute(&data.pool).await
+    }
+    
+    pub async fn setup_employees_table(crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<MySqlQueryResult, sqlx::Error> {
+        let query: String = format!(r#"CREATE TABLE IF NOT EXISTS `{}-employees` (
+            `uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
+            `user_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL UNIQUE,
+            `soc_sec` VARCHAR(12),
+            `date_of_birth` DATETIME,
+            `access_level` TEXT,
+            `employment_type` TEXT,
+            `salary` DOUBLE,
+            `added` DATETIME,
+            `updated` DATETIME
+        ) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;       
+        "#, crm_uuid.hyphenated().to_string());
+        sqlx::query(&query).execute(&data.pool).await
     }
 
-
-
+    pub async fn setup_deals_table(crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<MySqlQueryResult, sqlx::Error> {
+        let query: String = format!(r#"CREATE TABLE IF NOT EXISTS `{}-deals` (
+            `uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
+            `added_by` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL UNIQUE,
+            `title` VARCHAR(25),
+            `product` TEXT,
+            `stage` TEXT,
+            `status` TEXT,
+            `note` TEXT,
+            `added` DATETIME,
+            `updated` DATETIME
+        ) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;       
+        "#, crm_uuid.hyphenated().to_string());
+        sqlx::query(&query).execute(&data.pool).await
+    }
 
 }

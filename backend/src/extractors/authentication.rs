@@ -1,6 +1,6 @@
 use std::future::{Ready, ready};
 
-use actix_web::{FromRequest, Error as ActixWebError, http::{self, header::HeaderValue}, error::ErrorUnauthorized, web};
+use actix_web::{FromRequest, Error as ActixWebError, http::{self, header::HeaderValue}, error::{ErrorUnauthorized, ErrorInternalServerError}, web};
 use chrono::Utc;
 use jsonwebtoken::TokenData;
 use serde::{Serialize, Deserialize};
@@ -17,7 +17,6 @@ impl FromRequest for AuthenticationToken {
     type Future = Ready<Result<Self, Self::Error>>;
 
     fn from_request(req: &actix_web::HttpRequest, _payload: &mut actix_web::dev::Payload) -> Self::Future {
-        
         let auth_header: Option<&HeaderValue> = req.headers().get(http::header::AUTHORIZATION);
         match auth_header {
             None => ready(Err(ErrorUnauthorized(r#"{"code": 401, "message": "Invalid Authorization Token"}"#))),
@@ -33,12 +32,12 @@ impl FromRequest for AuthenticationToken {
 
                 match decoded {
                     Err(_err) => ready(Err(ErrorUnauthorized(r#"{"code": 401, "message": "Unauthorized"}"#))),
-                    Ok(token_data) => {
+                    Ok(token_data) => {    
                         if (Utc::now().timestamp() as u64) < token_data.claims.exp {
                             ready(Ok(AuthenticationToken {user: token_data.claims.user}))
                         } else {
                             ready(Err(ErrorUnauthorized(r#"{"code": 401, "message": "Token expired"}"#)))
-                        }
+                        }                        
                     }
                 }
             }

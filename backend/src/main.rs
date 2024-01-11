@@ -1,4 +1,5 @@
 use actix_cors::Cors;
+use actix_web_httpauth::middleware::HttpAuthentication;
 use dotenvy::dotenv;
 use std::env;
 use actix_web::{web, HttpServer, App};
@@ -7,9 +8,11 @@ mod routes;
 mod models;
 mod controllers;
 mod extractors;
+mod middleware;
 
 use controllers::database::Database;
 use routes::routes;
+use middleware::auth_middleware::validator;
 
 struct AppState {
     pool: Pool<MySql>
@@ -35,6 +38,7 @@ async fn main() -> std::io::Result<()> {
 
     println!("Server running on http://{}:{}", server_address, server_port);
     HttpServer::new(move|| {
+        
         App::new()
         .wrap(Cors::permissive())
         .app_data(web::Data::new(AppState {

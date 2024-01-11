@@ -1,17 +1,21 @@
-use actix_web::{web::{self}, get,  Responder, HttpResponse, Scope, post};
+use actix_web::{web::{self}, get,  Responder, HttpResponse, Scope, dev::{ServiceFactory, ServiceRequest, ServiceResponse}, body::{EitherBody, BoxBody}, Error};
+use actix_web_httpauth::middleware::HttpAuthentication;
 
-use crate::{AppState, models::user::User, extractors::admin_authentication::AdminAuthenticationToken, controllers::database::Database};
+use crate::{AppState, models::user::User, extractors::admin_authentication::AdminAuthenticationToken};
 use serde::{Serialize, Deserialize};
 use super::Response;
-use crate::extractors::authentication::AuthenticationToken;
+use crate::middleware::auth_middleware::validator;
 
-pub fn users() -> Scope {
+
+pub fn users() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Response = ServiceResponse<EitherBody<BoxBody>>, Error = Error, InitError = ()>> {
+    let user_auth_middleware = HttpAuthentication::bearer(validator);
+
     let scope = web::scope("/users")
+        .wrap(user_auth_middleware)
         .route("", web::post().to(index))
         .route("/", web::post().to(index))
         .service(user_by_uuid)
         .service(user_by_username)
-        .service(setup_customers_table)
         .service(count);
 
     scope
@@ -23,7 +27,7 @@ struct DecodeAllUsersOptions {
     amount: u16,
 }
 
-async fn index(body: web::Json<DecodeAllUsersOptions>, data: web::Data<AppState>, _admin_auth_token: AdminAuthenticationToken) -> impl Responder {
+async fn index(body: web::Json<DecodeAllUsersOptions>, data: web::Data<AppState>) -> impl Responder {
     let result: Result<Vec<User>, sqlx::Error> = User::get_all_users(body.amount, body.offset, &data).await;
     match result {
         Err(err) => HttpResponse::InternalServerError().json(Response::internal_server_error(&err.to_string())),
@@ -38,7 +42,7 @@ struct CountResponse {
 }
 
 #[get("/count")]
-async fn count(data: web::Data<AppState>, _auth_token: AdminAuthenticationToken) -> impl Responder {
+async fn count(data: web::Data<AppState>) -> impl Responder {
     let count = User::get_users_count(&data).await;
     match count {
         Err(err) => HttpResponse::InternalServerError().json(Response::internal_server_error(&err.to_string())),
@@ -48,7 +52,7 @@ async fn count(data: web::Data<AppState>, _auth_token: AdminAuthenticationToken)
 
 
 #[get("/uuid/{uuid}")]
-async fn user_by_uuid(path: web::Path<String>, data: web::Data<AppState>, _auth_token: AdminAuthenticationToken) -> impl Responder {
+async fn user_by_uuid(path: web::Path<String>, data: web::Data<AppState>) -> impl Responder {
     let user: Result<Option<User>, sqlx::Error> = User::get_by_uuid(&path.into_inner(), &data).await;
     match user {
         Ok(optn) => {
@@ -62,7 +66,7 @@ async fn user_by_uuid(path: web::Path<String>, data: web::Data<AppState>, _auth_
 }
 
 #[get("/email/{email}")]
-async fn user_by_username(path: web::Path<String>, data: web::Data<AppState>, _auth_token: AdminAuthenticationToken) -> impl Responder {
+async fn user_by_username(path: web::Path<String>, data: web::Data<AppState>) -> impl Responder {
     let user: Result<Option<User>, sqlx::Error> = User::get_by_email(&path.into_inner(), &data).await;
     match user {
         Ok(optn) => {
@@ -75,11 +79,3 @@ async fn user_by_username(path: web::Path<String>, data: web::Data<AppState>, _a
     }
 }
 
-#[post("/setup-customer-table")]
-async fn setup_customers_table(data: web::Data<AppState>, auth_token: AuthenticationToken) -> impl Responder {
-    let result = Database::setup_customers_table(&auth_token.user, data).await;
-    match result {
-        Err(err) => HttpResponse::InternalServerError().json(Response::internal_server_error(&err.to_string())),
-        Ok(_) => HttpResponse::Created().json(Response::ok(format!("{}-customers", auth_token.user.uuid).as_str(), None, None))
-    }
-}

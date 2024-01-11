@@ -1,9 +1,9 @@
 use actix_web::web;
 use chrono::{Utc, DateTime};
 use serde::{self, Serialize, Deserialize};
-use sqlx::{Error, Row, mysql::{MySqlRow, MySqlQueryResult}};
+use sqlx::{Error, Row, mysql::MySqlRow};
 use uuid::Uuid;
-use crate::{AppState, controllers::hashing::Hashing};
+use crate::{AppState, controllers::{hashing::Hashing, database::Database}};
 
 #[derive(sqlx::FromRow, Debug, Serialize, Deserialize, Clone)]
 pub struct User {
@@ -50,13 +50,11 @@ impl User {
     }
 
     pub async fn get_users_count(data: &web::Data<AppState>) -> Result<i32, Error> {
-        let res = sqlx::query("SELECT COUNT(*) AS count from users").fetch_one(&data.pool).await;
-
+        let res = sqlx::query("SELECT COUNT(*) AS count FROM users").fetch_one(&data.pool).await;
         match res {
             Err(err) => Err(err),
             Ok(mysql_resp) => Ok(mysql_resp.get("count"))
         }
-
     }
 
 
@@ -100,6 +98,10 @@ impl User {
     } 
 
     pub async fn insert_user(email: &String, first_name: &String, last_name: & String, phone_number: &String, password: &String, data: &web::Data<AppState>) -> Result<sqlx::mysql::MySqlQueryResult, Error> {
+        let res = Database::setup_users_table(&data.pool).await;
+        if res.is_err() {
+            return res;
+        }
         let result = sqlx::query("INSERT INTO users (uuid, email, first_name, last_name, phone_number, p_hash, admin, joined, last_sign_in, crm_count, subscription_ends, legacy_user) VALUES (uuid(),?,?,?,?,?,0,?,?,?,NULL,false)")
             .bind(email)
             .bind(first_name)
