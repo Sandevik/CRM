@@ -28,7 +28,7 @@ pub struct User {
     #[serde(rename(serialize = "LegacyUser", deserialize = "LegacyUser"))]
     pub legacy_user: bool,
     #[serde(rename(serialize = "currentJWT", deserialize = "currentJWT"))]
-    pub current_JWT: String,
+    pub current_jwt: String,
 
 }
 
@@ -144,6 +144,6 @@ fn mysql_row_to_user(row: &MySqlRow) -> User {
         legacy_user: row.get("legacy_user"),
         crm_count: row.get("crm_count"),
         subscription_ends: row.get("subscription_ends"),   
-        current_JWT: row.get("current_JWT")
+        current_jwt: row.get("current_jwt")
     }
 }
