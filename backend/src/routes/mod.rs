@@ -61,6 +61,14 @@ impl<T> Response<T> {
         }
     }
 
+    pub fn unauthorized(reason: &str) -> Self {
+        Response {
+            code: 401,
+            message: reason.to_string(),
+            data: None
+        }
+    }
+
 
 
 }

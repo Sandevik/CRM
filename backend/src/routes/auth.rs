@@ -1,4 +1,5 @@
-use actix_web::{post, HttpResponse, Responder, Scope, web};
+use actix_web::{post, HttpResponse, Responder, Scope, web::{self}};
+use actix_web_httpauth::extractors::bearer::BearerAuth;
 use serde::{Serialize, Deserialize};
 use crate::{models::user::User, AppState, controllers::hashing::Hashing};
 use super::Response;
@@ -123,9 +124,11 @@ struct ValidateResponse {
 }
 
 #[post("/validate-token")]
-async fn validate_token(body: web::Json<DecodeValidateToken>, secret: web::Data<String>) -> impl Responder {
-    match JWT::decode_jwt(&body.token, &secret) {
-        Err(err) => HttpResponse::BadRequest().json(Response::<String>::bad_request(&err.to_string())),
+async fn validate_token(secret: web::Data<String>, credentials: BearerAuth) -> impl Responder {
+    let token_string: String = credentials.token().to_string();
+    println!("{token_string}");
+    match JWT::decode_jwt(&token_string, &secret) {
+        Err(err) => HttpResponse::Unauthorized().json(Response::<String>::unauthorized(&err.to_string())),
         Ok(token_claim) => HttpResponse::Ok().json(Response::ok("Authorized", Some(ValidateResponse {user: token_claim.claims.user})))
     }
 }
