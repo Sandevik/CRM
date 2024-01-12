@@ -29,27 +29,33 @@ struct DecodeSignIn {
     password: String,
 }
 
+
+#[derive(Serialize)]
+struct SignResponse {
+    token: String
+}
+
 #[post("/sign-in")]
 async fn sign_in(body: web::Json<DecodeSignIn>, secret: web::Data<String>, data: web::Data<AppState>) -> impl Responder {
 
     let db_result: Result<Option<User>, sqlx::Error> = User::get_by_email_or_phone_number(&body.email_or_phone_number, &data).await;
 
     match db_result {
-        Err(err) => HttpResponse::InternalServerError().json(Response::internal_server_error(&err.to_string())),
+        Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
         Ok(user) => {
             match user {
-                None => HttpResponse::BadRequest().json(Response::bad_request("Email or password is incorrect")),
+                None => HttpResponse::BadRequest().json(Response::<String>::bad_request("Email or password is incorrect")),
                 Some(user) => {
                         match Hashing::verify(body.password.to_string(), &user.p_hash) {
-                        Err(_) => HttpResponse::BadRequest().json(Response::bad_request("Email or password is incorrect")),
+                        Err(_) => HttpResponse::BadRequest().json(Response::<String>::bad_request("Email or password is incorrect")),
                         Ok(_) => {
                             let jwt = JWT::create_jwt(&user, &secret);
                             match jwt {
-                                Err(err) => HttpResponse::InternalServerError().json(Response::internal_server_error(&err.to_string())),
+                                Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
                                 Ok(token) => {
                                     let _ = user.update_last_sign_in(&data).await;
                                     let _ = user.update_current_jwt(&token, &data).await;
-                                    HttpResponse::Ok().json(Response::ok("Success", Some(token), None))
+                                    HttpResponse::Ok().json(Response::ok("Success", Some(SignResponse {token})))
                                 }
                             }
                         }
@@ -80,13 +86,13 @@ async fn sign_up(body: web::Json<DecodeSignUp>, secret: web::Data<String>, data:
     let db_result: Result<sqlx::mysql::MySqlQueryResult, sqlx::Error> = User::insert_user(&body.email, &body.first_name, &body.last_name, &body.phone_number, &body.password, &data).await;
 
     match db_result {
-        Err(_err) => HttpResponse::InternalServerError().json(Response::internal_server_error("User already exists.")),
+        Err(_err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error("User already exists.")),
         Ok(_) => {
             match User::get_by_email(&body.email, &data).await {
-                Err(err) => HttpResponse::InternalServerError().json(Response::internal_server_error(&err.to_string())),
+                Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
                 Ok(user) => {
                     match user {
-                        None => HttpResponse::BadRequest().json(Response::bad_request("Could not fetch user")),
+                        None => HttpResponse::BadRequest().json(Response::<String>::bad_request("Could not fetch user")),
                         Some(user) => {
                             let jwt = JWT::create_jwt(&user, &secret);
                             match jwt {
@@ -94,7 +100,7 @@ async fn sign_up(body: web::Json<DecodeSignUp>, secret: web::Data<String>, data:
                                 Ok(token) => {
                                     let _ = user.update_last_sign_in(&data).await;
                                     let _ = user.update_current_jwt(&token, &data).await;
-                                    HttpResponse::Created().json(Response::ok("Success", Some(token), None))
+                                    HttpResponse::Created().json(Response::ok("Success", Some(SignResponse {token})))
                                 }
                             }
                         }
@@ -111,11 +117,16 @@ struct DecodeValidateToken {
     token: String
 }
 
+#[derive(Serialize)]
+struct ValidateResponse {
+    user: User
+}
+
 #[post("/validate-token")]
 async fn validate_token(body: web::Json<DecodeValidateToken>, secret: web::Data<String>) -> impl Responder {
     match JWT::decode_jwt(&body.token, &secret) {
-        Err(err) => HttpResponse::BadRequest().json(Response::bad_request(&err.to_string())),
-        Ok(token_claim) => HttpResponse::Ok().json(Response::ok("Authorized", None, Some(token_claim.claims.user)))
+        Err(err) => HttpResponse::BadRequest().json(Response::<String>::bad_request(&err.to_string())),
+        Ok(token_claim) => HttpResponse::Ok().json(Response::ok("Authorized", Some(ValidateResponse {user: token_claim.claims.user})))
     }
 }
 

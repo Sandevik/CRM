@@ -41,8 +41,8 @@ export default function SignInForm() {
                 password: credetials.password
             }, "POST")
             if (res.code === 200) {
-                localStorage.setItem("auth_token", res.token || "");
-                const payloadData = decodeJWTPayload(res.token);
+                localStorage.setItem("auth_token", res.data.token || "");
+                const payloadData = decodeJWTPayload(res.data.token);
                 if (!payloadData) {
                     setData(null);
                 } else {

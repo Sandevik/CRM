@@ -30,7 +30,7 @@ struct DecodeAllUsersOptions {
 async fn index(body: web::Json<DecodeAllUsersOptions>, data: web::Data<AppState>) -> impl Responder {
     let result: Result<Vec<User>, sqlx::Error> = User::get_all_users(body.amount, body.offset, &data).await;
     match result {
-        Err(err) => HttpResponse::InternalServerError().json(Response::internal_server_error(&err.to_string())),
+        Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
         Ok(users) => HttpResponse::Ok().json(users)
     }
 }
@@ -45,7 +45,7 @@ struct CountResponse {
 async fn count(data: web::Data<AppState>) -> impl Responder {
     let count = User::get_users_count(&data).await;
     match count {
-        Err(err) => HttpResponse::InternalServerError().json(Response::internal_server_error(&err.to_string())),
+        Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
         Ok(count) => HttpResponse::Ok().json(CountResponse {count})
     }
 }
@@ -58,10 +58,10 @@ async fn user_by_uuid(path: web::Path<String>, data: web::Data<AppState>) -> imp
         Ok(optn) => {
             match optn {
                 Some(user) => HttpResponse::Found().json(user),
-                None => HttpResponse::NotFound().json(Response::not_found("User"))
+                None => HttpResponse::NotFound().json(Response::<String>::not_found("User was not found"))
             }
         }
-        Err(err) => HttpResponse::InternalServerError().json(Response::internal_server_error(&err.to_string()))
+        Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string()))
     }
 }
 
@@ -72,10 +72,10 @@ async fn user_by_username(path: web::Path<String>, data: web::Data<AppState>) ->
         Ok(optn) => {
             match optn {
                 Some(user) => HttpResponse::Found().json(user),
-                None => HttpResponse::NotFound().json(Response::not_found("User"))
+                None => HttpResponse::NotFound().json(Response::<String>::not_found("User was not found"))
             }
         }
-        Err(err) => HttpResponse::InternalServerError().json(Response::internal_server_error(&err.to_string()))
+        Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string()))
     }
 }
 

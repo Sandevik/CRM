@@ -3,15 +3,15 @@ import request from '@/utils/request';
 import { useRouter } from 'next/navigation';
 import React, { useContext, useEffect, useState } from 'react'
 
-export default function useRequest<T extends Object, U extends Object = Object>(endPoint: string, data: InputData<U>, method: HTTPMETHOD = "GET"): {data: T | null, loading: boolean, refetch: () => void} {
+export default function useRequest<T extends Object, U extends Object = Object>(endPoint: string, data: InputData<U>, method: HTTPMETHOD = "GET"): {data: ResultData<T> | null, loading: boolean, refetch: () => void} {
 
     const {data: authData, setData: setAuthData} = useContext(AuthContext);
     const router = useRouter();
     const [loading, setLoading] = useState<boolean>(false);
-    const [result, setResult] = useState<T | null>(null);
+    const [result, setResult] = useState<ResultData<T> | null>(null);
 
     useEffect(() => {
-        fetch();
+            fetch();
     }, [endPoint, data, method])
 
     async function fetch() {
@@ -27,7 +27,7 @@ export default function useRequest<T extends Object, U extends Object = Object>(
                 /* setLoading(false);
                 router.push("/sign-in"); */
             }else{
-                setResult(result as T);
+                setResult(result as ResultData<T>);
                 setLoading(false);
             }
         }

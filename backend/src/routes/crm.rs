@@ -19,34 +19,43 @@ pub fn crm() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Response 
     scope
 }
 
+#[derive(Serialize, Deserialize)]
+struct CrmsResponse {
+    crms: Vec<CRM>
+}
+
+
 #[get("")]
 async fn crms(data: web::Data<AppState>, req_user: Option<ReqData<Claims>>) -> impl Responder {
     match req_user {
-        None => HttpResponse::InternalServerError().json(Response::internal_server_error("No user was found by middleware")),
+        None => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error("No user was found by middleware")),
         Some(claims) => {
             let crms = CRM::get_by_user(&claims.user, &data).await;
             match crms {
-                Err(err) => HttpResponse::InternalServerError().json(Response::internal_server_error(&err.to_string())),
-                Ok(crms) => HttpResponse::Ok().json(crms)
+                Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
+                Ok(crms) => HttpResponse::Ok().json(Response::<CrmsResponse>::ok("Successfully retrieved crms", Some(CrmsResponse {crms})))
             }
         }
     }
 } 
 
-
+#[derive(Deserialize)]
+struct CreateBodyRequest {
+    name: String,
+}
 #[post("/create")]
-async fn create_crm(data: web::Data<AppState>, req_user: Option<ReqData<Claims>>) -> impl Responder {
+async fn create_crm(data: web::Data<AppState>, body: web::Json<CreateBodyRequest>, req_user: Option<ReqData<Claims>>) -> impl Responder {
 
     let user = &req_user.unwrap().user;
 
     //todo: get number of crm's the user has and check if user is allowed to create a new one
 
     //user is allowed to create a new crm:
-    let new_crm = CRM::new(&data, &user).await;
+    let new_crm = CRM::new(&data, &user, &body.name).await;
 
     match new_crm {
-        Err(err) => HttpResponse::InternalServerError().json(Response::internal_server_error(&err.to_string())),
-        Ok(_) => HttpResponse::Created().json(Response::created("Success! New CRM created."))
+        Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
+        Ok(_) => HttpResponse::Created().json(Response::<String>::created("Success! New CRM created."))
     }
 }
 
@@ -64,8 +73,8 @@ async fn remove_by_uuid(data: web::Data<AppState>, body: web::Json<DeleteBodyReq
 
 
     match CRM::remove_by_uuid(&data, &body.uuid).await {
-        Err(err) => HttpResponse::InternalServerError().json(Response::internal_server_error(&err.to_string())),
-        Ok(_) => HttpResponse::Ok().json(Response::ok("Deleted successfully", None, None))
+        Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
+        Ok(_) => HttpResponse::Ok().json(Response::<String>::ok("Deleted successfully", None))
     }
 
 }

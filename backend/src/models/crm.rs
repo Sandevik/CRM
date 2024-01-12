@@ -30,7 +30,7 @@ impl CRM {
     }
 
     //creates a new crm system with all the associated tables
-    pub async fn new(data: &web::Data<AppState>, user: &User) -> Result<MySqlQueryResult, sqlx::Error> {
+    pub async fn new(data: &web::Data<AppState>, user: &User, name: &String) -> Result<MySqlQueryResult, sqlx::Error> {
         let new_uuid: Uuid = Uuid::new_v4();
         let res: Result<MySqlQueryResult, sqlx::Error> = Database::setup_crm_users_table(&data.pool).await;
         if res.is_err() {return res;}
@@ -45,10 +45,11 @@ impl CRM {
         let res: Result<MySqlQueryResult, sqlx::Error> = Database::setup_deals_table(&new_uuid, data).await;
         if res.is_err() {return res;}
 
-        sqlx::query("INSERT INTO `crm`.`crm_users`(`user_uuid`, `crm_uuid`, `added`) VALUES (?,?,?)")
+        sqlx::query("INSERT INTO `crm`.`crm_users`(`user_uuid`, `crm_uuid`, `added`, `name`) VALUES (?,?,?,?)")
             .bind(user.uuid.hyphenated().to_string())
             .bind(new_uuid.hyphenated().to_string())
             .bind(Utc::now())
+            .bind(name)
             .execute(&data.pool)
             .await
     }
