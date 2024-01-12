@@ -124,12 +124,22 @@ struct ValidateResponse {
 }
 
 #[post("/validate-token")]
-async fn validate_token(secret: web::Data<String>, credentials: BearerAuth) -> impl Responder {
+async fn validate_token(data: web::Data<AppState>, secret: web::Data<String>, credentials: BearerAuth) -> impl Responder {
     let token_string: String = credentials.token().to_string();
-    println!("{token_string}");
     match JWT::decode_jwt(&token_string, &secret) {
         Err(err) => HttpResponse::Unauthorized().json(Response::<String>::unauthorized(&err.to_string())),
-        Ok(token_claim) => HttpResponse::Ok().json(Response::ok("Authorized", Some(ValidateResponse {user: token_claim.claims.user})))
+        Ok(token_claim) => {
+            match User::get_by_uuid(&token_claim.claims.user.uuid.hyphenated().to_string(), &data).await {
+                Ok(db_user) => {
+                    if db_user.is_some() && db_user.unwrap().current_jwt == token_string {
+                        HttpResponse::Ok().json(Response::ok("Authorized", Some(ValidateResponse {user: token_claim.claims.user})))
+                    } else {
+                        HttpResponse::Unauthorized().json(Response::<String>::unauthorized("Unauthorized, Your token has been updated"))
+                    }
+                }
+                Err(err) => HttpResponse::Unauthorized().json(Response::<String>::unauthorized(&err.to_string())),
+            }
+        }
     }
 }
 

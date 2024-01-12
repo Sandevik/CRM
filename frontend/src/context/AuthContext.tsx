@@ -1,3 +1,5 @@
+import request from "@/utils/request";
+import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 
 interface Context {
@@ -15,12 +17,13 @@ export interface JWTData {
 export const AuthContext = React.createContext<Context>({data: {user: null, exp: 0, token: null}, setData: () => {}});
 
 export const AuthContextProvider = ({children}: {children: React.ReactNode}) => {
+    const router = useRouter();
     const [loading, setLoading] = useState<boolean>(false);
     const [data, setData] = useState<JWTData | null>(null);
 
     //read and set user from JWT in localStorage
     useEffect(()=>{
-        (() => {
+        (async () => {
             setLoading(true);
             const jwtString = decodeJWTPayload();
             if (!jwtString) {
@@ -35,11 +38,20 @@ export const AuthContextProvider = ({children}: {children: React.ReactNode}) => 
             }else{
                 setData(data);
             }
+            await validateToken();
             setLoading(false);
-            
         })();
     },[])
 
+
+    const validateToken = async () => {
+        let res = await request<User>("/auth/validate-token", {}, "POST");
+        if (res.code !== 200) {
+            localStorage.removeItem("auth_token");
+            setData(null);
+            router.push("/sign-in")
+        }
+    }
 
 
     return (
