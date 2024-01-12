@@ -1,5 +1,4 @@
 use actix_web::{post, HttpResponse, Responder, Scope, web};
-use chrono::{DateTime, Utc};
 use serde::{Serialize, Deserialize};
 use crate::{models::user::User, AppState, controllers::hashing::Hashing};
 use super::Response;

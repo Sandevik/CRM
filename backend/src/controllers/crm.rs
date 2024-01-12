@@ -1,5 +1,5 @@
 use actix_web::web;
-use chrono::{DateTime, Utc};
+use chrono::Utc;
 use sqlx::mysql::MySqlQueryResult;
 use uuid::Uuid;
 use crate::{AppState, models::user::User};
