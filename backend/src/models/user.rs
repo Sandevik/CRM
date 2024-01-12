@@ -27,6 +27,8 @@ pub struct User {
     pub subscription_ends: Option<DateTime<Utc>>,
     #[serde(rename(serialize = "LegacyUser", deserialize = "LegacyUser"))]
     pub legacy_user: bool,
+    #[serde(rename(serialize = "currentJWT", deserialize = "currentJWT"))]
+    pub current_JWT: String,
 
 }
 
@@ -142,5 +144,6 @@ fn mysql_row_to_user(row: &MySqlRow) -> User {
         legacy_user: row.get("legacy_user"),
         crm_count: row.get("crm_count"),
         subscription_ends: row.get("subscription_ends"),   
+        current_JWT: row.get("current_JWT")
     }
 }
