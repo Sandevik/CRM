@@ -48,7 +48,8 @@ async fn sign_in(body: web::Json<DecodeSignIn>, secret: web::Data<String>, data:
                             match jwt {
                                 Err(err) => HttpResponse::InternalServerError().json(Response::internal_server_error(&err.to_string())),
                                 Ok(token) => {
-                                    let _ = sqlx::query("UPDATE `crm`.`users` SET current_jwt = ?, last_sign_in = ?").bind(&token).bind(DateTime::<Utc>::from(Utc::now())).execute(&data.pool).await;
+                                    let _ = user.update_last_sign_in(&data).await;
+                                    let _ = user.update_current_jwt(&token, &data).await;
                                     HttpResponse::Ok().json(Response::ok("Success", Some(token), None))
                                 }
                             }
@@ -92,7 +93,8 @@ async fn sign_up(body: web::Json<DecodeSignUp>, secret: web::Data<String>, data:
                             match jwt {
                                 Err(err) => HttpResponse::InternalServerError().json(&err.to_string()),
                                 Ok(token) => {
-                                    let _ = sqlx::query("UPDATE `crm`.`users` SET current_jwt = ?, last_sign_in = ?").bind(&token).bind(DateTime::<Utc>::from(Utc::now())).execute(&data.pool).await;
+                                    let _ = user.update_last_sign_in(&data).await;
+                                    let _ = user.update_current_jwt(&token, &data).await;
                                     HttpResponse::Created().json(Response::ok("Success", Some(token), None))
                                 }
                             }

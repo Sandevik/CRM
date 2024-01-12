@@ -118,14 +118,27 @@ impl User {
         result
     }
 
-    pub async fn update_last_sign_in(&self, data: &web::Data<AppState>) -> Result<sqlx::mysql::MySqlQueryResult, Error> {
-        let result = sqlx::query("UPDATE users SET last_sign_in = ? WHERE uuid = ?")
-            .bind(Utc::now())
-            .bind(self.uuid)
+    pub async fn update_last_sign_in(&self, data: &web::Data<AppState>) -> Result<(), Error> {
+        let result = sqlx::query("UPDATE `crm`.`users` SET last_sign_in = ? WHERE uuid = ?")
+            .bind(DateTime::<Utc>::from(Utc::now()))
+            .bind(self.uuid.hyphenated().to_string())
             .execute(&data.pool).await;
-        result
+        match result {
+            Ok(_) => Ok(()),
+            Err(err) => Err(err)
+        }
     }
 
+    pub async fn update_current_jwt(&self, new_current_jwt: &String, data: &web::Data<AppState>) -> Result<(), Error> {
+        let result = sqlx::query("UPDATE `crm`.`users` SET current_jwt = ? WHERE uuid = ?")
+            .bind(new_current_jwt)
+            .bind(self.uuid.hyphenated().to_string())
+            .execute(&data.pool).await;
+        match result {
+            Ok(_) => Ok(()),
+            Err(err) => Err(err)
+        }
+    }
 
 }
 
