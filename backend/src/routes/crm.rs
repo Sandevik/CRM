@@ -1,9 +1,9 @@
-use actix_web::{Scope, web::{self, ReqData}, Responder, HttpResponse, post, delete, dev::{ServiceRequest, ServiceFactory, ServiceResponse}, body::{EitherBody, BoxBody}, Error};
+use actix_web::{Scope, web::{self, ReqData}, Responder, HttpResponse, post, get, delete, dev::{ServiceRequest, ServiceFactory, ServiceResponse}, body::{EitherBody, BoxBody}, Error};
 use actix_web_httpauth::middleware::HttpAuthentication;
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 
-use crate::{AppState, controllers::{crm::CRM, jwt::Claims}, routes::Response};
+use crate::{AppState, controllers::jwt::Claims, routes::Response, models::crm::CRM};
 use crate::middleware::user_middleware::validator;
 
 
@@ -12,16 +12,25 @@ pub fn crm() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Response 
     
     let scope = web::scope("/crm")
         .wrap(user_auth_middleware)
-        .route("", web::get().to(index))
-        .route("/", web::get().to(index))
+        .service(crms)
         .service(create_crm)
         .service(remove_by_uuid);
         
     scope
 }
 
-async fn index() -> impl Responder {
-    HttpResponse::Ok().body("crm route")
+#[get("")]
+async fn crms(data: web::Data<AppState>, req_user: Option<ReqData<Claims>>) -> impl Responder {
+    match req_user {
+        None => HttpResponse::InternalServerError().json(Response::internal_server_error("No user was found by middleware")),
+        Some(claims) => {
+            let crms = CRM::get_by_user(&claims.user, &data).await;
+            match crms {
+                Err(err) => HttpResponse::InternalServerError().json(Response::internal_server_error(&err.to_string())),
+                Ok(crms) => HttpResponse::Ok().json(crms)
+            }
+        }
+    }
 } 
 
 

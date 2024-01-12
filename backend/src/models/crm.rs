@@ -1,12 +1,33 @@
 use actix_web::web;
-use chrono::Utc;
-use sqlx::mysql::MySqlQueryResult;
+use chrono::{Utc, DateTime};
+use serde::{Serialize, Deserialize};
+use sqlx::{mysql::{MySqlQueryResult, MySqlRow}, Row};
 use uuid::Uuid;
-use crate::{AppState, models::user::User};
-use super::database::Database;
-pub struct CRM ();
+use crate::{AppState, models::user::User, controllers::database::Database};
+
+
+#[derive(Serialize, Deserialize)]
+pub struct CRM {
+    #[serde(rename(serialize = "userUuid", deserialize = "userUuid"))]
+    user_uuid: Uuid,
+    #[serde(rename(serialize = "crmUuid", deserialize = "crmUuid"))]
+    crm_uuid: Uuid,
+    name: String,
+    added: DateTime<Utc>,
+    hidden: bool,
+}
 
 impl CRM {
+
+    pub fn from_row(row: &MySqlRow) -> Self {
+        CRM {
+            user_uuid: Uuid::parse_str(row.get("user_uuid")).expect("ERROR: Could not parse uuid for this user."),
+            crm_uuid: Uuid::parse_str(row.get("crm_uuid")).expect("ERROR: Could not parse uuid for this crm."),
+            name: row.get("name"),
+            added: row.get("added"),
+            hidden: row.get("hidden")
+        }
+    }
 
     //creates a new crm system with all the associated tables
     pub async fn new(data: &web::Data<AppState>, user: &User) -> Result<MySqlQueryResult, sqlx::Error> {
@@ -30,14 +51,26 @@ impl CRM {
             .bind(Utc::now())
             .execute(&data.pool)
             .await
-
-        // create all of the database tables
-
-
-
-
     }
 
+
+    pub async fn get_by_user(user: &User, data: &web::Data<AppState>) -> Result<Vec<Self>, sqlx::Error> {
+        let mut crms: Vec<Self> = Vec::new();
+        let result = sqlx::query("SELECT * FROM `crm`.`crm_users` WHERE `user_uuid` = ?")
+            .bind(user.uuid.hyphenated().to_string())
+            .fetch_all(&data.pool)
+            .await;
+
+        match result {
+            Err(err) => Err(err),
+            Ok(mysql_rows) => {
+                mysql_rows.iter().for_each(|row| {
+                    crms.push(Self::from_row(row));
+                });
+                Ok(crms)
+            }
+        }
+    }
 
     pub async fn remove_by_uuid(data: &web::Data<AppState>, uuid: &Uuid) -> Result<MySqlQueryResult, sqlx::Error> {
         let uuid_string = uuid.hyphenated().to_string();
@@ -51,8 +84,5 @@ impl CRM {
             .execute(&data.pool)
             .await
     }
-
-
-
 
 }

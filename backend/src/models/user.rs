@@ -27,12 +27,30 @@ pub struct User {
     pub subscription_ends: Option<DateTime<Utc>>,
     #[serde(rename(serialize = "LegacyUser", deserialize = "LegacyUser"))]
     pub legacy_user: bool,
-    #[serde(rename(serialize = "currentJwt", deserialize = "currentJwt"))]
+    #[serde(skip_deserializing, skip_serializing)]
     pub current_jwt: String,
 
 }
 
 impl User {
+
+    pub fn from_row(row: &MySqlRow) -> Self {
+        User {
+            uuid: Uuid::parse_str(row.get("uuid")).expect("ERROR: Could not parse uuid for this user."),
+            email: row.get("email"),
+            phone_number: row.get("phone_number"),
+            p_hash: row.get("p_hash"),
+            admin: row.get("admin"),
+            joined: row.get("joined"),
+            last_sign_in: row.get("last_sign_in"),
+            first_name: row.get("first_name"),
+            last_name: row.get("last_name"),
+            legacy_user: row.get("legacy_user"),
+            crm_count: row.get("crm_count"),
+            subscription_ends: row.get("subscription_ends"),   
+            current_jwt: row.get("current_jwt")
+        }
+    }
     
     pub async fn get_all_users(amount: u16, offset: u16, data: &web::Data<AppState>) -> Result<Vec<User>, Error> {
         let res = sqlx::query("SELECT * FROM users LIMIT ? OFFSET ?")
@@ -44,7 +62,7 @@ impl User {
             Ok(rows) => {
                 let mut users: Vec<User> = Vec::new();
                 rows.iter().for_each(|row: &MySqlRow| {
-                    users.push(mysql_row_to_user(row))
+                    users.push(Self::from_row(row))
                 });
                 Ok(users)
             }
@@ -66,7 +84,7 @@ impl User {
             Err(err) => return Err(err),
             Ok(row) => {
                 match row {
-                    Some(msql_row) => return Ok(Some(mysql_row_to_user(&msql_row))),
+                    Some(msql_row) => return Ok(Some(Self::from_row(&msql_row))),
                     None => return Ok(None),
                 }
             }
@@ -79,7 +97,7 @@ impl User {
             Err(err) => return Err(err),
             Ok(row) => {
                 match row {
-                    Some(msql_row) => return Ok(Some(mysql_row_to_user(&msql_row))),
+                    Some(msql_row) => return Ok(Some(Self::from_row(&msql_row))),
                     None => return Ok(None),
                 }
             }
@@ -92,7 +110,7 @@ impl User {
             Err(err) => return Err(err),
             Ok(row) => {
                 match row {
-                    Some(msql_row) => return Ok(Some(mysql_row_to_user(&msql_row))),
+                    Some(msql_row) => return Ok(Some(Self::from_row(&msql_row))),
                     None => return Ok(None),
                 }
             }
@@ -140,23 +158,4 @@ impl User {
         }
     }
 
-}
-
-
-fn mysql_row_to_user(row: &MySqlRow) -> User {
-    User {
-        uuid: Uuid::parse_str(row.get("uuid")).expect("ERROR: Could not parse uuid for this user."),
-        email: row.get("email"),
-        phone_number: row.get("phone_number"),
-        p_hash: row.get("p_hash"),
-        admin: row.get("admin"),
-        joined: row.get("joined"),
-        last_sign_in: row.get("last_sign_in"),
-        first_name: row.get("first_name"),
-        last_name: row.get("last_name"),
-        legacy_user: row.get("legacy_user"),
-        crm_count: row.get("crm_count"),
-        subscription_ends: row.get("subscription_ends"),   
-        current_jwt: row.get("current_jwt")
-    }
 }

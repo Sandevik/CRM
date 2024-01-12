@@ -40,8 +40,9 @@ impl Database {
         CREATE TABLE IF NOT EXISTS `crm`.`crm_users` (
             `user_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
             `crm_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL UNIQUE,
-            `name` VARCHAR(40) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL DEFAULT "CRM",
-            `added` DATETIME
+            `name` VARCHAR(40) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL UNIQUE,
+            `added` DATETIME,
+            `hidden` BOOLEAN NOT NULL DEFAULT FALSE
           ) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;
         "#;
         sqlx::query(create_table_crm_query).execute(pool).await
