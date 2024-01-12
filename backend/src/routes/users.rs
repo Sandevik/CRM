@@ -1,17 +1,17 @@
 use actix_web::{web::{self}, get,  Responder, HttpResponse, Scope, dev::{ServiceFactory, ServiceRequest, ServiceResponse}, body::{EitherBody, BoxBody}, Error};
 use actix_web_httpauth::middleware::HttpAuthentication;
 
-use crate::{AppState, models::user::User, extractors::admin_authentication::AdminAuthenticationToken};
+use crate::{AppState, models::user::User};
 use serde::{Serialize, Deserialize};
 use super::Response;
-use crate::middleware::auth_middleware::validator;
+use crate::middleware::admin_middleware::validator;
 
 
 pub fn users() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Response = ServiceResponse<EitherBody<BoxBody>>, Error = Error, InitError = ()>> {
-    let user_auth_middleware = HttpAuthentication::bearer(validator);
+    let admin_auth_middleware = HttpAuthentication::bearer(validator);
 
     let scope = web::scope("/users")
-        .wrap(user_auth_middleware)
+        .wrap(admin_auth_middleware)
         .route("", web::post().to(index))
         .route("/", web::post().to(index))
         .service(user_by_uuid)

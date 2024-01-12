@@ -19,7 +19,7 @@ impl JWT {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Claims {
     pub user: User,
     pub exp: u64,

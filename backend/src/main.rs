@@ -1,5 +1,4 @@
 use actix_cors::Cors;
-use actix_web_httpauth::middleware::HttpAuthentication;
 use dotenvy::dotenv;
 use std::env;
 use actix_web::{web, HttpServer, App};
@@ -7,12 +6,10 @@ use sqlx::{mysql::MySqlPoolOptions, MySql, Pool};
 mod routes;
 mod models;
 mod controllers;
-mod extractors;
 mod middleware;
 
 use controllers::database::Database;
 use routes::routes;
-use middleware::auth_middleware::validator;
 
 struct AppState {
     pool: Pool<MySql>

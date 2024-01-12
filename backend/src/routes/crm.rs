@@ -1,13 +1,17 @@
-use actix_web::{Scope, web, Responder, HttpResponse, post, delete};
+use actix_web::{Scope, web::{self, ReqData}, Responder, HttpResponse, post, delete, dev::{ServiceRequest, ServiceFactory, ServiceResponse}, body::{EitherBody, BoxBody}, Error};
+use actix_web_httpauth::middleware::HttpAuthentication;
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 
-use crate::{extractors::authentication::AuthenticationToken, AppState, models::user::User, controllers::{crm::CRM, database::Database}, routes::Response};
+use crate::{AppState, controllers::{crm::CRM, jwt::Claims}, routes::Response};
+use crate::middleware::user_middleware::validator;
 
 
-
-pub fn crm() -> Scope {
+pub fn crm() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Response = ServiceResponse<EitherBody<BoxBody>>, Error = Error, InitError = ()>> {
+    let user_auth_middleware = HttpAuthentication::bearer(validator);
+    
     let scope = web::scope("/crm")
+        .wrap(user_auth_middleware)
         .route("", web::get().to(index))
         .route("/", web::get().to(index))
         .service(create_crm)
@@ -22,9 +26,9 @@ async fn index() -> impl Responder {
 
 
 #[post("/create")]
-async fn create_crm(data: web::Data<AppState>, auth_token: AuthenticationToken) -> impl Responder {
+async fn create_crm(data: web::Data<AppState>, req_user: Option<ReqData<Claims>>) -> impl Responder {
 
-    let user: User = auth_token.user;
+    let user = &req_user.unwrap().user;
 
     //todo: get number of crm's the user has and check if user is allowed to create a new one
 
