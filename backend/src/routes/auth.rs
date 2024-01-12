@@ -1,4 +1,5 @@
 use actix_web::{post, HttpResponse, Responder, Scope, web};
+use chrono::{DateTime, Utc};
 use serde::{Serialize, Deserialize};
 use crate::{models::user::User, AppState, controllers::hashing::Hashing};
 use super::Response;
@@ -43,13 +44,13 @@ async fn sign_in(body: web::Json<DecodeSignIn>, secret: web::Data<String>, data:
                         match Hashing::verify(body.password.to_string(), &user.p_hash) {
                         Err(_) => HttpResponse::BadRequest().json(Response::bad_request("Email or password is incorrect")),
                         Ok(_) => {
-                            let u = user.update_last_sign_in(&data).await; // ignore the result as it is not essential for the program.
-                            println!("{}", user.uuid);
-                            println!("{:?}", u);
                             let jwt = JWT::create_jwt(&user, &secret);
                             match jwt {
                                 Err(err) => HttpResponse::InternalServerError().json(Response::internal_server_error(&err.to_string())),
-                                Ok(token) => HttpResponse::Ok().json(Response::ok("Success", Some(token), None))
+                                Ok(token) => {
+                                    let _ = sqlx::query("UPDATE `crm`.`users` SET current_jwt = ?, last_sign_in = ?").bind(&token).bind(DateTime::<Utc>::from(Utc::now())).execute(&data.pool).await;
+                                    HttpResponse::Ok().json(Response::ok("Success", Some(token), None))
+                                }
                             }
                         }
                     }
@@ -90,7 +91,10 @@ async fn sign_up(body: web::Json<DecodeSignUp>, secret: web::Data<String>, data:
                             let jwt = JWT::create_jwt(&user, &secret);
                             match jwt {
                                 Err(err) => HttpResponse::InternalServerError().json(&err.to_string()),
-                                Ok(token) => HttpResponse::Created().json(Response::ok("Success", Some(token), None))
+                                Ok(token) => {
+                                    let _ = sqlx::query("UPDATE `crm`.`users` SET current_jwt = ?, last_sign_in = ?").bind(&token).bind(DateTime::<Utc>::from(Utc::now())).execute(&data.pool).await;
+                                    HttpResponse::Created().json(Response::ok("Success", Some(token), None))
+                                }
                             }
                         }
                     }

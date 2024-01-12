@@ -27,9 +27,13 @@ pub async fn validator(req: ServiceRequest, credentials: BearerAuth) -> Result<S
                 Ok(user) => {
                     match user {
                         None => Err((ErrorUnauthorized(r#"{"code": 401, "message": "Unauthorized"}"#), req)),
-                        Some(_) => {
-                            req.extensions_mut().insert(value.claims);
-                            Ok(req)
+                        Some(user) => {
+                            if user.current_jwt == token_string {
+                                req.extensions_mut().insert(value.claims);
+                                Ok(req)
+                            } else {
+                                Err((ErrorUnauthorized(r#"{"code": 401, "message": "Unauthorized, your token has been updated"}"#), req))
+                            }
                         }
                     }
                 }

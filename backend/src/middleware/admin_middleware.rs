@@ -30,12 +30,17 @@ pub async fn validator(req: ServiceRequest, credentials: BearerAuth) -> Result<S
                     match user {
                         None => Err((ErrorUnauthorized(r#"{"code": 401, "message": "Unauthorized"}"#), req)),
                         Some(user) => {
-                            if user.admin {
-                                req.extensions_mut().insert(value.claims);
-                                return Ok(req);
+                            if user.current_jwt == token_string {
+                                if user.admin {
+                                    req.extensions_mut().insert(value.claims);
+                                    Ok(req)
+                                } else {
+                                    Err((ErrorUnauthorized(r#"{"code": 401, "message": "Unauthorized, you are not an admin."}"#), req))
+                                }
                             } else {
-                                Err((ErrorUnauthorized(r#"{"code": 401, "message": "Unauthorized, you are not an admin."}"#), req))
+                                Err((ErrorUnauthorized(r#"{"code": 401, "message": "Unauthorized, your token has been updated"}"#), req))
                             }
+                            
                         }
                     }
                 }

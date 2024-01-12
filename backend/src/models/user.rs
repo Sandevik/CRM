@@ -27,7 +27,7 @@ pub struct User {
     pub subscription_ends: Option<DateTime<Utc>>,
     #[serde(rename(serialize = "LegacyUser", deserialize = "LegacyUser"))]
     pub legacy_user: bool,
-    #[serde(rename(serialize = "currentJWT", deserialize = "currentJWT"))]
+    #[serde(rename(serialize = "currentJwt", deserialize = "currentJwt"))]
     pub current_jwt: String,
 
 }
