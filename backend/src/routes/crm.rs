@@ -3,7 +3,7 @@ use actix_web_httpauth::middleware::HttpAuthentication;
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 
-use crate::{AppState, controllers::jwt::Claims, routes::Response, models::crm::CRM};
+use crate::{AppState, controllers::jwt::Claims, routes::Response, models::{crm::CRM, user::User}};
 use crate::middleware::user_middleware::validator;
 
 
@@ -60,22 +60,25 @@ async fn create_crm(data: web::Data<AppState>, body: web::Json<CreateBodyRequest
 }
 
 
-#[derive(Serialize, Deserialize)]
-struct DeleteBodyRequest {
-    uuid: Uuid,
-}
 
-#[delete("")]
-async fn remove_by_uuid(data: web::Data<AppState>, body: web::Json<DeleteBodyRequest>) -> impl Responder {
-    
-    
-    //todo! only an admin or a user that is the owner of the crm should be able to remove
-
-
-    match CRM::remove_by_uuid(&data, &body.uuid).await {
+#[delete("/{uuid}")]
+async fn remove_by_uuid(data: web::Data<AppState>, path: web::Path<String>, req_user: Option<ReqData<Claims>>) -> impl Responder {
+    let crm_uuid: Uuid = Uuid::parse_str(path.into_inner().as_str()).unwrap_or_default();
+    let user: &User = &req_user.unwrap().user;
+    let is_admin: bool = user.admin;
+    let is_owner: Result<bool, sqlx::Error> = CRM::user_owns(&user, crm_uuid, &data).await;
+    match is_owner {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
-        Ok(_) => HttpResponse::Ok().json(Response::<String>::ok("Deleted successfully", None))
+        Ok(is_owner) => {
+            if is_owner || is_admin {
+                match CRM::remove_by_uuid(&data, &crm_uuid).await {
+                    Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
+                    Ok(_) => HttpResponse::Ok().json(Response::<String>::ok("Deleted successfully", None))
+                }
+            } else {
+                HttpResponse::Unauthorized().json(Response::<String>::unauthorized("You do not own this crm"))
+            }        
+        }
     }
-
 }
 

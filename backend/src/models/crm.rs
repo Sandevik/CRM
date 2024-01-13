@@ -86,4 +86,28 @@ impl CRM {
             .await
     }
 
+    pub async fn user_owns(user: &User, crm_uuid: Uuid, data: &web::Data<AppState>) -> Result<bool, sqlx::Error> {
+        let res = sqlx::query("SELECT user_uuid FROM `crm`.`crm_users` WHERE `crm_uuid` = ?")
+            .bind(crm_uuid.hyphenated().to_string())
+            .fetch_optional(&data.pool)
+            .await;
+
+        match res {
+            Err(err) => Err(err),
+            Ok(option) => {
+                match option {
+                    None => Ok(false),
+                    Some(row) => {
+                        if Uuid::parse_str(row.get("user_uuid")).unwrap_or_default() == user.uuid {
+                            Ok(true)
+                        } else {
+                            Ok(false)
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
 }

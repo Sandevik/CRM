@@ -44,7 +44,7 @@ export default function index() {
         <li className="w-full h-[128px] cursor-pointer border-transparent bg-gray-200 hover:border-[var(--light-green)] hover:bg-gray-500 hover:text-[var(--light-green)] border-2 rounded-md text-gray-400 font-bold text-xl flex justify-center items-center transition-colors">
           <button onClick={() => setPopupActive(true)} className="h-full w-full">Create CRM</button>
         </li>
-        {data?.data?.crms.map(crm => (<CrmCard crm={crm}/>))}
+        {data?.data?.crms.map(crm => (<CrmCard key={crm.crmUuid} crm={crm}/>))}
       </ul>      
       <CreateCrmPopup createCrm={createCrm} active={popupActive} closePopup={closePopup} />
     </div>

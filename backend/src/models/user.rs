@@ -122,7 +122,7 @@ impl User {
         if res.is_err() {
             return res;
         }
-        let result = sqlx::query("INSERT INTO users (uuid, email, first_name, last_name, phone_number, p_hash, admin, joined, last_sign_in, crm_count, subscription_ends, legacy_user) VALUES (uuid(),?,?,?,?,?,0,?,?,?,NULL,false)")
+        let result = sqlx::query("INSERT INTO users (uuid, email, first_name, last_name, phone_number, p_hash, admin, joined, last_sign_in, crm_count, subscription_ends, legacy_user, current_jwt) VALUES (uuid(),?,?,?,?,?,0,?,?,?,NULL,false, \"\")")
             .bind(email)
             .bind(first_name)
             .bind(last_name)

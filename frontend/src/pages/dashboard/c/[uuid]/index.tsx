@@ -9,7 +9,7 @@ export default function index() {
   const router = useRouter();
 
   const removeCrm = async () => {
-    const res = await request("/crm", {uuid: params.uuid}, "DELETE");
+    const res = await request(`/crm/${params?.uuid}`, {}, "DELETE");
     alert(JSON.stringify(res));
     if (res.code === 200) {
       router.push("/dashboard");

@@ -26,7 +26,7 @@ impl Database {
                 `crm_count` TINYINT UNSIGNED NOT NULL,
                 `subscription_ends` DATETIME,
                 `legacy_user` BOOLEAN NOT NULL DEFAULT FALSE,
-                `current_jwt` TEXT,
+                `current_jwt` TEXT DEFAULT "",
                 PRIMARY KEY (`uuid`(36)),
                 UNIQUE (`email`(50), `phone_number`(15))
               ) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;
