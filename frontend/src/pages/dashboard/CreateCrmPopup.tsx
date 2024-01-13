@@ -10,7 +10,7 @@ export default function CreateCrmPopup({closePopup, active, createCrm}: {closePo
     const handleCreateClick = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();
         const res = await createCrm(name);
-        if (res.code !== 200) {
+        if (res.code !== 201) {
             setError(res);
         } else {
             setName("");

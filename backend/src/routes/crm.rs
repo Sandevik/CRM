@@ -65,7 +65,7 @@ struct DeleteBodyRequest {
     uuid: Uuid,
 }
 
-#[delete("/")]
+#[delete("")]
 async fn remove_by_uuid(data: web::Data<AppState>, body: web::Json<DeleteBodyRequest>) -> impl Responder {
     
     
