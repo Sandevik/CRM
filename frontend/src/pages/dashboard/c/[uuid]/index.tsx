@@ -1,7 +1,11 @@
+import { useParams } from 'next/navigation'
 import React from 'react'
 
 export default function index() {
+  const params = useParams();
+
+
   return (
-    <div>index</div>
+    <div>{params?.uuid}</div>
   )
 }
