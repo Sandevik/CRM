@@ -1,9 +1,12 @@
 use actix_web::web;
 use chrono::{Utc, DateTime};
+use futures_util::Future;
 use serde::{Serialize, Deserialize};
 use sqlx::{mysql::{MySqlQueryResult, MySqlRow}, Row};
 use uuid::Uuid;
 use crate::{AppState, models::user::User, controllers::database::Database};
+
+use super::{Model, customer::Customer, employee::Employee, meeting::Meeting, deal::Deal};
 
 
 #[derive(Serialize, Deserialize)]
@@ -15,20 +18,36 @@ pub struct CRM {
     name: String,
     added: DateTime<Utc>,
     hidden: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    customers: Option<Vec<Customer>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    employees: Option<Vec<Employee>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    meetings: Option<Vec<Meeting>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    deals: Option<Vec<Deal>>,
 }
 
-impl CRM {
-
-    pub fn from_row(row: &MySqlRow) -> Self {
+impl Model for CRM {
+    fn from_row(row: &MySqlRow) -> Self {
         CRM {
             user_uuid: Uuid::parse_str(row.get("user_uuid")).expect("ERROR: Could not parse uuid for this user."),
             crm_uuid: Uuid::parse_str(row.get("crm_uuid")).expect("ERROR: Could not parse uuid for this crm."),
             name: row.get("name"),
             added: row.get("added"),
-            hidden: row.get("hidden")
+            hidden: row.get("hidden"),
+            customers: None,
+            employees: None,
+            deals: None,
+            meetings: None,
         }
     }
+}
 
+
+impl CRM {
+
+    
     //creates a new crm system with all the associated tables
     pub async fn new(data: &web::Data<AppState>, user: &User, name: &String) -> Result<MySqlQueryResult, sqlx::Error> {
         let new_uuid: Uuid = Uuid::new_v4();
@@ -55,11 +74,29 @@ impl CRM {
     }
 
 
-    pub async fn get_by_user(user: &User, data: &web::Data<AppState>) -> Result<Vec<Self>, sqlx::Error> {
+    pub async fn get_all_by_user(user: &User, data: &web::Data<AppState>) -> Result<Vec<Self>, sqlx::Error> {
         let mut crms: Vec<Self> = Vec::new();
         let result = sqlx::query("SELECT * FROM `crm`.`crm_users` WHERE `user_uuid` = ?")
             .bind(user.uuid.hyphenated().to_string())
             .fetch_all(&data.pool)
+            .await;
+
+        match result {
+            Err(err) => Err(err),
+            Ok(mysql_rows) => {
+                mysql_rows.iter().for_each(|row| {
+                    crms.push(Self::from_row(row));
+                });
+                Ok(crms)
+            }
+        }
+    }
+
+    pub async fn get_all_by_uuid(crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<Vec<Self>, sqlx::Error> {
+        let mut crms: Vec<Self> = Vec::new();
+        let query = format!("SELECT * FROM `crm`.`{}-customers`", crm_uuid.hyphenated().to_string());
+        let result = sqlx::query(&query)
+            .fetch_optional(&data.pool)
             .await;
 
         match result {

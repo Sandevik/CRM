@@ -5,6 +5,8 @@ use sqlx::{Error, Row, mysql::MySqlRow};
 use uuid::Uuid;
 use crate::{AppState, controllers::{hashing::Hashing, database::Database}};
 
+use super::Model;
+
 #[derive(sqlx::FromRow, Debug, Serialize, Deserialize, Clone)]
 pub struct User {
     pub uuid: Uuid, 
@@ -32,9 +34,9 @@ pub struct User {
 
 }
 
-impl User {
-
-    pub fn from_row(row: &MySqlRow) -> Self {
+impl Model for User {
+    
+    fn from_row(row: &MySqlRow) -> Self {
         User {
             uuid: Uuid::parse_str(row.get("uuid")).expect("ERROR: Could not parse uuid for this user."),
             email: row.get("email"),
@@ -51,7 +53,10 @@ impl User {
             current_jwt: row.get("current_jwt")
         }
     }
-    
+}
+
+impl User {
+
     pub async fn get_all_users(amount: u16, offset: u16, data: &web::Data<AppState>) -> Result<Vec<User>, Error> {
         let res = sqlx::query("SELECT * FROM users LIMIT ? OFFSET ?")
         .bind(amount)

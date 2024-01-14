@@ -73,7 +73,7 @@ impl Database {
         let query: String = format!(r#"CREATE TABLE IF NOT EXISTS `{}-entries` (
             `id` INT NOT NULL UNIQUE AUTO_INCREMENT,
             `added` DATETIME,
-            `added_at_meeting` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
+            `added_at_meeting` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci,
             `updated` DATETIME,
             `content` TEXT
         ) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;       

@@ -30,7 +30,7 @@ async fn crms(data: web::Data<AppState>, req_user: Option<ReqData<Claims>>) -> i
     match req_user {
         None => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error("No user was found by middleware")),
         Some(claims) => {
-            let crms = CRM::get_by_user(&claims.user, &data).await;
+            let crms = CRM::get_all_by_user(&claims.user, &data).await;
             match crms {
                 Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
                 Ok(crms) => HttpResponse::Ok().json(Response::<CrmsResponse>::ok("Successfully retrieved crms", Some(CrmsResponse {crms})))
@@ -56,6 +56,28 @@ async fn create_crm(data: web::Data<AppState>, body: web::Json<CreateBodyRequest
     match new_crm {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
         Ok(_) => HttpResponse::Created().json(Response::<String>::created("Success! New CRM created."))
+    }
+}
+
+
+#[get("/{uuid}")]
+async fn read_crm(data: web::Data<AppState>, path: web::Path<String>, req_user: Option<ReqData<Claims>>) -> impl Responder {
+    let crm_uuid: Uuid = Uuid::parse_str(path.into_inner().as_str()).unwrap_or_default();
+    let user: &User = &req_user.unwrap().user;
+    let is_admin: bool = user.admin;
+    let is_owner: Result<bool, sqlx::Error> = CRM::user_owns(&user, crm_uuid, &data).await;
+    match is_owner {
+        Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
+        Ok(is_owner) => {
+            if is_owner || is_admin {
+                match CRM::get_by_crm_uuid(&crm_uuid, &data).await {
+                    Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
+                    Ok(_) => HttpResponse::Ok().json(Response::<String>::ok("Deleted successfully", None))
+                }
+            } else {
+                HttpResponse::Unauthorized().json(Response::<String>::unauthorized("You do not own this crm"))
+            }        
+        }
     }
 }
 
