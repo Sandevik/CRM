@@ -1,6 +1,7 @@
 mod users;
 mod auth;
 mod crm;
+mod client;
 mod test;
 
 use actix_web::web::ServiceConfig;
@@ -10,6 +11,8 @@ use users::users;
 use auth::auth;
 use crm::crm;
 use test::test;
+
+use self::client::clients;
 
 
 #[derive(Serialize)]
@@ -78,5 +81,6 @@ pub fn routes(conf: &mut ServiceConfig) {
     conf.service(auth());
     conf.service(users());
     conf.service(crm());
+    conf.service(clients());
     conf.service(test());
 }

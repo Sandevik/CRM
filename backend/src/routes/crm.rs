@@ -66,7 +66,7 @@ async fn read_crm(data: web::Data<AppState>, path: web::Path<String>, req_user: 
     let crm_uuid: Uuid = Uuid::parse_str(path.into_inner().as_str()).unwrap_or_default();
     let user: &User = &req_user.unwrap().user;
     let is_admin: bool = user.admin;
-    let is_owner: Result<bool, sqlx::Error> = CRM::user_owns(&user, crm_uuid, &data).await;
+    let is_owner: Result<bool, sqlx::Error> = CRM::user_owns(&user, &crm_uuid, &data).await;
     match is_owner {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
         Ok(is_owner) => {
@@ -98,7 +98,7 @@ async fn remove_by_uuid(data: web::Data<AppState>, path: web::Path<String>, req_
     let crm_uuid: Uuid = Uuid::parse_str(path.into_inner().as_str()).unwrap_or_default();
     let user: &User = &req_user.unwrap().user;
     let is_admin: bool = user.admin;
-    let is_owner: Result<bool, sqlx::Error> = CRM::user_owns(&user, crm_uuid, &data).await;
+    let is_owner: Result<bool, sqlx::Error> = CRM::user_owns(&user, &crm_uuid, &data).await;
     match is_owner {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
         Ok(is_owner) => {
