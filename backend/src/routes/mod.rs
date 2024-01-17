@@ -12,7 +12,7 @@ use auth::auth;
 use crm::crm;
 use test::test;
 
-use self::client::clients;
+use self::{client::clients, crm::create_crm};
 
 
 #[derive(Serialize)]
@@ -81,6 +81,8 @@ pub fn routes(conf: &mut ServiceConfig) {
     conf.service(auth());
     conf.service(users());
     conf.service(crm());
+    conf.service(create_crm());
     conf.service(clients());
     conf.service(test());
 }
+

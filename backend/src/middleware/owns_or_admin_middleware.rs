@@ -1,5 +1,3 @@
-use std::borrow::BorrowMut;
-
 use actix_web::{dev::ServiceRequest, web::{Data, self}, error::ErrorUnauthorized, HttpMessage};
 use actix_web_httpauth::extractors::{bearer::{BearerAuth, self}, AuthenticationError};
 use jsonwebtoken::TokenData;
@@ -8,18 +6,30 @@ use uuid::Uuid;
 use crate::{controllers::jwt::{Claims, JWT}, models::{user::User, crm::CRM}, AppState};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-struct RequestRequires {
-    uuid: String,
+pub struct RequiresUuid {
+    pub uuid: String,
 }
+
+// You can get the uuid either via json (body) or via the query params
 
 pub async fn validator(mut req: ServiceRequest, credentials: BearerAuth) -> Result<ServiceRequest, (actix_web::Error, ServiceRequest)> {
     let jwt_secret: Data<String> = Data::new(std::env::var("BACKEND_JWT_SECRET").expect("BACKEND_JWT_SECRET must be set"));
     let token_string: String = credentials.token().to_string();
-    let json = req.extract::<web::Json<RequestRequires>>().await;
-    if json.is_err() {
-        return Err((ErrorUnauthorized(r#"{"code": 404, "Unauthorized, no uuid for crm found. Can't verify ownership."}"#), req));
+    let json: Result<web::Json<RequiresUuid>, actix_web::Error> = req.extract::<web::Json<RequiresUuid>>().await;
+    let query_string: Result<web::Query<RequiresUuid>, actix_web::Error> = req.extract::<web::Query<RequiresUuid>>().await;
+    
+    let uuid: Uuid;
+    if query_string.is_ok() && Uuid::parse_str(query_string.as_ref().unwrap().uuid.as_str()).is_ok() || json.is_ok() && Uuid::parse_str(json.as_ref().unwrap().uuid.as_str()).is_ok() {
+        if query_string.is_ok() {
+            uuid = Uuid::parse_str(query_string.as_ref().unwrap().uuid.as_str()).unwrap();
+        } else {
+            uuid = Uuid::parse_str(json.as_ref().unwrap().uuid.as_str()).unwrap();
+        }
+    } else {
+        return Err((ErrorUnauthorized(r#"{"code": 400, "Bad request, neither uuid found in query params or body. Can't verify ownership."}"#), req));
     }
-    let uuid = Uuid::parse_str(json.unwrap().uuid.as_str()).unwrap_or_default();
+
+    
     if token_string == "".to_string() || token_string == "Bearer ".to_string() {
         return Err((ErrorUnauthorized(r#"{"code": 401, "Unauthorized, no token found"}"#), req));
     }
