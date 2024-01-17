@@ -1,6 +1,5 @@
 use actix_web::web;
 use chrono::{Utc, DateTime};
-use futures_util::Future;
 use serde::{Serialize, Deserialize};
 use sqlx::{mysql::{MySqlQueryResult, MySqlRow}, Row};
 use uuid::Uuid;
@@ -47,6 +46,13 @@ impl Model for CRM {
 
 impl CRM {
 
+    pub async fn get_meetings(&mut self, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Self {
+
+
+
+        todo!();
+    }
+
     
     //creates a new crm system with all the associated tables
     pub async fn new(data: &web::Data<AppState>, user: &User, name: &String) -> Result<MySqlQueryResult, sqlx::Error> {
@@ -90,6 +96,30 @@ impl CRM {
                 Ok(crms)
             }
         }
+    }
+
+    pub async fn get_by_crm_uuid(crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<Option<Self>, sqlx::Error> {
+        
+        let query = "SELECT * FROM `crm`.`crm_users` WHERE `crm_uuid` = ?";
+        let res = sqlx::query(query)
+            .bind(crm_uuid.hyphenated().to_string())
+            .fetch_optional(&data.pool)
+            .await;
+
+        match res {
+            Err(err) => Err(err),
+            Ok(maybe_row) => {
+                match maybe_row {
+                    None => Ok(None),
+                    Some(row) => {
+                        let crm: CRM = Self::from_row(&row);
+                        // add more tables to crm
+                        Ok(Some(crm))
+                    }
+                }
+            }
+        }
+
     }
 
     pub async fn get_all_by_uuid(crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<Vec<Self>, sqlx::Error> {

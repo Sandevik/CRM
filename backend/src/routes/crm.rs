@@ -14,7 +14,8 @@ pub fn crm() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Response 
         .wrap(user_auth_middleware)
         .service(crms)
         .service(create_crm)
-        .service(remove_by_uuid);
+        .service(remove_by_uuid)
+        .service(read_crm);
         
     scope
 }
@@ -72,7 +73,12 @@ async fn read_crm(data: web::Data<AppState>, path: web::Path<String>, req_user: 
             if is_owner || is_admin {
                 match CRM::get_by_crm_uuid(&crm_uuid, &data).await {
                     Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
-                    Ok(_) => HttpResponse::Ok().json(Response::<String>::ok("Deleted successfully", None))
+                    Ok(maybe_crm) => {
+                        match maybe_crm {
+                            None => HttpResponse::NotFound().json(Response::<String>::not_found("Crm does not exist")),
+                            Some(crm) => HttpResponse::Ok().json(Response::<CRM>::ok("Fetch successful", Some(crm)))
+                        }
+                    }
                 }
             } else {
                 HttpResponse::Unauthorized().json(Response::<String>::unauthorized("You do not own this crm"))
