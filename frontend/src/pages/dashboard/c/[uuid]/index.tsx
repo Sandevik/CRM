@@ -18,6 +18,7 @@ export default function index() {
       if (params?.uuid !== undefined) {
         const res = await request<Crm>(`/crm?uuid=${params?.uuid}`, {}, "GET");
         setCrm(res.data || null);
+        console.log(res)
         if (res.data && res.data.clients) {
           cache(res.data.clients, CacheType.Client);
         }
