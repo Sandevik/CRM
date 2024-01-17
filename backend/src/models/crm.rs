@@ -7,6 +7,13 @@ use crate::{AppState, models::user::User, controllers::database::Database};
 
 use super::{Model, client::Client, employee::Employee, meeting::Meeting, deal::Deal};
 
+#[derive(PartialEq)]
+pub enum MeetingsOption {
+    All,
+    Future,
+    Past,
+}
+
 
 #[derive(Serialize, Deserialize)]
 pub struct CRM {
@@ -46,11 +53,52 @@ impl Model for CRM {
 
 impl CRM {
 
-    pub async fn get_meetings(&mut self, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Self {
 
+    pub async fn get_clients(&mut self, data: &web::Data<AppState>) {
+        let mut clients: Vec<Client> = Vec::new();
+        let query = format!("SELECT * FROM `crm`.`{}-clients`", &self.crm_uuid);
+        //todo: create limits on how many clients a person can get
 
+        let res = sqlx::query(&query)
+            .bind(Utc::now())
+            .fetch_all(&data.pool)
+            .await;
 
-        todo!();
+        match res {
+            Err(err) => println!("{err}"),
+            Ok(rows) => {
+                rows.iter().for_each(|row| {
+                    clients.push(Client::from_row(row));
+                });
+            }
+        }
+        self.clients = Some(clients);
+
+    }
+
+    pub async fn get_meetings(&mut self, meeting_option: MeetingsOption, data: &web::Data<AppState>) {
+        let mut meetings: Vec<Meeting> = Vec::new();
+        let mut query = format!("SELECT * FROM `crm`.`{}-meetings` ", &self.crm_uuid);
+        match meeting_option {
+            MeetingsOption::All => (),
+            MeetingsOption::Future => query.push_str("WHERE `from` >= ? ORDER BY `from` ASC"),
+            MeetingsOption::Past => query.push_str("WHERE `to` <= ? ORDER BY `from` DESC")
+        }
+
+        let res = sqlx::query(&query)
+            .bind(Utc::now())
+            .fetch_all(&data.pool)
+            .await;
+
+        match res {
+            Err(err) => println!("{err}"),
+            Ok(rows) => {
+                rows.iter().for_each(|row| {
+                    meetings.push(Meeting::from_row(row));
+                });
+            }
+        }
+        self.meetings = Some(meetings);
     }
 
     

@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react'
 import Meetings from './Meetings';
 import Navbar from './Navbar';
+import { CacheType, cache } from '@/utils/cache';
 
 export default function index() {
   const params = useParams();
@@ -17,6 +18,9 @@ export default function index() {
       if (params?.uuid !== undefined) {
         const res = await request<Crm>(`/crm/${params?.uuid}`, {}, "GET");
         setCrm(res.data || null);
+        if (res.data && res.data.clients) {
+          cache(res.data.clients, CacheType.Client);
+        }
       }
 
     })();
@@ -35,10 +39,9 @@ export default function index() {
     <div className='flex gap-4 h-[calc(100vh-3em)]'>
       <main className="p-2 flex-grow">
         <Navbar crmName={crm?.name} />
-        <h1 className="text-3xl font-semibold">{crm?.name}</h1>
         <Button onClick={() => removeCrm()}>Remove crm</Button>  
       </main>
-      <Meetings />
+      <Meetings meetings={crm?.meetings}/>
     </div>
   )
 }

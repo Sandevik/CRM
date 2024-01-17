@@ -3,7 +3,7 @@ use actix_web_httpauth::middleware::HttpAuthentication;
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 
-use crate::{AppState, controllers::jwt::Claims, routes::Response, models::{crm::CRM, user::User}};
+use crate::{AppState, controllers::jwt::Claims, routes::Response, models::{crm::{CRM, MeetingsOption}, user::User}};
 use crate::middleware::user_middleware::validator;
 
 
@@ -76,7 +76,11 @@ async fn read_crm(data: web::Data<AppState>, path: web::Path<String>, req_user: 
                     Ok(maybe_crm) => {
                         match maybe_crm {
                             None => HttpResponse::NotFound().json(Response::<String>::not_found("Crm does not exist")),
-                            Some(crm) => HttpResponse::Ok().json(Response::<CRM>::ok("Fetch successful", Some(crm)))
+                            Some(mut crm) => {
+                                crm.get_meetings(MeetingsOption::Future, &data).await;
+                                crm.get_clients(&data).await;
+                                HttpResponse::Ok().json(Response::<CRM>::ok("Fetch successful", Some(crm)))
+                            }
                         }
                     }
                 }

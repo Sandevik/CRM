@@ -88,7 +88,7 @@ impl Database {
             `to` DATETIME,
             `added` DATETIME,
             `updated` DATETIME,
-            `entry_id` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL
+            `entry_id` INT
         ) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;       
         "#, crm_uuid.hyphenated().to_string());
         sqlx::query(&query).execute(&data.pool).await

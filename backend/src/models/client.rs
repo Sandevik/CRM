@@ -1,4 +1,4 @@
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Utc, NaiveDate};
 use serde::{Serialize, Deserialize};
 use sqlx::{mysql::MySqlRow, Row};
 use uuid::Uuid;
@@ -14,7 +14,7 @@ pub struct Client {
     #[serde(rename(serialize = "lastName", deserialize = "lastName"))]
     pub last_name: Option<String>,
     #[serde(rename(serialize = "dateOfBirth", deserialize = "dateOfBirth"))]
-    pub date_of_birth: Option<DateTime<Utc>>,
+    pub date_of_birth: Option<NaiveDate>,
     pub email: String,
     pub address: Option<String>,
     #[serde(rename(serialize = "zipCode", deserialize = "zipCode"))]
