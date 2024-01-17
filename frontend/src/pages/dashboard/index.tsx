@@ -14,7 +14,7 @@ export default function index() {
   const [popupActive, setPopupActive] = useState<boolean>(false);
 
   const fetchCrms = async () => {
-    const crmsRes = await request<FetchResult>("/crm", {}, "GET");
+    const crmsRes = await request<FetchResult>("/all-crms", {}, "GET");
     setData(crmsRes);
     if (crmsRes.code == 401) {
       alert(crmsRes.message);

@@ -16,7 +16,7 @@ export default function index() {
     (async () => {
 
       if (params?.uuid !== undefined) {
-        const res = await request<Crm>(`/crm/${params?.uuid}`, {}, "GET");
+        const res = await request<Crm>(`/crm?uuid=${params?.uuid}`, {}, "GET");
         setCrm(res.data || null);
         if (res.data && res.data.clients) {
           cache(res.data.clients, CacheType.Client);
@@ -28,7 +28,7 @@ export default function index() {
 
 
   const removeCrm = async () => {
-    const res = await request(`/crm/${params?.uuid}`, {}, "DELETE");
+    const res = await request(`/crm?uuid=${params?.uuid}`, {}, "DELETE");
     alert(JSON.stringify(res));
     if (res.code === 200) {
       router.push("/dashboard");

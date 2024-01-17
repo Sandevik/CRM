@@ -11,6 +11,10 @@
 ###     /crm?uuid={insert-uuid-here} | DELETE, Secured by ownership
 ###     /crm/all                     | GET, Secured by ownership
 
+
+
+
+## /all-crms | GET
 ## /create-crm | POST | JSON: name (string)
 
 

@@ -17,10 +17,10 @@ export function cache(item: T | T[], as: U): void {
             } else {
                 let parsed = JSON.parse(ls) as Client[];
                 if (Array.isArray(item)) {
-                    item.forEach(cl => parsed.filter(client => client.uuid === cl.uuid))
+                    item.forEach(cl => parsed.filter(client => client.uuid !== cl.uuid))
                     parsed = [...parsed, ...item];
                 } else {
-                    parsed.filter(client => client.uuid === item.uuid)
+                    parsed.filter(client => client.uuid !== item.uuid)
                     parsed.push(item);
                 }
                 localStorage.setItem("crm-client-cache", JSON.stringify(parsed));

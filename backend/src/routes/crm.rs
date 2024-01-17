@@ -3,7 +3,7 @@ use actix_web_httpauth::middleware::HttpAuthentication;
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 
-use crate::{AppState, controllers::jwt::Claims, routes::Response, models::{crm::{CRM, MeetingsOption}, user::User}, middleware::{owns_or_admin_middleware::RequiresUuid, user_middleware::{self, validator}}};
+use crate::{AppState, controllers::jwt::Claims, routes::Response, models::crm::{CRM, MeetingsOption}, middleware::{owns_or_admin_middleware::RequiresUuid, user_middleware::{self, validator}}};
 use crate::middleware::owns_or_admin_middleware::validator as owner_validator;
 
 
@@ -11,17 +11,22 @@ pub fn create_crm() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Re
     let user_middleware = HttpAuthentication::bearer(validator);
     let scope = web::scope("/create-crm")
         .wrap(user_middleware)
-        .service(create);
+        .service(create)        ;
 
     scope
 }
 
+/* 
+###########
+The routes are secured by login
+###########
+*/
 
 #[derive(Deserialize)]
 struct CreateBodyRequest {
     name: String,
 }
-#[post("")]
+#[post("/create")]
 async fn create(data: web::Data<AppState>, body: web::Json<CreateBodyRequest>, req_user: Option<ReqData<Claims>>) -> impl Responder {
     let user = &req_user.unwrap().user;
 
@@ -41,20 +46,15 @@ async fn create(data: web::Data<AppState>, body: web::Json<CreateBodyRequest>, r
 
 
 
+pub fn all_crms_by_user() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Response = ServiceResponse<EitherBody<BoxBody>>, Error = Error, InitError = ()>>  {
+    let user_middleware = HttpAuthentication::bearer(validator);
+    let scope = web::scope("/all-crms")
+        .wrap(user_middleware)
+        .service(crms)        ;
 
-
-
-pub fn crm() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Response = ServiceResponse<EitherBody<BoxBody>>, Error = Error, InitError = ()>> {
-    let owns_or_admin_middleware = HttpAuthentication::bearer(owner_validator);
-    
-    let scope = web::scope("/crm")
-        .wrap(owns_or_admin_middleware)
-        .service(crms)
-        .service(remove_by_uuid)
-        .service(read_crm);
-        
     scope
 }
+
 
 #[derive(Serialize, Deserialize)]
 struct CrmsResponse {
@@ -62,7 +62,7 @@ struct CrmsResponse {
 }
 
 
-#[get("all")]
+#[get("")]
 async fn crms(data: web::Data<AppState>, req_user: Option<ReqData<Claims>>) -> impl Responder {
     match req_user {
         None => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error("No user was found by middleware")),
@@ -75,6 +75,29 @@ async fn crms(data: web::Data<AppState>, req_user: Option<ReqData<Claims>>) -> i
         }
     }
 } 
+
+
+
+
+
+
+
+pub fn crm() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Response = ServiceResponse<EitherBody<BoxBody>>, Error = Error, InitError = ()>> {
+    let owns_or_admin_middleware = HttpAuthentication::bearer(owner_validator);
+    
+    let scope = web::scope("/crm")
+        .wrap(owns_or_admin_middleware)
+        .service(remove_by_uuid)
+        .service(read_crm);
+        
+    scope
+}
+
+/* 
+###########
+The routes are secured by login and ownership
+###########
+*/
 
 
 #[get("")]
