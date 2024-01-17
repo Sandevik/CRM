@@ -48,8 +48,8 @@ impl Database {
         sqlx::query(create_table_crm_query).execute(pool).await
     }
 
-    pub async fn setup_customers_table(crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<MySqlQueryResult, sqlx::Error> {
-        let query: String = format!(r#"CREATE TABLE IF NOT EXISTS `{}-customers` (
+    pub async fn setup_clients_table(crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<MySqlQueryResult, sqlx::Error> {
+        let query: String = format!(r#"CREATE TABLE IF NOT EXISTS `{}-clients` (
             `uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL UNIQUE,
             `first_name` TEXT,
             `last_name` TEXT,
@@ -83,7 +83,7 @@ impl Database {
     
     pub async fn setup_meetings_table(crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<MySqlQueryResult, sqlx::Error> {
         let query: String = format!(r#"CREATE TABLE IF NOT EXISTS `{}-meetings` (
-            `customer_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
+            `client_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
             `from` DATETIME,
             `to` DATETIME,
             `added` DATETIME,

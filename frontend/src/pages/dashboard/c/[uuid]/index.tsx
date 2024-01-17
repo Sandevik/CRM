@@ -3,7 +3,8 @@ import request from '@/utils/request';
 import { useParams } from 'next/navigation'
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react'
-import Meetings from './meetings';
+import Meetings from './Meetings';
+import Navbar from './Navbar';
 
 export default function index() {
   const params = useParams();
@@ -33,6 +34,7 @@ export default function index() {
   return (
     <div className='flex gap-4 h-[calc(100vh-3em)]'>
       <main className="p-2 flex-grow">
+        <Navbar crmName={crm?.name} />
         <h1 className="text-3xl font-semibold">{crm?.name}</h1>
         <Button onClick={() => removeCrm()}>Remove crm</Button>  
       </main>

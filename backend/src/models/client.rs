@@ -7,7 +7,7 @@ use super::Model;
 
 #[derive(Serialize, Deserialize)]
 
-pub struct Customer {
+pub struct Client {
     pub uuid: Uuid,
     #[serde(rename(serialize = "firstName", deserialize = "firstName"))]
     pub first_name: Option<String>,
@@ -30,9 +30,9 @@ pub struct Customer {
     pub updated: DateTime<Utc>,
 }
 
-impl Model for Customer {
+impl Model for Client {
     fn from_row(row: &MySqlRow) -> Self {
-        Customer {
+        Client {
             uuid: Uuid::parse_str(row.get("uuid")).unwrap_or_default(),
             first_name: row.get("first_name"),
             last_name: row.get("last_name"),
@@ -51,6 +51,6 @@ impl Model for Customer {
     }
 }
 
-impl Customer {
+impl Client {
 
 }

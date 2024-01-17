@@ -5,7 +5,7 @@ use sqlx::{mysql::{MySqlQueryResult, MySqlRow}, Row};
 use uuid::Uuid;
 use crate::{AppState, models::user::User, controllers::database::Database};
 
-use super::{Model, customer::Customer, employee::Employee, meeting::Meeting, deal::Deal};
+use super::{Model, client::Client, employee::Employee, meeting::Meeting, deal::Deal};
 
 
 #[derive(Serialize, Deserialize)]
@@ -18,7 +18,7 @@ pub struct CRM {
     added: DateTime<Utc>,
     hidden: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
-    customers: Option<Vec<Customer>>,
+    clients: Option<Vec<Client>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     employees: Option<Vec<Employee>>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -35,7 +35,7 @@ impl Model for CRM {
             name: row.get("name"),
             added: row.get("added"),
             hidden: row.get("hidden"),
-            customers: None,
+            clients: None,
             employees: None,
             deals: None,
             meetings: None,
@@ -59,7 +59,7 @@ impl CRM {
         let new_uuid: Uuid = Uuid::new_v4();
         let res: Result<MySqlQueryResult, sqlx::Error> = Database::setup_crm_users_table(&data.pool).await;
         if res.is_err() {return res;}
-        let res: Result<MySqlQueryResult, sqlx::Error> = Database::setup_customers_table(&new_uuid, data).await;
+        let res: Result<MySqlQueryResult, sqlx::Error> = Database::setup_clients_table(&new_uuid, data).await;
         if res.is_err() {return res;}
         let res: Result<MySqlQueryResult, sqlx::Error> = Database::setup_entries_table(&new_uuid, data).await;
         if res.is_err() {return res;}
@@ -124,7 +124,7 @@ impl CRM {
 
     pub async fn get_all_by_uuid(crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<Vec<Self>, sqlx::Error> {
         let mut crms: Vec<Self> = Vec::new();
-        let query = format!("SELECT * FROM `crm`.`{}-customers`", crm_uuid.hyphenated().to_string());
+        let query = format!("SELECT * FROM `crm`.`{}-clients`", crm_uuid.hyphenated().to_string());
         let result = sqlx::query(&query)
             .fetch_optional(&data.pool)
             .await;
@@ -143,7 +143,7 @@ impl CRM {
     pub async fn remove_by_uuid(data: &web::Data<AppState>, uuid: &Uuid) -> Result<MySqlQueryResult, sqlx::Error> {
         let uuid_string = uuid.hyphenated().to_string();
         // Drop all tables with a certain uuid
-        let query = format!("DROP TABLE IF EXISTS `crm`.`{uuid_string}-customers`, `crm`.`{uuid_string}-entries`, `crm`.`{uuid_string}-meetings`, `crm`.`{uuid_string}-employees`, `crm`.`{uuid_string}-deals`");
+        let query = format!("DROP TABLE IF EXISTS `crm`.`{uuid_string}-clients`, `crm`.`{uuid_string}-entries`, `crm`.`{uuid_string}-meetings`, `crm`.`{uuid_string}-employees`, `crm`.`{uuid_string}-deals`");
         let res =sqlx::query(&query).execute(&data.pool).await;
         if res.is_err() {return res;}
         // clean the uuid record in crm_users
