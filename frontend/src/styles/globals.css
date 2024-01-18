@@ -3,11 +3,8 @@
 @tailwind utilities;
 
 html {
-  --light-green: #A9FDAC;
-  --dark-green: #041F1E;
-  --gray: #67697C;
-  --blue: #D6EFFF;
-  --pink: #EF798A;
+  background-color: #020108;
+  color: white;
 }
 
 .custom-shadow-right {
@@ -33,6 +30,14 @@ html {
   z-index: -10;
 }
 
-.no-scrollthumb-left {
+.scrollthumb::-webkit-scrollbar {
+  background-color: #02010844;
+  width: 7px;
+
+}
+
+.scrollthumb::-webkit-scrollbar-thumb {
+  background-color: #242038;
+  border-radius: 10px;
   
 }

@@ -41,7 +41,7 @@ export default function index() {
   return (
     <div className="h-[calc(100vh-4em)] relative">
       <ul className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-5 max-w-[1440px] m-auto justify-center px-2 py-8 ">
-        <li className="w-full h-[128px] cursor-pointer border-transparent bg-gray-200 hover:border-[var(--light-green)] hover:bg-gray-500 hover:text-[var(--light-green)] border-2 rounded-md text-gray-400 font-bold text-xl flex justify-center items-center transition-colors">
+        <li className="w-full h-[128px] cursor-pointer border-dashed border-background-light hover:border-transparent hover:bg-background-light hover:text-[var(--light-green)] border-2 rounded-md text-gray-400 font-bold text-xl flex justify-center items-center transition-colors">
           <button onClick={() => setPopupActive(true)} className="h-full w-full">Create CRM</button>
         </li>
         {data?.data?.crms.map(crm => (<CrmCard key={crm.crmUuid} crm={crm}/>))}
