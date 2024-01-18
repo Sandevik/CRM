@@ -12,7 +12,9 @@ export default function MeetingCard({meeting}: {meeting: Meeting}) {
     // fetch client details from localstorage first then request
     useEffect(()=>{
         (async () => {
-            setClient(await fetchClientDetails(meeting.clientUuid));
+            if (crm?.crmUuid) {
+                setClient(await fetchClientDetails(crm?.crmUuid, meeting.clientUuid));
+            }
         })();
     },[meeting])
 

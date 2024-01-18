@@ -1,7 +1,10 @@
+use actix_web::web;
 use chrono::{DateTime, Utc, NaiveDate};
 use serde::{Serialize, Deserialize};
 use sqlx::{mysql::MySqlRow, Row};
 use uuid::Uuid;
+
+use crate::AppState;
 
 use super::Model;
 
@@ -52,5 +55,21 @@ impl Model for Client {
 }
 
 impl Client {
+    pub async fn get_by_uuid(client_uuid: &Uuid, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<Option<Self>, sqlx::Error> {
+        let query = format!("SELECT * FROM `crm`.`{}-clients` WHERE uuid = ?", crm_uuid.hyphenated().to_string());
+        let res = sqlx::query(&query)
+            .bind(client_uuid.hyphenated().to_string())
+            .fetch_optional(&data.pool)
+            .await;
 
+        match res {
+            Err(err) => Err(err),
+            Ok(maybe_row) => {
+                match maybe_row {
+                    None => Ok(None),
+                    Some(row) => Ok(Some(Self::from_row(&row)))
+                }
+            }
+        }
+    }
 }
