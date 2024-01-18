@@ -15,7 +15,7 @@ export default function SignInUpPage() {
         </>
         :
         <>
-          <div className="hidden md:grid place-items-center w-full h-full bg-[var(--dark-green)]">
+          <div className="hidden md:grid place-items-center w-full h-full bg-background-light bg-opacity-30">
             <span className="text-white m-auto w-[80%] text-lg">
               Lorem ipsum dolor sit amet consectetur adipisicing elit. 
               Temporibus commodi asperiores, vero veniam, nostrum aut, 

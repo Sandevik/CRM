@@ -5,6 +5,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import request from '@/utils/request';
 import { useRouter } from 'next/navigation';
 import { AuthContext, JWTData, decodeJWTPayload } from '@/context/AuthContext';
+import Button from './Button';
 
 interface Credentials {
     emailOrPhoneNumber: string,
@@ -36,8 +37,8 @@ export default function SignInForm() {
                 password: credetials.password
             }, "POST")
             if (res.code === 200) {
-                localStorage.setItem("auth_token", res.data.token || "");
-                const payloadData = decodeJWTPayload(res.data.token);
+                localStorage.setItem("auth_token", res.data?.token || "");
+                const payloadData = decodeJWTPayload(res.data?.token);
                 if (!payloadData) {
                     setData(null);
                 } else {
@@ -58,24 +59,24 @@ export default function SignInForm() {
     }
 
   return (
-    <form className="bg-[var(--dark-green)] w-full h-full justify-center items-center p-4 custom-shadow-right z-10">
+    <form className="bg-background-light bg-opacity-30 w-full h-full justify-center items-center p-4 custom-shadow-right z-10">
         <div className='max-w-[20em] m-auto flex flex-col gap-6 justify-center h-full mt-4'>
-        <h1 className="text-3xl flex justify-center font-semibold text-[var(--light-green)]">SIGN IN</h1>
+        <h1 className="text-3xl flex justify-center font-semibold text-light-blue">SIGN IN</h1>
         <div className="h-14 flex gap-4 justify-center w-full items-center">
         {error && 
         <div className={`flex justify-center gap-8 items-center}`}>
-            <HiOutlineExclamation className="text-[var(--pink)] text-4xl mt-1 w-24" /> 
-            <p className="text-[var(--pink)] px-2 flex items-center">Invalid email, phone number or password, please try again.</p>
+            <HiOutlineExclamation className="text-light-red text-4xl mt-1 w-24" /> 
+            <p className="text-light-red px-2 flex items-center">Invalid email, phone number or password, please try again.</p>
         </div>
         }
         </div>
-        <input type="text" value={credetials.emailOrPhoneNumber} onChange={(e) => setCredentials({...credetials, emailOrPhoneNumber: e.target.value})} placeholder='Email or phone number' className={`p-2 text-lg rounded-md ${error ? "ring-2 ring-[var(--pink)]": ""}`}/>
-        <input type="password" value={credetials.password} onChange={(e) => setCredentials({...credetials, password: e.target.value})} placeholder='Password'  className={`p-2 text-lg rounded-md ${error ? "ring-2 ring-[var(--pink)]": ""}`}/>
-        <button type='submit' className="bg-[var(--blue)] p-2 rounded-md h-9 flex items-center justify-center font-semibold mt-7 " onClick={(e) => handleSignIn(e)}>{isLoading ? <ImSpinner2 className="w-full animate-spin text-xl" /> : "Sign in"}</button>
+        <input type="text" value={credetials.emailOrPhoneNumber} onChange={(e) => setCredentials({...credetials, emailOrPhoneNumber: e.target.value})} placeholder='Email or phone number' className={`p-2 text-lg rounded-md ${error ? "ring-2 ring-light-red": ""}`}/>
+        <input type="password" value={credetials.password} onChange={(e) => setCredentials({...credetials, password: e.target.value})} placeholder='Password'  className={`p-2 text-lg rounded-md ${error ? "ring-2 ring-light-red": ""}`}/>
+        <Button type='submit' className=" p-2 rounded-md h-9 flex items-center justify-center font-semibold mt-7 " onClick={(e) => handleSignIn(e)}>{isLoading ? <ImSpinner2 className="w-full animate-spin text-xl" /> : "Sign in"}</Button>
         <div className="flex flex-col items-center justify-center gap-6 w-full">
             <div className="flex w-full justify-between">
-                <Link href={"#"} className="text-[var(--light-green)] underline">Forgot password</Link>
-                <Link href={"/sign-up"} className="text-[var(--light-green)] underline">Sign up</Link>
+                <Link href={"#"} className="text-light-blue underline">Forgot password</Link>
+                <Link href={"/sign-up"} className="text-light-blue underline">Sign up</Link>
             </div>
         </div>
        </div>
