@@ -14,7 +14,7 @@ export default function Navbar() {
     <nav className="h-[3em] bg-[var(--blue)] z-10 flex justify-between items-center px-4">
         <span className="font-bold text-2xl">CRM</span>
         <ul className='flex gap-8 items-center '>
-            <li><Link href={"/dashboard"} className='flex items-center gap-1 text-[var(--dark-green)] hover:text-[var(--pink)] transition-colors'> <MdDashboard /> Dashboard </Link></li>
+            <li><Link href={"/dashboard"} className='flex items-center gap-1 text-[var(--dark-green)] hover:text-[var(--pink)] transition-colors'> <MdDashboard /> All Crms </Link></li>
             <li><Link href={"/dashboard/admin"} className='flex items-center gap-1 text-[var(--dark-green)] hover:text-[var(--pink)] transition-colors'> <RiAdminFill /> Admin </Link></li>
             <li>
                 {data?.user ? 

@@ -8,7 +8,7 @@ export default function index() {
 
   return (
     <div>
-        <Navbar/>
+        <Navbar />
         <ul>
             {crm?.clients?.map(client => (<li>{client.firstName}</li>))}
         </ul>
