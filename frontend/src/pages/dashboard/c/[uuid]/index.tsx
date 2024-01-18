@@ -2,15 +2,13 @@ import Button from '@/components/Button';
 import request from '@/utils/request';
 import { useParams } from 'next/navigation'
 import { useRouter } from 'next/router';
-import React, { useContext} from 'react'
+import React from 'react'
 import Meetings from './Meetings';
 import Navbar from './Navbar';
-import { CurrentCrmContext } from '@/context/CurrentCrmContext';
 
 export default function index() {
   const params = useParams();
   const router = useRouter();
-  const {crm} = useContext(CurrentCrmContext);
   
   const removeCrm = async () => {
     const res = await request(`/crm?uuid=${params?.uuid}`, {}, "DELETE");
