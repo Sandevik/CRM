@@ -26,7 +26,7 @@ export default function index() {
         <Navbar />
         <Button onClick={() => removeCrm()}>Remove crm</Button>  
       </main>
-      <Meetings meetings={crm?.meetings} crmUuid={crm?.crmUuid}/>
+      <Meetings />
     </div>
   )
 }
