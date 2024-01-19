@@ -9,6 +9,13 @@ export default function index() {
     <div className='flex h-[calc(100dvh-3em)]'>
       <main className="flex-grow">
         <Navbar />
+        <div>
+          Some statistics?
+          Some info?  
+
+          num of meetings today
+        </div>
+
       </main>
       <Meetings />
     </div>

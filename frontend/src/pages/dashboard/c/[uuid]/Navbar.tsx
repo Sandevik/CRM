@@ -17,7 +17,7 @@ export default function Navbar() {
             </li>
             <li className="flex gap-8 items-center text-lg">
                 <Link href={`/dashboard/c/${crm?.crmUuid}`} className={`${pathName?.split("/").length === 4 && "text-greenish"} transition-colors hover:text-greenish`}>Dashboard</Link>
-                <Link href={`/dashboard/c/${crm?.crmUuid}`} className={`${(/.+\/calendar.*/).test(pathName) && "text-greenish"} transition-colors hover:text-greenish `}>Calendar</Link>
+                <Link href={`/dashboard/c/${crm?.crmUuid}/calendar`} className={`${(/.+\/calendar.*/).test(pathName) && "text-greenish"} transition-colors hover:text-greenish `}>Calendar</Link>
                 <Link href={`/dashboard/c/${crm?.crmUuid}/clients`} className={`${(/.+\/clients.*/).test(pathName) && "text-greenish"} transition-colors hover:text-greenish `}>Clients</Link>
                 <Link href={`/dashboard/c/${crm?.crmUuid}`} className={`${(/.+\/archive.*/).test(pathName) && "text-greenish"} transition-colors hover:text-greenish `}>Archive</Link>
                 <Link href={`/dashboard/c/${crm?.crmUuid}`} className={`${(/.+\/services.*/).test(pathName) && "text-greenish"} transition-colors hover:text-greenish `}>Services</Link>
