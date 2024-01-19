@@ -111,7 +111,7 @@ async fn read_crm(data: web::Data<AppState>, query: web::Query<RequiresUuid>) ->
                 None => HttpResponse::NotFound().json(Response::<String>::not_found("Crm does not exist")),
                 Some(mut crm) => {
                     crm.get_meetings(MeetingsOption::Future, Limit::Some(2), &data).await;
-                    crm.get_clients(Limit::Some(10), &data).await;
+                    crm.get_clients(Limit::None, &data).await;
                     HttpResponse::Ok().json(Response::<CRM>::ok("Fetch successful", Some(crm)))
                 }
             }
