@@ -3,7 +3,7 @@ use actix_web_httpauth::middleware::HttpAuthentication;
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 
-use crate::{AppState, controllers::jwt::Claims, routes::Response, models::crm::{CRM, MeetingsOption}, middleware::{owns_or_admin_middleware::RequiresUuid, user_middleware::{self, validator}}};
+use crate::{AppState, controllers::jwt::Claims, routes::Response, models::crm::{CRM, MeetingsOption, Limit}, middleware::{owns_or_admin_middleware::RequiresUuid, user_middleware::{self, validator}}};
 use crate::middleware::owns_or_admin_middleware::validator as owner_validator;
 
 
@@ -110,8 +110,8 @@ async fn read_crm(data: web::Data<AppState>, query: web::Query<RequiresUuid>) ->
             match maybe_crm {
                 None => HttpResponse::NotFound().json(Response::<String>::not_found("Crm does not exist")),
                 Some(mut crm) => {
-                    crm.get_meetings(MeetingsOption::Future, &data).await;
-                    crm.get_clients(&data).await;
+                    crm.get_meetings(MeetingsOption::Future, Limit::Some(2), &data).await;
+                    crm.get_clients(Limit::Some(10), &data).await;
                     HttpResponse::Ok().json(Response::<CRM>::ok("Fetch successful", Some(crm)))
                 }
             }

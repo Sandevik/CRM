@@ -50,14 +50,23 @@ impl Model for CRM {
     }
 }
 
+pub enum Limit {
+    None,
+    Some(i32)
+}
 
 impl CRM {
 
 
-    pub async fn get_clients(&mut self, data: &web::Data<AppState>) {
+    pub async fn get_clients(&mut self, limit: Limit, data: &web::Data<AppState>) {
         let mut clients: Vec<Client> = Vec::new();
-        let query = format!("SELECT * FROM `crm`.`{}-clients`", &self.crm_uuid);
+        let mut query = format!("SELECT * FROM `crm`.`{}-clients`", &self.crm_uuid);
         //todo: create limits on how many clients a person can get
+        match limit {
+            Limit::None => (),
+            Limit::Some(limit) => query.push_str(format!(" LIMIT {}", limit).as_str()),
+        }
+
 
         let res = sqlx::query(&query)
             .bind(Utc::now())
@@ -76,13 +85,18 @@ impl CRM {
 
     }
 
-    pub async fn get_meetings(&mut self, meeting_option: MeetingsOption, data: &web::Data<AppState>) {
+    pub async fn get_meetings(&mut self, meeting_option: MeetingsOption, limit: Limit, data: &web::Data<AppState>) {
         let mut meetings: Vec<Meeting> = Vec::new();
         let mut query = format!("SELECT * FROM `crm`.`{}-meetings` ", &self.crm_uuid);
         match meeting_option {
             MeetingsOption::All => (),
             MeetingsOption::Future => query.push_str("WHERE `from` >= ? ORDER BY `from` ASC"),
             MeetingsOption::Past => query.push_str("WHERE `to` <= ? ORDER BY `from` DESC")
+        }
+
+        match limit {
+            Limit::None => (),
+            Limit::Some(limit) => query.push_str(format!(" LIMIT {}", limit).as_str()),
         }
 
         let res = sqlx::query(&query)
