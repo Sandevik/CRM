@@ -1,4 +1,4 @@
-import Meetings from './Meetings';
+import Meetings from '../../../../components/Meetings';
 import Navbar from './Navbar';
 
 export default function index() {
