@@ -1,7 +1,8 @@
 mod users;
 mod auth;
 mod crm;
-mod client;
+mod clients;
+mod meetings;
 mod test;
 
 use actix_web::web::ServiceConfig;
@@ -10,9 +11,10 @@ use serde::Serialize;
 use users::users;
 use auth::auth;
 use crm::crm;
+use meetings::meetings;
 use test::test;
 
-use self::{client::clients, crm::{create_crm, all_crms_by_user}};
+use self::{clients::clients, crm::{create_crm, all_crms_by_user}};
 
 
 #[derive(Serialize)]
@@ -76,6 +78,20 @@ impl<T> Response<T> {
 
 }
 
+#[derive(PartialEq)]
+pub enum MeetingsOption {
+    All,
+    Future,
+    Past,
+    ThisMonth,
+    ByYearAndMonth((i32, u8))
+}
+
+pub enum Limit {
+    None,
+    Some(i32)
+}
+
 
 pub fn routes(conf: &mut ServiceConfig) {
     conf.service(auth());
@@ -84,6 +100,7 @@ pub fn routes(conf: &mut ServiceConfig) {
     conf.service(create_crm());
     conf.service(all_crms_by_user());
     conf.service(clients());
+    conf.service(meetings());
     conf.service(test());
 }
 

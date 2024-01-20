@@ -3,16 +3,10 @@ use chrono::{Utc, DateTime};
 use serde::{Serialize, Deserialize};
 use sqlx::{mysql::{MySqlQueryResult, MySqlRow}, Row};
 use uuid::Uuid;
-use crate::{AppState, models::user::User, controllers::database::Database};
+use crate::{AppState, models::user::User, controllers::database::Database, routes::{Limit, MeetingsOption}};
 
 use super::{Model, client::Client, employee::Employee, meeting::Meeting, deal::Deal};
 
-#[derive(PartialEq)]
-pub enum MeetingsOption {
-    All,
-    Future,
-    Past,
-}
 
 
 #[derive(Serialize, Deserialize)]
@@ -50,69 +44,28 @@ impl Model for CRM {
     }
 }
 
-pub enum Limit {
-    None,
-    Some(i32)
-}
+
 
 impl CRM {
 
 
     pub async fn get_clients(&mut self, limit: Limit, data: &web::Data<AppState>) {
-        let mut clients: Vec<Client> = Vec::new();
-        let mut query = format!("SELECT * FROM `crm`.`{}-clients`", &self.crm_uuid);
-        //todo: create limits on how many clients a person can get
-        match limit {
-            Limit::None => (),
-            Limit::Some(limit) => query.push_str(format!(" LIMIT {}", limit).as_str()),
-        }
-
-
-        let res = sqlx::query(&query)
-            .bind(Utc::now())
-            .fetch_all(&data.pool)
-            .await;
-
-        match res {
+        match Client::get_all(&self.crm_uuid, limit, data).await {
             Err(err) => println!("{err}"),
-            Ok(rows) => {
-                rows.iter().for_each(|row| {
-                    clients.push(Client::from_row(row));
-                });
+            Ok(clients) => {
+                self.clients = Some(clients);
             }
         }
-        self.clients = Some(clients);
 
     }
 
     pub async fn get_meetings(&mut self, meeting_option: MeetingsOption, limit: Limit, data: &web::Data<AppState>) {
-        let mut meetings: Vec<Meeting> = Vec::new();
-        let mut query = format!("SELECT * FROM `crm`.`{}-meetings` ", &self.crm_uuid);
-        match meeting_option {
-            MeetingsOption::All => (),
-            MeetingsOption::Future => query.push_str("WHERE `from` >= ? ORDER BY `from` ASC"),
-            MeetingsOption::Past => query.push_str("WHERE `to` <= ? ORDER BY `from` DESC")
-        }
-
-        match limit {
-            Limit::None => (),
-            Limit::Some(limit) => query.push_str(format!(" LIMIT {}", limit).as_str()),
-        }
-
-        let res = sqlx::query(&query)
-            .bind(Utc::now())
-            .fetch_all(&data.pool)
-            .await;
-
-        match res {
+        match Meeting::get_all(&self.crm_uuid, meeting_option, limit, data).await {
             Err(err) => println!("{err}"),
-            Ok(rows) => {
-                rows.iter().for_each(|row| {
-                    meetings.push(Meeting::from_row(row));
-                });
+            Ok(meetings) => {
+                self.meetings = Some(meetings);
             }
         }
-        self.meetings = Some(meetings);
     }
 
     

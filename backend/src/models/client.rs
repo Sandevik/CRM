@@ -4,7 +4,7 @@ use serde::{Serialize, Deserialize};
 use sqlx::{mysql::MySqlRow, Row};
 use uuid::Uuid;
 
-use crate::AppState;
+use crate::{AppState, routes::Limit};
 
 use super::Model;
 
@@ -71,5 +71,31 @@ impl Client {
                 }
             }
         }
+    }
+
+    pub async fn get_all(crm_uuid: &Uuid, limit: Limit, data: &web::Data<AppState>) -> Result<Vec<Self>, sqlx::Error> {
+        let mut clients: Vec<Client> = Vec::new();
+        let mut query = format!("SELECT * FROM `crm`.`{}-clients`", crm_uuid);
+        //todo: create limits on how many clients a person can get
+        match limit {
+            Limit::None => (),
+            Limit::Some(limit) => query.push_str(format!(" LIMIT {}", limit).as_str()),
+        }
+
+
+        let res = sqlx::query(&query)
+            .bind(Utc::now())
+            .fetch_all(&data.pool)
+            .await;
+
+        match res {
+            Err(err) => println!("{err}"),
+            Ok(rows) => {
+                rows.iter().for_each(|row| {
+                    clients.push(Client::from_row(row));
+                });
+            }
+        }
+        Ok(clients)
     }
 }
