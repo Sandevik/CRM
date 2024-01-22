@@ -3,7 +3,7 @@ use actix_web_httpauth::middleware::HttpAuthentication;
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 
-use crate::{AppState, controllers::jwt::Claims, routes::Response, models::{crm::CRM}, middleware::{owns_or_admin_middleware::RequiresUuid, user_middleware::{self, validator}}};
+use crate::{AppState, controllers::jwt::Claims, routes::Response, middleware::{owns_or_admin_middleware::RequiresUuid, user_middleware::validator}, models::crm::CRM};
 use crate::middleware::owns_or_admin_middleware::validator as owner_validator;
 
 
@@ -26,7 +26,7 @@ The routes are secured by login
 struct CreateBodyRequest {
     name: String,
 }
-#[post("/create")]
+#[post("")]
 async fn create(data: web::Data<AppState>, body: web::Json<CreateBodyRequest>, req_user: Option<ReqData<Claims>>) -> impl Responder {
     let user = &req_user.unwrap().user;
 
@@ -102,7 +102,7 @@ The routes are secured by login and ownership
 
 #[get("")]
 async fn read_crm(data: web::Data<AppState>, query: web::Query<RequiresUuid>) -> impl Responder {
-    let crm_uuid_string = &query.uuid;
+    let crm_uuid_string = &query.crm_uuid;
     
     match CRM::get_by_crm_uuid(&Uuid::parse_str(crm_uuid_string).unwrap(), &data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
@@ -122,8 +122,8 @@ async fn read_crm(data: web::Data<AppState>, query: web::Query<RequiresUuid>) ->
 
 
 #[delete("")]
-async fn remove_by_uuid(data: web::Data<AppState>, query: web::Query<RequiresUuid>, req_user: Option<ReqData<Claims>>) -> impl Responder {
-    let crm_uuid_string = &query.uuid;
+async fn remove_by_uuid(data: web::Data<AppState>, query: web::Query<RequiresUuid>, _req_user: Option<ReqData<Claims>>) -> impl Responder {
+    let crm_uuid_string = &query.crm_uuid;
     match CRM::remove_by_uuid(&data, &Uuid::parse_str(crm_uuid_string).unwrap()).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
         Ok(_) => HttpResponse::Ok().json(Response::<String>::ok("Deleted successfully", None))

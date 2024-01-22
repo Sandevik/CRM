@@ -70,8 +70,8 @@ export default function SignInForm() {
         </div>
         }
         </div>
-        <input type="text" value={credetials.emailOrPhoneNumber} onChange={(e) => setCredentials({...credetials, emailOrPhoneNumber: e.target.value})} placeholder='Email or phone number' className={`p-2 text-lg rounded-md ${error ? "ring-2 ring-light-red": ""}`}/>
-        <input type="password" value={credetials.password} onChange={(e) => setCredentials({...credetials, password: e.target.value})} placeholder='Password'  className={`p-2 text-lg rounded-md ${error ? "ring-2 ring-light-red": ""}`}/>
+        <input type="text" value={credetials.emailOrPhoneNumber} onChange={(e) => setCredentials({...credetials, emailOrPhoneNumber: e.target.value})} placeholder='Email or phone number' className={`p-2 text-lg text-gray-700 rounded-md ${error ? "ring-2 ring-light-red": ""}`}/>
+        <input type="password" value={credetials.password} onChange={(e) => setCredentials({...credetials, password: e.target.value})} placeholder='Password'  className={`p-2 text-lg text-gray-700 rounded-md ${error ? "ring-2 ring-light-red": ""}`}/>
         <Button type='submit' className=" p-2 rounded-md h-9 flex items-center justify-center font-semibold mt-7 " onClick={(e) => handleSignIn(e)}>{isLoading ? <ImSpinner2 className="w-full animate-spin text-xl" /> : "Sign in"}</Button>
         <div className="flex flex-col items-center justify-center gap-6 w-full">
             <div className="flex w-full justify-between">

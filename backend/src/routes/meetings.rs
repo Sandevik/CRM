@@ -1,5 +1,6 @@
-use actix_web::{Scope, dev::{ServiceFactory, ServiceRequest, ServiceResponse}, body::{EitherBody, BoxBody}, Error, web, get, Responder, HttpResponse};
+use actix_web::{Scope, dev::{ServiceFactory, ServiceRequest, ServiceResponse}, body::{EitherBody, BoxBody}, Error, web, get, Responder, HttpResponse, post};
 use actix_web_httpauth::middleware::HttpAuthentication;
+use chrono::{Datelike, NaiveDateTime};
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 
@@ -15,19 +16,30 @@ pub fn meetings() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Resp
     let scope = web::scope("/meetings")
         .wrap(owns_or_admin_middleware)
         .service(meetings_this_month)
-        .service(meetings_by_year_and_month);
+        .service(meetings_by_year_and_month)
+        .service(create_meeting)
+        .service(upcoming_meetings);
         
     scope
 }
 
+#[derive(Serialize)]
+struct MeetingWithDay {
+    meeting: Meeting,
+    day: u8,
+}
 
 #[get("/this-month")]
 async fn meetings_this_month(data: web::Data<AppState>, query: web::Query<RequiresUuid>) -> impl Responder {
-    let crm_uuid = Uuid::parse_str(&query.uuid).unwrap_or_default();
-
+    let crm_uuid = Uuid::parse_str(&query.crm_uuid).unwrap_or_default();
     match Meeting::get_all(&crm_uuid, MeetingsOption::ThisMonth, Limit::None, &data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
-        Ok(meetings) => HttpResponse::Ok().json(Response::ok("Successfully retrieved meetings", Some(meetings)))
+        Ok(meetings) => {
+            let meetings_with_days: Vec<MeetingWithDay> = meetings.iter().map(|meeting| {
+                MeetingWithDay { meeting: meeting.clone(), day: meeting.clone().from.day() as u8 }
+            }).collect();
+            HttpResponse::Ok().json(Response::ok("Successfully retrieved meetings", Some(meetings_with_days)))
+        }
     }
 }
 
@@ -42,12 +54,52 @@ struct ByYearAndMonthRequest{
 #[get("")]
 async fn meetings_by_year_and_month(data: web::Data<AppState>, query: web::Query<ByYearAndMonthRequest>) -> impl Responder {
     let crm_uuid = Uuid::parse_str(&query.uuid).unwrap_or_default();
-
     match Meeting::get_all(&crm_uuid, MeetingsOption::ByYearAndMonth((query.year, query.month)), Limit::None, &data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
-        Ok(meetings) => HttpResponse::Ok().json(Response::ok("Successfully retrieved meetings", Some(meetings)))
+        Ok(meetings) => {
+            let meetings_with_days: Vec<MeetingWithDay> = meetings.iter().map(|meeting| {
+                MeetingWithDay { meeting: meeting.clone(), day: meeting.clone().from.day() as u8 }
+            }).collect();
+            HttpResponse::Ok().json(Response::ok("Successfully retrieved meetings", Some(meetings_with_days)))
+        }
     }
 }
+
+
+
+#[get("/upcoming")]
+async fn upcoming_meetings(data: web::Data<AppState>, query: web::Query<ByYearAndMonthRequest>) -> impl Responder {
+    let crm_uuid = Uuid::parse_str(&query.uuid).unwrap_or_default();
+    match Meeting::get_all(&crm_uuid, MeetingsOption::Future, Limit::Some(2), &data).await {
+        Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
+        Ok(meetings) => {
+            HttpResponse::Ok().json(Response::ok("Successfully retrieved meetings", Some(meetings)))
+        }
+    }
+}
+
+
+#[derive(Deserialize, Serialize, Debug)]
+struct CreateMeetingRequest {
+    from: i64,
+    to: i64,
+    #[serde(rename(deserialize = "clientUuid"))]
+    client_uuid: String,
+    #[serde(rename(deserialize = "crmUuid"))]
+    crm_uuid: String,
+}
+
+#[post("/create")]
+pub async fn create_meeting(data: web::Data<AppState>, body: web::Json<CreateMeetingRequest>) -> impl Responder {
+    println!("{:?}", body);
+    let from = NaiveDateTime::from_timestamp_millis(body.from).expect("Could not convert milliseconds to date");
+    let to = NaiveDateTime::from_timestamp_millis(body.to).expect("Could not convert milliseconds to date");
+    match Meeting::new(from, to, &Uuid::parse_str(&body.client_uuid.as_str()).unwrap_or_default()).insert(&data, &Uuid::parse_str(body.crm_uuid.as_str()).unwrap_or_default()).await {
+        Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
+        Ok(_) => HttpResponse::Created().json(Response::<String>::created("Successfully created meeting"))
+    }
+}
+
 
 
 

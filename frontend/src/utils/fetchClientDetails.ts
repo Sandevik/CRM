@@ -19,7 +19,7 @@ export default async function (crmUuid: string, clientUuid: string): Promise<Cli
 }
 
 const requestClient = async (crmUuid: string, clientUuid: string): Promise<Client | null> => {
-    const res = await request<Client>(`/clients?uuid=${crmUuid}&clientUuid=${clientUuid}`, {}, "GET");
+    const res = await request<Client>(`/clients?crmUuid=${crmUuid}&clientUuid=${clientUuid}`, {}, "GET");
     if (res.data){
         cache(res.data, CacheType.Client);
         return Promise.resolve(res.data);

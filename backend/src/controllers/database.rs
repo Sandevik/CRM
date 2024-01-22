@@ -83,6 +83,7 @@ impl Database {
     
     pub async fn setup_meetings_table(crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<MySqlQueryResult, sqlx::Error> {
         let query: String = format!(r#"CREATE TABLE IF NOT EXISTS `{}-meetings` (
+            `uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
             `client_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
             `from` DATETIME,
             `to` DATETIME,

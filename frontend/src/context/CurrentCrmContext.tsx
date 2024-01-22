@@ -20,7 +20,7 @@ export const CurrentContextProvider = ({children}: {children: React.ReactNode}) 
     useEffect(()=>{
         (async () => {
             if (currentUuid) {
-              const res = await request<Crm>(`/crm?uuid=${currentUuid}`, {}, "GET");
+              const res = await request<Crm>(`/crm?crmUuid=${currentUuid}`, {}, "GET");
               setCrm(res.data || null);
               if (res.data && res.data.clients) {
                 cache(res.data.clients, CacheType.Client);

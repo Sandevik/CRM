@@ -1,5 +1,6 @@
-use actix_web::{dev::ServiceRequest, web::{Data, self}, error::ErrorUnauthorized, HttpMessage};
+use actix_web::{dev::ServiceRequest, web::{Data, self, BytesMut}, error::{ErrorUnauthorized, ErrorBadRequest}, HttpMessage};
 use actix_web_httpauth::extractors::{bearer::{BearerAuth, self}, AuthenticationError};
+use futures_util::StreamExt;
 use jsonwebtoken::TokenData;
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
@@ -7,29 +8,38 @@ use crate::{controllers::jwt::{Claims, JWT}, models::{user::User, crm::CRM}, App
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct RequiresUuid {
-    pub uuid: String,
+    #[serde(rename(deserialize = "crmUuid"))]
+    pub crm_uuid: String,
 }
 
 // You can get the uuid either via json (body) or via the query params
 
 pub async fn validator(mut req: ServiceRequest, credentials: BearerAuth) -> Result<ServiceRequest, (actix_web::Error, ServiceRequest)> {
+    let mut body = BytesMut::new();
+    let mut stream = req.take_payload();
+    while let Some(chunk) = stream.next().await {
+        body.extend_from_slice(&chunk.unwrap());
+    }
+    let body_clone = body.clone();
+    let (_, mut payload) = actix_http::h1::Payload::create(true);
+    payload.unread_data(body.into());
+    req.set_payload(payload.into());
+
     let jwt_secret: Data<String> = Data::new(std::env::var("BACKEND_JWT_SECRET").expect("BACKEND_JWT_SECRET must be set"));
     let token_string: String = credentials.token().to_string();
     let json: Result<web::Json<RequiresUuid>, actix_web::Error> = req.extract::<web::Json<RequiresUuid>>().await;
     let query_string: Result<web::Query<RequiresUuid>, actix_web::Error> = req.extract::<web::Query<RequiresUuid>>().await;
-    
     let uuid: Uuid;
-    if query_string.is_ok() && Uuid::parse_str(query_string.as_ref().unwrap().uuid.as_str()).is_ok() || json.is_ok() && Uuid::parse_str(json.as_ref().unwrap().uuid.as_str()).is_ok() {
+
+    if query_string.is_ok() && Uuid::parse_str(&query_string.as_ref().unwrap().crm_uuid.as_str()).is_ok() || json.is_ok() && Uuid::parse_str(&json.as_ref().unwrap().crm_uuid.as_str()).is_ok() {
         if query_string.is_ok() {
-            uuid = Uuid::parse_str(query_string.as_ref().unwrap().uuid.as_str()).unwrap();
+            uuid = Uuid::parse_str(&query_string.as_ref().unwrap().crm_uuid.as_str()).unwrap();
         } else {
-            uuid = Uuid::parse_str(json.as_ref().unwrap().uuid.as_str()).unwrap();
+            uuid = Uuid::parse_str(&json.as_ref().unwrap().crm_uuid.as_str()).unwrap();
         }
     } else {
-        return Err((ErrorUnauthorized(r#"{"code": 400, "Bad request, neither uuid found in query params or body. Can't verify ownership."}"#), req));
+        return Err((ErrorBadRequest(r#"{"code": 400, "Bad request, neither crmUuid found in query params or body. Can't verify ownership."}"#), req));
     }
-
-    
     if token_string == "".to_string() || token_string == "Bearer ".to_string() {
         return Err((ErrorUnauthorized(r#"{"code": 401, "Unauthorized, no token found"}"#), req));
     }
@@ -41,7 +51,6 @@ pub async fn validator(mut req: ServiceRequest, credentials: BearerAuth) -> Resu
             Err((AuthenticationError::from(config).into(), req))
         },
         Ok(value) => {
-
             match User::get_by_uuid(&value.claims.user.uuid.hyphenated().to_string(), data).await {
                 Err(_) => Err((ErrorUnauthorized(r#"{"code": 401, "message": "Unauthorized"}"#), req)),
                 Ok(user) => {
@@ -50,6 +59,12 @@ pub async fn validator(mut req: ServiceRequest, credentials: BearerAuth) -> Resu
                         Some(user) => {
                             if user.current_jwt == token_string {
                                 if user.admin || CRM::user_owns(&user, &uuid, data).await.unwrap() {
+
+                                    let (_, mut payload) = actix_http::h1::Payload::create(true);
+                                    payload.unread_data(body_clone.into());
+                                    req.set_payload(payload.into());
+
+
                                     req.extensions_mut().insert(value.claims);
                                     Ok(req)
                                 } else {

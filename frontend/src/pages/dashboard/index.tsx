@@ -26,7 +26,7 @@ export default function index() {
   },[])
 
   const createCrm = async (name: string) => {
-    const res = await request("/crm/create", {name}, "POST");
+    const res = await request("/create-crm", {name}, "POST");
     if (res.code === 201) {
       setPopupActive(false);
       fetchCrms();

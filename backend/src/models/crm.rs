@@ -137,23 +137,6 @@ impl CRM {
 
     }
 
-    pub async fn get_all_by_uuid(crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<Vec<Self>, sqlx::Error> {
-        let mut crms: Vec<Self> = Vec::new();
-        let query = format!("SELECT * FROM `crm`.`{}-clients`", crm_uuid.hyphenated().to_string());
-        let result = sqlx::query(&query)
-            .fetch_optional(&data.pool)
-            .await;
-
-        match result {
-            Err(err) => Err(err),
-            Ok(mysql_rows) => {
-                mysql_rows.iter().for_each(|row| {
-                    crms.push(Self::from_row(row));
-                });
-                Ok(crms)
-            }
-        }
-    }
 
     pub async fn remove_by_uuid(data: &web::Data<AppState>, uuid: &Uuid) -> Result<MySqlQueryResult, sqlx::Error> {
         let uuid_string = uuid.hyphenated().to_string();

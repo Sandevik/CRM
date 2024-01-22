@@ -1,4 +1,4 @@
-use actix_web::{web, cookie::time::format_description::modifier::Month};
+use actix_web::web;
 use chrono::{DateTime, Utc, Datelike, NaiveDate, NaiveDateTime};
 use serde::{Serialize, Deserialize};
 use sqlx::{mysql::MySqlRow, Row};
@@ -8,15 +8,16 @@ use crate::{AppState, routes::{MeetingsOption, Limit}};
 
 use super::Model;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 
 pub struct Meeting {
+    pub uuid: Uuid,
     #[serde(rename(serialize = "clientUuid", deserialize = "clientUuid"))]
     pub client_uuid: Uuid,
     #[serde(rename(serialize = "entryId", deserialize = "entryId"))]
     pub entry_id: Option<i32>,
-    pub from: DateTime<Utc>,
-    pub to: DateTime<Utc>,
+    pub from: NaiveDateTime,
+    pub to: NaiveDateTime,
     pub added: DateTime<Utc>,
     pub updated: DateTime<Utc>,
 }
@@ -24,6 +25,7 @@ pub struct Meeting {
 impl Model for Meeting {
     fn from_row(row: &MySqlRow) -> Self {
         Meeting {
+            uuid: Uuid::parse_str(row.get("client_uuid")).unwrap_or_default(),
             client_uuid: Uuid::parse_str(row.get("client_uuid")).unwrap_or_default(),
             from: row.get("from"),
             to: row.get("to"),
@@ -82,6 +84,35 @@ impl Meeting {
             }
         }
         Ok(meetings)
+    }
+
+    pub fn new(from: NaiveDateTime, to: NaiveDateTime, client_uuid: &Uuid) -> Self {
+        Meeting {
+            uuid: Uuid::new_v4(),
+            from,
+            to,
+            client_uuid: client_uuid.clone(),
+            added: Utc::now(),
+            updated: Utc::now(),
+            entry_id: None,
+        }
+    }
+
+    pub async fn insert(&self, data: &web::Data<AppState>, crm_uuid: &Uuid) -> Result<(), sqlx::Error> {
+        let query = format!("INSERT INTO `crm`.`{}-meetings` (`uuid`, `client_uuid`, `from`, `to`, `added`, `updated`, `entry_id`) VALUES (?,?,?,?,?,?,?)", crm_uuid.hyphenated().to_string());
+        match sqlx::query(&query)
+            .bind(&self.uuid.hyphenated().to_string())
+            .bind(&self.client_uuid.hyphenated().to_string())
+            .bind(&self.from)
+            .bind(&self.to)
+            .bind(&self.added)
+            .bind(&self.updated)
+            .bind(&self.entry_id)
+            .execute(&data.pool)
+            .await {
+                Err(err) => Err(err),
+                Ok(_) => Ok(())
+            }
     }
 
 }

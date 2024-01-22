@@ -1,11 +1,19 @@
 import Button from '@/components/Button';
-import React, { useEffect, useState } from 'react'
+import { CurrentCrmContext } from '@/context/CurrentCrmContext';
+import request from '@/utils/request';
+import React, { useContext, useEffect, useState } from 'react'
+import CalendarPart from './CalendarPart';
+
+export interface MeetingWithDay {
+    meeting: Meeting,
+    day: number,
+}
 
 export default function Calendar() {
-
+    const {crm} = useContext(CurrentCrmContext);
     const currentDate = new Date();
     const [activeDate, setActiveDate] = useState<Date>(new Date());
-    const [meetings, setMeetings] = useState<Meeting[]>([]);
+    const [meetingsWithDays, setMeetingsWithDays] = useState<MeetingWithDay[]>([]);
 
     const numDaysThisMonth = (y: number, m: number) => new Date(y, m, 0).getDate();
 
@@ -18,14 +26,20 @@ export default function Calendar() {
 
 
     const getMeetings = async () => {
-
+        if(crm?.crmUuid) {
+            const res = await request<MeetingWithDay[]>(`/meetings?crmUuid=${crm?.crmUuid}&year=${activeDate.getFullYear()}&month=${activeDate.getMonth()+1}`, {}, "GET")
+            if (res.code === 200 && res.data) {
+                setMeetingsWithDays(res.data)
+            }
+        }
     }
 
     useEffect(()=>{
-        console.log("new month")
-    },[activeDate])
+        getMeetings();
+    },[activeDate, crm])
 
 
+    useEffect(()=>{console.log(meetingsWithDays)},[meetingsWithDays])
 
     const arr = Array(numDaysThisMonth(activeDate.getFullYear(), activeDate.getMonth() + 1)).fill("");
 
@@ -40,11 +54,7 @@ export default function Calendar() {
 
         <ul className="grid grid-cols-auto-fill md:grid-cols-calendar gap-2 ">
             {arr.map((_, i) => (
-                <li className={`h-32  hover:bg-light-purple transition-colors ${new Date(activeDate.getFullYear(), activeDate.getMonth(), i + 1).toDateString() === currentDate.toDateString() ? "bg-light-purple" : new Date(activeDate.getFullYear(), activeDate.getMonth(), i + 1).getTime() < currentDate.getTime() ? "bg-background-light bg-opacity-50" : "bg-background-light" }`} key={i + 1}>
-                {i + 1}
-                <br />
-                {matchWeekDay(new Date(activeDate.getFullYear(), activeDate.getMonth() + 1, i + 1).getDay())}
-            </li>
+                <CalendarPart key={i} i={i} meetings={meetingsWithDays.filter(mWD => mWD.day === i+1).map(mWD => mWD.meeting)} currentDate={currentDate} activeDate={activeDate} />
             ))}
         </ul>
     </div>
@@ -52,26 +62,7 @@ export default function Calendar() {
 }
 
 
-const matchWeekDay = (num: number): string => {
-    switch (num) {
-        case 0:
-            return "Thursday";
-        case 1:
-            return "Friday";
-        case 2:
-            return "Saturday";
-        case 3:
-            return "Sunday";
-        case 4:
-            return "Monday";
-        case 5:
-            return "Tuesday";
-        case 6: 
-            return "Wednesday";
-        default: 
-            return "";
-    }
-}
+
 
 const matchMonth = (num: number): string => {
     switch (num) {

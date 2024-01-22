@@ -9,10 +9,12 @@ export default function index() {
     const router = useRouter();
     const {crm} = useContext(CurrentCrmContext);
     const removeCrm = async () => {
-        const res = await request(`/crm?uuid=${crm?.crmUuid}`, {}, "DELETE");
-        alert(JSON.stringify(res));
-        if (res.code === 200) {
-          router.push("/dashboard");
+        if (crm?.crmUuid) {
+          const res = await request(`/crm?crmUuid=${crm?.crmUuid}`, {}, "DELETE");
+          alert(JSON.stringify(res));
+          if (res.code === 200) {
+            router.push("/dashboard");
+          }
         }
     }
   

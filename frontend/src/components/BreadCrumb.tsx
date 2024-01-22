@@ -23,9 +23,9 @@ export default function BreadCrumb() {
   return (
     <ul className='flex gap-2 text-sm capitalize'>
         {parsePathNames(pathName)?.map((part, index) => (
-        <li className="flex items-center">
+        <li key={part} className="flex items-center">
             {index !== 0 && <MdChevronRight className="text-lg"/>}
-            <Link href="#">{part}</Link>
+            <Link  href="#">{part}</Link>
         </li>
         ))}
     </ul>
