@@ -10,7 +10,7 @@ interface Client {
     country: string | null,
     company: string | null,
     phoneNumber: string | null,
-    newsLetter: string | null,
+    newsLetter: boolean,
     added: string,
     updated: string,
 }

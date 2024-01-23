@@ -25,6 +25,7 @@ export default function index() {
         <Navbar />
         Settings
         <Button onClick={() => removeCrm()}>Remove crm</Button>  
+        <Button onClick={() => alert("create function")}>Clear cache</Button>
 
     </div>
   )

@@ -55,6 +55,46 @@ impl Model for Client {
 }
 
 impl Client {
+
+    pub fn default() -> Self {
+        Client {
+            uuid: Uuid::new_v4(),
+            first_name: None,
+            last_name: None,
+            date_of_birth: None,
+            email: "".to_string(),
+            address: None,
+            zip_code: None,
+            city: None,
+            country: None,
+            company: None,
+            phone_number: None,
+            news_letter: false,
+            added: Utc::now(),
+            updated: Utc::now(),
+        }
+    }
+
+    pub fn new(first_name: Option<String>, last_name: Option<String>, date_of_birth: Option<NaiveDate>, email: String, address: Option<String>, zip_code: Option<String>, city: Option<String>, country: Option<String>, company: Option<String>, phone_number: Option<String>, news_letter: bool) -> Self {
+        Client {
+            uuid: Uuid::new_v4(),
+            first_name,
+            last_name,
+            date_of_birth,
+            email,
+            address,
+            zip_code,
+            city,
+            country,
+            company,
+            phone_number,
+            news_letter,
+            added: Utc::now(),
+            updated: Utc::now()
+        }
+    }
+
+
     pub async fn get_by_uuid(client_uuid: &Uuid, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<Option<Self>, sqlx::Error> {
         let query = format!("SELECT * FROM `crm`.`{}-clients` WHERE uuid = ?", crm_uuid.hyphenated().to_string());
         let res = sqlx::query(&query)
@@ -98,4 +138,32 @@ impl Client {
         }
         Ok(clients)
     }
+
+    pub async fn insert(&self, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+        let query = format!("INSERT INTO `crm`.`{}-clients` (uuid, first_name, last_name, date_of_birth, email, address, zip_code, city, country, company, phone_number, news_letter, added, updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", crm_uuid.hyphenated().to_string());
+        match sqlx::query(&query)
+            .bind(&self.uuid.hyphenated().to_string())
+            .bind(&self.first_name)
+            .bind(&self.last_name)
+            .bind(&self.date_of_birth)
+            .bind(&self.email)
+            .bind(&self.address)
+            .bind(&self.zip_code)
+            .bind(&self.city)
+            .bind(&self.country)
+            .bind(&self.company)
+            .bind(&self.phone_number)
+            .bind(&self.news_letter)
+            .bind(&self.added)
+            .bind(&self.updated)
+            .execute(&data.pool)
+            .await {
+                Err(err) => Err(err),
+                Ok(_) => Ok(())
+            }
+    }
+
+
+
+
 }

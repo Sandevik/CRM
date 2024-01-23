@@ -32,7 +32,7 @@ export default function MeetingCard({meeting, refetchMeetings}: {meeting: Meetin
             setMeetingSettingsOpen(false);
             refetchMeetings();
         } else {
-            console.log(res);
+            alert(res.message);
         }
     }
 
