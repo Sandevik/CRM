@@ -25,7 +25,7 @@ pub struct Meeting {
 impl Model for Meeting {
     fn from_row(row: &MySqlRow) -> Self {
         Meeting {
-            uuid: Uuid::parse_str(row.get("client_uuid")).unwrap_or_default(),
+            uuid: Uuid::parse_str(row.get("uuid")).unwrap_or_default(),
             client_uuid: Uuid::parse_str(row.get("client_uuid")).unwrap_or_default(),
             from: row.get("from"),
             to: row.get("to"),
@@ -114,6 +114,36 @@ impl Meeting {
                 Ok(_) => Ok(())
             }
     }
+
+    pub async fn get_by_uuid(uuid: &Uuid, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<Option<Meeting>, sqlx::Error> {
+        let query = format!("SELECT * FROM `crm`.`{}-meetings` WHERE `uuid` = ?", crm_uuid.hyphenated().to_string());
+        match sqlx::query(&query)
+            .bind(uuid.hyphenated().to_string())
+            .fetch_optional(&data.pool)
+            .await {
+                Err(err) => Err(err),
+                Ok(opt_row) => {
+                    match opt_row {
+                        None => Ok(None),
+                        Some(row) => Ok(Some(Self::from_row(&row)))
+                    }
+                }
+            }
+    }
+
+    pub async fn delete_by_uuid(uuid: &Uuid, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+        let query = format!("DELETE FROM `crm`.`{}-meetings` WHERE `uuid` = ?", crm_uuid.hyphenated().to_string());
+        match sqlx::query(&query)
+            .bind(uuid.hyphenated().to_string())
+            .execute(&data.pool)
+            .await {
+                Err(err) => Err(err),
+                Ok(_) => Ok(())
+            }
+    }
+
+
+
 
 }
 

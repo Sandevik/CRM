@@ -1,4 +1,4 @@
-use actix_web::{Scope, dev::{ServiceFactory, ServiceRequest, ServiceResponse}, body::{EitherBody, BoxBody}, Error, web, get, Responder, HttpResponse, post};
+use actix_web::{Scope, dev::{ServiceFactory, ServiceRequest, ServiceResponse}, body::{EitherBody, BoxBody}, Error, web, get, Responder, HttpResponse, post, delete};
 use actix_web_httpauth::middleware::HttpAuthentication;
 use chrono::{Datelike, NaiveDateTime};
 use serde::{Serialize, Deserialize};
@@ -18,7 +18,9 @@ pub fn meetings() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Resp
         .service(meetings_this_month)
         .service(meetings_by_year_and_month)
         .service(create_meeting)
-        .service(upcoming_meetings);
+        .service(upcoming_meetings)
+        .service(read_meeting)
+        .service(delete_meeting);
         
     scope
 }
@@ -68,8 +70,8 @@ async fn meetings_by_year_and_month(data: web::Data<AppState>, query: web::Query
 
 
 #[get("/upcoming")]
-async fn upcoming_meetings(data: web::Data<AppState>, query: web::Query<ByYearAndMonthRequest>) -> impl Responder {
-    let crm_uuid = Uuid::parse_str(&query.uuid).unwrap_or_default();
+async fn upcoming_meetings(data: web::Data<AppState>, query: web::Query<RequiresUuid>) -> impl Responder {
+    let crm_uuid = Uuid::parse_str(&query.crm_uuid).unwrap_or_default();
     match Meeting::get_all(&crm_uuid, MeetingsOption::Future, Limit::Some(2), &data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
         Ok(meetings) => {
@@ -91,7 +93,6 @@ struct CreateMeetingRequest {
 
 #[post("/create")]
 pub async fn create_meeting(data: web::Data<AppState>, body: web::Json<CreateMeetingRequest>) -> impl Responder {
-    println!("{:?}", body);
     let from = NaiveDateTime::from_timestamp_millis(body.from).expect("Could not convert milliseconds to date");
     let to = NaiveDateTime::from_timestamp_millis(body.to).expect("Could not convert milliseconds to date");
     match Meeting::new(from, to, &Uuid::parse_str(&body.client_uuid.as_str()).unwrap_or_default()).insert(&data, &Uuid::parse_str(body.crm_uuid.as_str()).unwrap_or_default()).await {
@@ -105,7 +106,23 @@ pub async fn create_meeting(data: web::Data<AppState>, body: web::Json<CreateMee
 
 #[derive(Serialize, Deserialize)]
 struct MeetingByUuidRequest {
-    uuid: String, //crm uuid
-    #[serde(rename(deserialize = "clientUuid"))]
-    client_uuid: String,
+    #[serde(rename(deserialize = "crmUuid"))]
+    crm_uuid: String, //crm uuid
+    uuid: String,
+}
+
+#[get("")]
+pub async fn read_meeting(data: web::Data<AppState>, query: web::Query<MeetingByUuidRequest>) -> impl Responder {
+    match Meeting::get_by_uuid(&Uuid::parse_str(&query.uuid).unwrap_or_default(), &Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), &data).await {
+        Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
+        Ok(meeting) => HttpResponse::Ok().json(Response::ok("Successfully read meeting", meeting))
+    }
+}
+
+#[delete("")]
+pub async fn delete_meeting(data: web::Data<AppState>, query: web::Query<MeetingByUuidRequest>) -> impl Responder {
+    match Meeting::delete_by_uuid(&Uuid::parse_str(&query.uuid).unwrap_or_default(), &Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), &data).await {
+        Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
+        Ok(_) => HttpResponse::Ok().json(Response::<String>::ok("Successfully deleted meeting", None))
+    }
 }
