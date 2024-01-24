@@ -9,10 +9,10 @@ export default function Navbar() {
   const {crm} = useContext(CurrentCrmContext);
   
   return (
-    <nav className="w-full p-2 text-light-blue border-b-2 border-background-light pr-4">
+    <nav className="w-full p-2 text-light-blue border-b-2 border-background-light pr-4 sticky top-12 bg-background-dark">
         <BreadCrumb />
         <ul className='flex justify-between items-center text-xl font-semibold'>
-            <li className='text-2xl font-bold capitalize'>
+            <li className='text-2xl font-bold capitalize truncate'>
               <span>{crm?.name}</span>
             </li>
             <li className="flex gap-8 items-center text-lg">

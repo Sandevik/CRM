@@ -11,7 +11,7 @@ export default function Navbar() {
     const {data} = useContext(AuthContext);
 
   return (
-    <nav className="h-[3em] bg-background-light z-10 text-light-blue flex justify-between items-center px-4">
+    <nav className="h-[3em] bg-background-light z-10 text-light-blue flex justify-between items-center px-4 sticky top-0">
         <span className="font-bold text-2xl">CRM</span>
         <ul className='flex gap-8 items-center '>
             <li><Link href={"/dashboard"} className='flex items-center gap-1 text-light-blue hover:text-light-red transition-colors'> <MdDashboard /> All Crms </Link></li>
