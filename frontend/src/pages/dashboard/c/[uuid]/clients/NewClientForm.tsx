@@ -3,8 +3,9 @@ import Input from '@/components/Input'
 import { CurrentCrmContext } from '@/context/CurrentCrmContext';
 import request from '@/utils/request';
 import React, { FormEvent, useContext, useState } from 'react'
+import { FaCircleChevronDown } from "react-icons/fa6";
 
-export default function NewClientForm({active, onSuccessfulSubmit}: {active: boolean, onSuccessfulSubmit: () => void}) {
+export default function NewClientForm({active, setCreateClientActive, onSuccessfulSubmit}: {active: boolean, onSuccessfulSubmit: () => void, setCreateClientActive: React.Dispatch<React.SetStateAction<boolean>>}) {
     const {crm} = useContext(CurrentCrmContext);
     const [client, setClient] = useState<Client>({
         firstName: null,
@@ -27,13 +28,26 @@ export default function NewClientForm({active, onSuccessfulSubmit}: {active: boo
             const res = await request("/clients/create", {...client, crmUuid: crm?.crmUuid}, "POST");
             if (res.code === 201) {
                 onSuccessfulSubmit();
+                setClient({
+                    firstName: null,
+                    lastName: null,
+                    dateOfBirth: null,
+                    email: "",
+                    address: null,
+                    zipCode: null,
+                    city: null,
+                    country: null,
+                    company: null,
+                    phoneNumber: null,
+                    newsLetter: false} as Client)
             }
         }
     }
   
     return (
-    <form method='POST' action={""} className={`${active ? "opacity-100 pointer-events-auto translate-x-0" : "opacity-0 pointer-events-none translate-x-8"} bg-background-light transition-all rounded-md absolute top-32 right-2 w-[20%] flex flex-col gap-6 p-4`}>
-        
+    <form method='POST' action={""} className={`${active ? "opacity-100 pointer-events-auto translate-x-0" : "opacity-0 pointer-events-none translate-x-8 "} bg-background-light transition-all h-[calc(100dvh-5em)] overflow-y-scroll scrollthumb rounded-md absolute top-2 right-2 w-[25em] flex flex-col gap-6 p-4 z-10`}>
+        <Button type='button' onClick={() => setCreateClientActive(!active)} className="absolute right-4 top-4 z-20">{active ? "Close" : "New client"}</Button>
+        <FaCircleChevronDown className="absolute bottom-2 right-2 text-xl animate-pulse"/>
         <h3 className="text-xl font-semibold">Create a new client</h3>
         <div className="grid grid-cols-2 gap-2">
             <div className=" flex flex-col gap-2">
@@ -48,7 +62,7 @@ export default function NewClientForm({active, onSuccessfulSubmit}: {active: boo
         </div>
         <div className=" flex flex-col gap-2">
             <label htmlFor="date of birth">Date of birth</label>
-            <Input className="bg-light-blue font-semibold" name="date of birth" value={client.dateOfBirth || ""} onChange={(e) => setClient({...client, dateOfBirth: e.target.value})}/>
+            <Input className="bg-light-blue font-semibold" type='date' name="date of birth" value={client.dateOfBirth || ""} onChange={(e) => setClient({...client, dateOfBirth: e.target.value})}/>
         </div>
         
         <div className=" flex flex-col gap-2">

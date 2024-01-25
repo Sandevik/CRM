@@ -5,6 +5,10 @@
 html {
   background-color: #020108;
   color: white;
+  
+  width:100dvw;
+  height:100dvh;
+  overflow: hidden;
 }
 
 .custom-shadow-right {
@@ -33,11 +37,22 @@ html {
 .scrollthumb::-webkit-scrollbar {
   background-color: #02010844;
   width: 7px;
-
+  height: 7px;
 }
 
 .scrollthumb::-webkit-scrollbar-thumb {
   background-color: #242038;
   border-radius: 10px;
   
+}
+
+html::-webkit-scrollbar {
+  background-color: #02010844;
+  width: 7px;
+  height: 7px;
+}
+
+html::-webkit-scrollbar-thumb {
+  background-color: #242038;
+  border-radius: 10px;
 }

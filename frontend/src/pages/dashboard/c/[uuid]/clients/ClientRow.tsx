@@ -18,7 +18,7 @@ export default function ClientRow({client}: {client: Client}) {
         <Link href={`/dashboard/c/${crm?.crmUuid}/clients/${client.uuid}`} className="border-l-2 p-2 pl-4 border-background-light truncate">{client.email}</Link>
         <Link href={`/dashboard/c/${crm?.crmUuid}/clients/${client.uuid}`} className="border-l-2 p-2 pl-4 border-background-light truncate">{client.phoneNumber || "-"}</Link>
         <Link href={`/dashboard/c/${crm?.crmUuid}/clients/${client.uuid}`} className="border-l-2 p-2 pl-4 border-background-light truncate">{client.city}</Link>
-        <Link href={`/dashboard/c/${crm?.crmUuid}/clients/${client.uuid}`} className="border-l-2 p-2 pl-4 border-background-light truncate flex gap-2 items-center">{ hasCopied ? <BsClipboard2CheckFill className="text-3xl cursor-pointer" onClick={() => copyToClipBoard(client.uuid)} /> : <BsClipboard2Fill className="text-3xl cursor-pointer" onClick={() => copyToClipBoard(client.uuid)} />} <div className="truncate">{client.uuid}</div></Link>
+        <div className="border-l-2 p-2 pl-4 border-background-light truncate flex gap-2 items-center">{ hasCopied ? <BsClipboard2CheckFill className="text-3xl cursor-pointer" onClick={() => copyToClipBoard(client.uuid)} /> : <BsClipboard2Fill className="text-3xl cursor-pointer" onClick={() => copyToClipBoard(client.uuid)} />} <div className="truncate">{client.uuid}</div></div>
     </li>
   )
 }
