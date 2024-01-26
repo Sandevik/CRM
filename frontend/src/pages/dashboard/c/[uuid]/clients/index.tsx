@@ -57,7 +57,6 @@ export default function index() {
         <div className='sticky mt-2  flex justify-center top-[130px]'>
           <div className="flex gap-2 bg-background-dark bg-opacity-60">
             <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search" className="w-[30em]"/>
-            <Button>Search</Button>
           </div> 
           <Button onClick={() => setCreateClientActive(!createClientActive)} className="absolute right-4 top-14 md:top-0 z-20">{createClientActive ? "Close" : "New client"}</Button>
         </div>
