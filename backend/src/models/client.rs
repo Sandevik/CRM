@@ -113,6 +113,38 @@ impl Client {
         }
     }
 
+    pub async fn search(crm_uuid: &Uuid, q: &str, limit: Limit, data: &web::Data<AppState>) -> Result<Vec<Self>, sqlx::Error> {
+        let mut clients: Vec<Client> = Vec::new();
+        let mut query = format!("SELECT * FROM `crm`.`{}-clients` WHERE `first_name` LIKE ? OR `last_name` LIKE ? OR `email` LIKE ?", crm_uuid);
+        //todo: create limits on how many clients a person can get
+        match limit {
+            Limit::None => (),
+            Limit::Some(limit) => query.push_str(format!(" LIMIT {}", limit).as_str()),
+        }
+        let parsed_q: String = format!("%{}%",q);
+
+        let res = sqlx::query(&query)
+            .bind(&parsed_q)
+            .bind(&parsed_q)
+            .bind(&parsed_q)
+            .fetch_all(&data.pool)
+            .await;
+
+        match res {
+            Err(err) => println!("{err}"),
+            Ok(rows) => {
+                rows.iter().for_each(|row| {
+                    clients.push(Client::from_row(row));
+                });
+            }
+        }
+        Ok(clients)
+
+
+
+
+    }
+
     pub async fn get_all(crm_uuid: &Uuid, limit: Limit, data: &web::Data<AppState>) -> Result<Vec<Self>, sqlx::Error> {
         let mut clients: Vec<Client> = Vec::new();
         let mut query = format!("SELECT * FROM `crm`.`{}-clients`", crm_uuid);

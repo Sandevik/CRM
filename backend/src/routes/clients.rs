@@ -15,7 +15,8 @@ pub fn clients() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Respo
         .wrap(owner_or_admin_middleware)
         .service(by_uuid)
         .service(create_client)
-        .service(get_all);
+        .service(get_all)
+        .service(search);
         
     scope
 }
@@ -47,6 +48,21 @@ async fn get_all(data: web::Data<AppState>, query: web::Query<RequiresUuid>) -> 
     }
 }
 
+
+#[derive(Deserialize)]
+struct SearchRequest {
+    #[serde(rename(deserialize = "crmUuid"))]
+    crm_uuid: String,
+    q: String,
+}
+
+#[get("/search")]
+async fn search(data: web::Data<AppState>, query: web::Query<SearchRequest>) -> impl Responder {
+    match Client::search(&Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), &query.q, Limit::Some(20), &data).await {
+        Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
+        Ok(client) => HttpResponse::Ok().json(Response::ok("Successfully searched clients", Some(client)))
+    }
+}
 
 
 #[derive(Deserialize)]

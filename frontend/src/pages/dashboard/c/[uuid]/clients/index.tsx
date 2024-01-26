@@ -7,13 +7,14 @@ import request from '@/utils/request';
 import ClientRow from './ClientRow';
 import Input from '@/components/Input';
 import ClientRowHeading from './ClientRowHeading';
-import { GiAstronautHelmet } from "react-icons/gi";
 import Image from 'next/image';
 
 export default function index() {
     const {crm} = useContext(CurrentCrmContext);
     const [createClientActive, setCreateClientActive] = useState<boolean>(false);
     const [clients, setClients] = useState<Client[]>(crm?.clients || []);
+    const [searchQuery, setSearchQuery] = useState<string>("");
+    const [searchResult, setSearchResult] = useState<Client[] | undefined>(undefined);
 
     const onSuccessfullSubmit = () => {
       setCreateClientActive(false);
@@ -34,13 +35,28 @@ export default function index() {
       }
     }
 
+    const search = async () => {
+      if(crm?.crmUuid && searchQuery !== "") {
+        const res = await request<Client[]>(`/clients/search?crmUuid=${crm?.crmUuid}&q=${searchQuery}`, {}, "GET");
+        if (res.code === 200) {
+          setSearchResult(res.data && res.data.length > 0 ? res.data : undefined);
+        }
+      } else {
+        setSearchResult(undefined);
+      }
+    }
+
+    useEffect(()=>{
+      search();
+    },[searchQuery])
+
   return (
     <main className='relative p-4'>
         <Navbar />
         {clients.length > 0 ? 
         <div className='sticky mt-2  flex justify-center top-[130px]'>
           <div className="flex gap-2 bg-background-dark bg-opacity-60">
-            <Input placeholder="Search" className="w-[30em]"/>
+            <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search" className="w-[30em]"/>
             <Button>Search</Button>
           </div> 
           <Button onClick={() => setCreateClientActive(!createClientActive)} className="absolute right-4 top-14 md:top-0 z-20">{createClientActive ? "Close" : "New client"}</Button>
@@ -50,7 +66,8 @@ export default function index() {
         {clients.length > 0 ? 
         <ul className="p-4 mr-28 flex flex-col gap-2 ">
             <ClientRowHeading />
-            {clients.map(client => (<ClientRow key={client.uuid} client={client}/>))}
+            {!searchResult && clients.map(client => (<ClientRow key={client.uuid} client={client}/>))}
+            {searchResult && searchResult.length > 0 && searchResult.map(client => (<ClientRow key={client.uuid} client={client} />))}
         </ul>
         : <div className="flex justify-center items-center text-2xl mt-16 h-full flex-col gap-4">
             <span>Oops, it seems like you do not yet have any clients. Create one</span>
