@@ -1,8 +1,9 @@
 import Button from '@/components/Button'
 import Input from '@/components/Input'
 import { CurrentCrmContext } from '@/context/CurrentCrmContext';
+import checkIfScrollable from '@/utils/checkIfScrollable';
 import request from '@/utils/request';
-import React, { FormEvent, useContext, useState } from 'react'
+import React, { FormEvent, useContext, useRef, useState } from 'react'
 import { FaCircleChevronDown } from "react-icons/fa6";
 
 export default function NewClientForm({active, setCreateClientActive, onSuccessfulSubmit}: {active: boolean, onSuccessfulSubmit: () => void, setCreateClientActive: React.Dispatch<React.SetStateAction<boolean>>}) {
@@ -21,6 +22,7 @@ export default function NewClientForm({active, setCreateClientActive, onSuccessf
         newsLetter: false,
         
     } as Client);
+    const ref = useRef<any>(undefined);
 
     const submit = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();
@@ -45,7 +47,7 @@ export default function NewClientForm({active, setCreateClientActive, onSuccessf
     }
   
     return (
-    <form method='POST' action={""} className={`${active ? "opacity-100 pointer-events-auto translate-x-0" : "opacity-0 pointer-events-none translate-x-8 "} bg-background-light transition-all h-[calc(100dvh-5em)] overflow-y-scroll scrollthumb rounded-md absolute top-2 right-2 w-[25em] flex flex-col gap-6 p-4 z-10`}>
+    <form ref={ref} method='POST' action={""} className={`${active ? "opacity-100 pointer-events-auto translate-x-0" : "opacity-0 pointer-events-none translate-x-8 "} bg-background-light transition-all h-[calc(100dvh-5em)] overflow-y-scroll scrollthumb rounded-md absolute top-2 right-2 w-[25em] flex flex-col gap-6 p-4 z-10`}>
         <Button type='button' onClick={() => setCreateClientActive(!active)} className="absolute right-4 top-4 z-20">{active ? "Close" : "New client"}</Button>
         <FaCircleChevronDown className="absolute bottom-2 right-2 text-xl animate-pulse"/>
         <h3 className="text-xl font-semibold">Create a new client</h3>

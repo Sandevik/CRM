@@ -43,7 +43,7 @@ export default function index() {
             <Input placeholder="Search" className="w-[30em]"/>
             <Button>Search</Button>
           </div> 
-          <Button onClick={() => setCreateClientActive(!createClientActive)} className="absolute right-4 top-0 z-20">{createClientActive ? "Close" : "New client"}</Button>
+          <Button onClick={() => setCreateClientActive(!createClientActive)} className="absolute right-4 top-14 md:top-0 z-20">{createClientActive ? "Close" : "New client"}</Button>
         </div>
         : ""}
         <NewClientForm setCreateClientActive={setCreateClientActive} onSuccessfulSubmit={onSuccessfullSubmit} active={createClientActive}/>
