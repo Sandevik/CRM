@@ -28,7 +28,6 @@ export default function index() {
 
     }
 
-    
 
   return (
     <main className='relative p-4'>
@@ -50,7 +49,7 @@ export default function index() {
         </ul>
         : <div className="flex justify-center items-center text-2xl mt-16 h-full flex-col gap-4">
             <span>Oops, it seems like you do not yet have any clients. Create one</span>
-            <Image className="" src={"/astronaut.svg"} alt="astronaut" width={200} height={200}/>
+            <Image className="" priority src={"/astronaut.svg"} alt="astronaut" width={200} height={200}/>
           </div>}
 
           <div className="flex gap-2 justify-center items-center">
