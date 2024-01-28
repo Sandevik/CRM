@@ -71,7 +71,8 @@ impl Database {
 
     pub async fn setup_entries_table(crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<MySqlQueryResult, sqlx::Error> {
         let query: String = format!(r#"CREATE TABLE IF NOT EXISTS `{}-entries` (
-            `id` INT NOT NULL UNIQUE AUTO_INCREMENT,
+            `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            `client_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
             `added` DATETIME,
             `added_at_meeting` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci,
             `updated` DATETIME,

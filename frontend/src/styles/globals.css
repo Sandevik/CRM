@@ -56,3 +56,7 @@ html::-webkit-scrollbar-thumb {
   background-color: #242038;
   border-radius: 10px;
 }
+
+.clippath{
+  clip-path: polygon(7% 0, 100% 0, 93% 100%, 0% 100%);
+}
