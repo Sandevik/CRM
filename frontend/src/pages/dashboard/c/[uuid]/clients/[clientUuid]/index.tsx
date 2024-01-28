@@ -15,6 +15,8 @@ export default function index() {
   const [client, setClient] = useState<Client | null>(null);
   const [edit, setEdit] = useState<boolean>(false);
 
+  const [currentView, setCurrentView] = useState<"quick" | "entries" | "meetings">("quick");
+
   useEffect(()=>{
     (async () => {
       if (crm?.crmUuid && params?.clientUuid) {
@@ -29,9 +31,19 @@ export default function index() {
       <div className='relative p-4'>
         <Navbar />
         <Link href={`/dashboard/c/${crm?.crmUuid}/clients`} className="flex gap-2 items-center text-lg bg-light-blue hover:bg-greenish transition-colors absolute top-[4.2em] px-2 text-black rounded-md"><FaChevronLeft /> <div>Clients</div> </Link>
-        <main className='h-[calc(100dvh-11em)] rounded-md w-full mt-12 p-4 bg-background-light bg-opacity-50 flex'>
+        <main className='h-[calc(100dvh-11em)] rounded-md w-full mt-12 p-4 bg-background-light bg-opacity-50 flex gap-4'>
           <ClientCard client={client} setEdit={setEdit} edit={edit}/>
-          <div className="flex-1">
+          <div className="flex-1 w-full ">
+
+            <nav>
+              <ul className="flex gap-1">
+                <li onClick={()=>setCurrentView("quick")} className={`${currentView === "quick" ? " bg-light-blue text-background-dark" : "bg-background-dark"} clippath transition-colors font-semibold cursor-pointer px-2 py-1`}>Quick Info</li>
+                <li onClick={()=>setCurrentView("entries")} className={`${currentView === "entries" ? " bg-light-blue text-background-dark" : "bg-background-dark"} clippath transition-colors font-semibold cursor-pointer px-2 py-1`}>Entries</li>
+                <li onClick={()=>setCurrentView("meetings")} className={`${currentView === "meetings" ? " bg-light-blue text-background-dark" : "bg-background-dark"} clippath transition-colors font-semibold cursor-pointer px-2 py-1`}>Meetings</li>
+              </ul>
+            </nav>
+
+
 
           </div>
         </main>
