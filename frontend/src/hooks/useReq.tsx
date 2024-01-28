@@ -9,7 +9,7 @@ interface ReqOptions {
     searchUriNoParams: string,
 }
 
-export default function<T extends Object>(initialValue: T[], {offset, limit, fetchUriNoParams, searchUriNoParams}: ReqOptions) {
+export default function<T extends Object>({offset, limit, fetchUriNoParams, searchUriNoParams}: ReqOptions) {
     const {crm} = useContext(CurrentCrmContext);
     const [result, setResult] = useState<T[]>([]);
     const [requestOptions, setRequestOptions] = useState<{offset: number, limit: number}>({limit: limit || 20, offset: offset || 0});
@@ -29,7 +29,7 @@ export default function<T extends Object>(initialValue: T[], {offset, limit, fet
                 setResult(cached[requestOptions.offset / requestOptions.limit])
             }
         })();
-    },[initialValue, requestOptions])
+    },[crm, requestOptions])
   
     const refetch = async (preFetch?: boolean) => {
         if(crm?.crmUuid){

@@ -15,7 +15,7 @@ export default function index() {
     const {crm} = useContext(CurrentCrmContext);
     const [createClientActive, setCreateClientActive] = useState<boolean>(false);
     
-    const {data, refetch, nextResult, prevResult, setSearchQuery, searchQuery, searchResult, currentPage} = useReq(crm?.clients || [], {
+    const {data, refetch, nextResult, prevResult, setSearchQuery, searchQuery, searchResult, currentPage} = useReq<Client>({
       fetchUriNoParams: "/clients/all",
       searchUriNoParams: "/clients/search"
     })
