@@ -40,9 +40,19 @@ async fn by_uuid(query: web::Query<ClientByUuidRequest>, data: web::Data<AppStat
 }
 
 
+
+
+#[derive(Deserialize)]
+struct AllRequest {
+    #[serde(rename(deserialize = "crmUuid"))]
+    crm_uuid: String,
+    offset: Option<u16>,
+    limit: Option<u16>
+}
+
 #[get("/all")]
-async fn get_all(data: web::Data<AppState>, query: web::Query<RequiresUuid>) -> impl Responder {
-    match Client::get_all(&Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), Limit::None, &data).await {
+async fn get_all(data: web::Data<AppState>, query: web::Query<AllRequest>) -> impl Responder {
+    match Client::get_all(&Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), match &query.limit {None => Limit::None, Some(u) => Limit::Some(*u)}, query.offset, &data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
         Ok(client) => HttpResponse::Ok().json(Response::ok("Successfully fetched client", Some(client)))
     }

@@ -89,7 +89,7 @@ pub enum MeetingsOption {
 
 pub enum Limit {
     None,
-    Some(i32)
+    Some(u16)
 }
 
 

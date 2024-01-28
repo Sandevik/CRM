@@ -8,52 +8,32 @@ import ClientRow from './ClientRow';
 import Input from '@/components/Input';
 import ClientRowHeading from './ClientRowHeading';
 import Image from 'next/image';
+import useReq from '@/hooks/useReq';
+import { FaChevronRight, FaChevronLeft } from "react-icons/fa6";
 
 export default function index() {
     const {crm} = useContext(CurrentCrmContext);
     const [createClientActive, setCreateClientActive] = useState<boolean>(false);
-    const [clients, setClients] = useState<Client[]>(crm?.clients || []);
-    const [searchQuery, setSearchQuery] = useState<string>("");
-    const [searchResult, setSearchResult] = useState<Client[] | undefined>(undefined);
+    
+
+
+    const {data, refetch, nextResult, prevResult, setSearchQuery, searchQuery, searchResult, currentPage} = useReq(crm?.clients || [], {
+      fetchUriNoParams: "/clients/all",
+      searchUriNoParams: "/clients/search"
+    })
 
     const onSuccessfullSubmit = () => {
       setCreateClientActive(false);
-      refetchClients();
+      refetch();
 
     }
 
-    useEffect(()=>{
-      refetchClients();
-    },[crm])
-
-    const refetchClients = async () => {
-      if(crm?.crmUuid){
-        const res = await request<Client[]>(`/clients/all?crmUuid=${crm?.crmUuid}`, {}, "GET");
-        if (res.code === 200) {
-          setClients(res.data || []);
-        }
-      }
-    }
-
-    const search = async () => {
-      if(crm?.crmUuid && searchQuery !== "") {
-        const res = await request<Client[]>(`/clients/search?crmUuid=${crm?.crmUuid}&q=${searchQuery}`, {}, "GET");
-        if (res.code === 200) {
-          setSearchResult(res.data && res.data.length > 0 ? res.data : undefined);
-        }
-      } else {
-        setSearchResult(undefined);
-      }
-    }
-
-    useEffect(()=>{
-      search();
-    },[searchQuery])
+    
 
   return (
     <main className='relative p-4'>
         <Navbar />
-        {clients.length > 0 ? 
+        {data.length > 0 ? 
         <div className='sticky mt-2  flex justify-center top-[130px]'>
           <div className="flex gap-2 bg-background-dark bg-opacity-60">
             <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search" className="w-[30em]"/>
@@ -62,16 +42,22 @@ export default function index() {
         </div>
         : ""}
         <NewClientForm setCreateClientActive={setCreateClientActive} onSuccessfulSubmit={onSuccessfullSubmit} active={createClientActive}/>
-        {clients.length > 0 ? 
-        <ul className="p-4 mr-28 flex flex-col gap-2 ">
+        {data.length > 0 ? 
+        <ul className="p-4 mr-28 flex flex-col gap-2 h-[calc(100dvh-15em)]">
             <ClientRowHeading />
-            {!searchResult && clients.map(client => (<ClientRow key={client.uuid} client={client}/>))}
+            {!searchResult && data.map(client => (<ClientRow key={client.uuid} client={client}/>))}
             {searchResult && searchResult.length > 0 && searchResult.map(client => (<ClientRow key={client.uuid} client={client} />))}
         </ul>
         : <div className="flex justify-center items-center text-2xl mt-16 h-full flex-col gap-4">
             <span>Oops, it seems like you do not yet have any clients. Create one</span>
             <Image className="" src={"/astronaut.svg"} alt="astronaut" width={200} height={200}/>
           </div>}
+
+          <div className="flex gap-2 justify-center items-center">
+            <Button onClick={() => prevResult()}><FaChevronLeft /></Button>
+              <span>Page {currentPage}</span>
+            <Button onClick={() => nextResult()}><FaChevronRight/></Button>
+          </div>
     </main>
   )
 }

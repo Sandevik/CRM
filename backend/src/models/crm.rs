@@ -49,8 +49,8 @@ impl Model for CRM {
 impl CRM {
 
 
-    pub async fn get_clients(&mut self, limit: Limit, data: &web::Data<AppState>) {
-        match Client::get_all(&self.crm_uuid, limit, data).await {
+    pub async fn get_clients(&mut self, limit: Limit, offset: Option<u16>, data: &web::Data<AppState>) {
+        match Client::get_all(&self.crm_uuid, limit, offset, data).await {
             Err(err) => println!("{err}"),
             Ok(clients) => {
                 self.clients = Some(clients);
