@@ -11,32 +11,20 @@ interface ReqOptions {
 
 export default function<T extends Object>(initialValue: T[], {offset, limit, fetchUriNoParams, searchUriNoParams}: ReqOptions) {
     const {crm} = useContext(CurrentCrmContext);
-    const [result, setResult] = useState<T[]>(initialValue);
+    const [result, setResult] = useState<T[]>([]);
     const [requestOptions, setRequestOptions] = useState<{offset: number, limit: number}>({limit: limit || 20, offset: offset || 0});
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [searchResult, setSearchResult] = useState<T[] | undefined>(undefined);
     const [cached, setCached] = useState<(T[])[]>([]);
-    const [prefetch, setPrefetch] = useState<number>(0);
 
-    console.log(cached);
 
     useEffect(()=>{
         (async () => {
-            const arr = cached;
             if (requestOptions.offset / requestOptions.limit >= cached.length){
                 let res = await refetch();
                 if (res && res.length > 0) {
-                    console.log("r")
-                    arr.push(res)
+                    setCached([...cached, res])
                 }
-                let preFetch = await refetch(true);
-                if (preFetch && preFetch.length > 0) {
-                    arr.push(preFetch)
-                    setPrefetch(preFetch.length);
-                } else {
-                    setPrefetch(0);
-                }
-                setCached(arr)
             } else {
                 setResult(cached[requestOptions.offset / requestOptions.limit])
             }
@@ -70,7 +58,6 @@ export default function<T extends Object>(initialValue: T[], {offset, limit, fet
 
 
     const prevResult = () => {
-        console.log("current " + requestOptions.offset + ", next " + (requestOptions.offset - requestOptions.limit) )
         if(requestOptions.offset - requestOptions.limit >= 0) {
           setRequestOptions({...requestOptions, offset: requestOptions.offset - requestOptions.limit});
         }
@@ -83,5 +70,5 @@ export default function<T extends Object>(initialValue: T[], {offset, limit, fet
     }
 
 
-    return {data: searchResult && searchResult.length > 0 ? searchResult : result || [], nextResult, prevResult, setSearchQuery, refetch, searchQuery, searchResult, currentPage: (requestOptions.offset / requestOptions.limit) + 1, thereIsMore: prefetch > 0 && (requestOptions.offset / requestOptions.limit) < cached.length}
+    return {data: searchResult && searchResult.length > 0 ? searchResult : result || [], nextResult, prevResult, setSearchQuery, refetch, searchQuery, searchResult, currentPage: (requestOptions.offset / requestOptions.limit) + 1}
 }
