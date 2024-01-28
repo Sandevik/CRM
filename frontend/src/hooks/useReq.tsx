@@ -17,7 +17,6 @@ export default function<T extends Object>({offset, limit, fetchUriNoParams, sear
     const [searchResult, setSearchResult] = useState<T[] | undefined>(undefined);
     const [cached, setCached] = useState<(T[])[]>([]);
 
-
     useEffect(()=>{
         (async () => {
             if (requestOptions.offset / requestOptions.limit >= cached.length){
@@ -68,7 +67,6 @@ export default function<T extends Object>({offset, limit, fetchUriNoParams, sear
           setRequestOptions({...requestOptions, offset: requestOptions.offset += requestOptions.limit});
         }
     }
-
 
     return {data: searchResult && searchResult.length > 0 ? searchResult : result || [], nextResult, prevResult, setSearchQuery, refetch, searchQuery, searchResult, currentPage: (requestOptions.offset / requestOptions.limit) + 1}
 }

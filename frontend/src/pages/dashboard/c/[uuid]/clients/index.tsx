@@ -1,9 +1,7 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import Navbar from '../Navbar'
-import { CurrentCrmContext } from '@/context/CurrentCrmContext'
 import Button from '@/components/Button';
 import NewClientForm from './NewClientForm';
-import request from '@/utils/request';
 import ClientRow from './ClientRow';
 import Input from '@/components/Input';
 import ClientRowHeading from './ClientRowHeading';
@@ -12,7 +10,6 @@ import useReq from '@/hooks/useReq';
 import { FaChevronRight, FaChevronLeft } from "react-icons/fa6";
 
 export default function index() {
-    const {crm} = useContext(CurrentCrmContext);
     const [createClientActive, setCreateClientActive] = useState<boolean>(false);
     
     const {data, refetch, nextResult, prevResult, setSearchQuery, searchQuery, searchResult, currentPage} = useReq<Client>({
