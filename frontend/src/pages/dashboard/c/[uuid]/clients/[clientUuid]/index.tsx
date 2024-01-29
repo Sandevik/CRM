@@ -7,6 +7,8 @@ import { FaChevronRight, FaChevronLeft } from "react-icons/fa6";
 import Link from 'next/link';
 import ClientCard from './ClientCard';
 import EditClient from './EditClient';
+import Entries from './Entries';
+import Button from '@/components/Button';
 
 
 export default function index() {
@@ -15,7 +17,7 @@ export default function index() {
   const [client, setClient] = useState<Client | null>(null);
   const [edit, setEdit] = useState<boolean>(false);
 
-  const [currentView, setCurrentView] = useState<"quick" | "entries" | "meetings">("quick");
+  const [currentView, setCurrentView] = useState<"quick" | "entries" | "meetings">("entries");
 
   useEffect(()=>{
     (async () => {
@@ -33,7 +35,7 @@ export default function index() {
         <Link href={`/dashboard/c/${crm?.crmUuid}/clients`} className="flex gap-2 items-center text-lg bg-light-blue hover:bg-greenish transition-colors absolute top-[4.2em] px-2 text-black rounded-md"><FaChevronLeft /> <div>Clients</div> </Link>
         <main className='h-[calc(100dvh-11em)] rounded-md w-full mt-12 p-4 bg-background-light bg-opacity-50 flex gap-4'>
           <ClientCard client={client} setEdit={setEdit} edit={edit}/>
-          <div className="flex-1 w-full ">
+          <div className="flex-1 w-full relative">
 
             <nav>
               <ul className="flex gap-1">
@@ -43,7 +45,17 @@ export default function index() {
               </ul>
             </nav>
 
+            <Button className='absolute top-0 right-0'>New Entry</Button>
 
+            <div className="mt-3">
+            {currentView === "quick" ?
+              <div>quck info</div>
+              : currentView === "entries" ?
+              <Entries />
+              : 
+              <div>meetings</div>
+            }
+            </div>
 
           </div>
         </main>

@@ -33,6 +33,10 @@ export default function ClientCard({client, edit, setEdit}: {client: Client | nu
                 <span>Company</span>
                 <span>{client?.company || "-"}</span>
             </div>
+            <div className="flex justify-between w-[70%] m-auto">
+                <span>Wants news letter</span>
+                <span>{client?.newsLetter ? "Yes" : "No"}</span>
+            </div>
         </div>
 
         <div className="flex-1 justify-center gap-6 flex py-2 items-end">

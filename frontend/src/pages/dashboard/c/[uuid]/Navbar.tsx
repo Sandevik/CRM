@@ -19,8 +19,8 @@ export default function Navbar() {
                 <Link href={`/dashboard/c/${crm?.crmUuid}`} className={`${pathName?.split("/").length === 4 && "text-black px-2 clippath bg-light-blue"} transition-colors hover:text-greenish`}>Dashboard</Link>
                 <Link href={`/dashboard/c/${crm?.crmUuid}/calendar`} className={`${(/.+\/calendar.*/).test(pathName) && "text-black px-2 clippath bg-light-blue"} transition-colors hover:text-greenish `}>Calendar</Link>
                 <Link href={`/dashboard/c/${crm?.crmUuid}/clients`} className={`${(/.+\/clients.*/).test(pathName) && "text-black px-2 clippath bg-light-blue"} transition-colors hover:text-greenish `}>Clients</Link>
-                <Link href={`/dashboard/c/${crm?.crmUuid}`} className={`${(/.+\/archive.*/).test(pathName) && "text-black px-2 clippath bg-light-blue"} transition-colors hover:text-greenish `}>Archive</Link>
-                <Link href={`/dashboard/c/${crm?.crmUuid}`} className={`${(/.+\/services.*/).test(pathName) && "text-black px-2 clippath bg-light-blue"} transition-colors hover:text-greenish `}>Services</Link>
+                <Link href={`/dashboard/c/${crm?.crmUuid}`} className={`${(/.+\/employees.*/).test(pathName) && "text-black px-2 clippath bg-light-blue"} transition-colors hover:text-greenish `}>Employees</Link>
+                <Link href={`/dashboard/c/${crm?.crmUuid}`} className={`${(/.+\/deals.*/).test(pathName) && "text-black px-2 clippath bg-light-blue"} transition-colors hover:text-greenish `}>Deals</Link>
                 <Link href={`/dashboard/c/${crm?.crmUuid}/settings`} className={`${(/.+\/settings.*/).test(pathName) && "text-black px-2 clippath bg-light-blue"} transition-colors hover:text-greenish `}>Settings</Link>
             </li>
         </ul>
