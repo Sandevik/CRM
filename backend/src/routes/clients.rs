@@ -3,7 +3,7 @@ use actix_web_httpauth::middleware::HttpAuthentication;
 use chrono::NaiveDate;
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
-use crate::{routes::Response, middleware::owns_or_admin_middleware::RequiresUuid};
+use crate::routes::Response;
 use crate::{middleware::owns_or_admin_middleware::validator, AppState, models::client::Client};
 
 use super::Limit;

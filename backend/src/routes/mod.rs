@@ -3,6 +3,7 @@ mod auth;
 mod crm;
 mod clients;
 mod meetings;
+mod entries;
 mod test;
 
 use actix_web::web::ServiceConfig;
@@ -12,6 +13,7 @@ use users::users;
 use auth::auth;
 use crm::crm;
 use meetings::meetings;
+use entries::entries;
 use test::test;
 
 use self::{clients::clients, crm::{create_crm, all_crms_by_user}};
@@ -101,6 +103,7 @@ pub fn routes(conf: &mut ServiceConfig) {
     conf.service(all_crms_by_user());
     conf.service(clients());
     conf.service(meetings());
+    conf.service(entries());
     conf.service(test());
 }
 
