@@ -14,6 +14,7 @@ export default function index() {
           Some info?  
 
           num of meetings today
+          things todo from different clients
         </div>
 
       </main>

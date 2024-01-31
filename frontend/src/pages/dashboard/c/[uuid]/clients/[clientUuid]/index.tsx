@@ -9,6 +9,7 @@ import ClientCard from './ClientCard';
 import EditClient from './EditClient';
 import Entries from './Entries';
 import Button from '@/components/Button';
+import QuickInfo from './QuickInfo';
 
 
 export default function index() {
@@ -17,7 +18,7 @@ export default function index() {
   const [client, setClient] = useState<Client | null>(null);
   const [edit, setEdit] = useState<boolean>(false);
 
-  const [currentView, setCurrentView] = useState<"quick" | "entries" | "meetings">("entries");
+  const [currentView, setCurrentView] = useState<"quick" | "entries" | "meetings">("quick");
 
   useEffect(()=>{
     (async () => {
@@ -49,7 +50,7 @@ export default function index() {
 
             <div className="mt-3">
             {currentView === "quick" ?
-              <div>quck info</div>
+              <QuickInfo />
               : currentView === "entries" ?
               <Entries />
               : 
