@@ -1,21 +1,52 @@
 
 import Button from '@/components/Button';
-import React, { useEffect, useState } from 'react'
+import { CurrentCrmContext } from '@/context/CurrentCrmContext';
+import request from '@/utils/request';
+import React, { useContext, useEffect, useState } from 'react'
 import { FaChevronRight } from "react-icons/fa6";
+import { FaPen, FaTrash } from "react-icons/fa";
 
 
-export default function Entry({entry}: {entry: Entry}) {
+export default function Entry({entry, client, refetchEntries}: {entry: Entry, client: Client | null, refetchEntries: () => Promise<void>}) {
+    const {crm} = useContext(CurrentCrmContext);
+    const [initialEntry, setInitialEntry] = useState<Entry>(entry);
     const [expand, setExpand] = useState<boolean>(false);
     const [editing, setEditing] = useState<boolean>(false);
-    const [currentContent, setCurrentContent] = useState<string>(entry.content || "");
+    const [currentContent, setCurrentContent] = useState<string>(initialEntry.content || "");
 
-    const onSaved = () => {
 
+    const removeEntry = async () => {
+        let answer = prompt("Are you sure you want to remove this entry? Write \"yes\"");
+        if (answer === "yes"){
+            if (crm?.crmUuid) {
+                let res = await request(`/entries?crmUuid=${crm.crmUuid}&id=${initialEntry.id}`, {}, "DELETE");
+                if (res.code === 200) {
+                    await refetchEntries();
+                }
+            }
+        }
+    }
+
+    const handleSave = async () => {
+        if (currentContent !== initialEntry.content){
+            await uploadChanges();
+            setInitialEntry({...initialEntry, content: currentContent, updated: new Date().toLocaleDateString()});
+        }
+        setEditing(!editing)
+    }
+
+    const uploadChanges = async () => {
+        if (crm?.crmUuid && client?.uuid && entry.id){
+            let res = await request(`/entries?crmUuid=${crm.crmUuid}&clientUuid=${client.uuid}&id=${entry.id}`, {...initialEntry, content: currentContent}, "PUT") 
+            if (res.code === 200) {
+                console.log(res.message);
+            }
+        }
     }
 
     useEffect(()=>{
-        setCurrentContent(entry.content || "");
-    },[entry])
+        setCurrentContent(initialEntry.content || "");
+    },[initialEntry])
 
   return (
     <div onClick={()=>!expand && setExpand(!expand)} className={` ${expand ? " cursor-default" : "min-h-20 cursor-pointer"} transition-all relative bg-background-light rounded-md p-2`}>
@@ -23,11 +54,11 @@ export default function Entry({entry}: {entry: Entry}) {
         <div onClick={() => expand && setExpand(false)} className={`${!expand ? "top-[1.7em]" : "top-2 cursor-pointer"} ml-6 absolute transition-all grid grid-cols-5 w-full items-center gap-8`}>
             <div className="flex gap-2 truncate">
                 <span>Added</span>
-                <span>{entry.added}</span>
+                <span>{entry.added ? new Date(entry.added).toLocaleDateString() : ""}</span>
             </div>
             <div className="flex gap-2 truncate">
                 <span>Updated</span>
-                <span>{entry.updated}</span>
+                <span>{entry.updated ? new Date(entry.updated).toLocaleDateString() : ""}</span>
             </div>
             <div className="flex gap-2 truncate">
                 <span>Meeting</span>
@@ -35,8 +66,9 @@ export default function Entry({entry}: {entry: Entry}) {
             </div>
             <span className={`${!expand ? "opacity-100" : "opacity-0"} " truncate w-32`}>{currentContent}</span>
         </div>
-        <div className="absolute top-1 right-2">
-            <button onClick={() => setEditing(!editing)}>{currentContent !== entry.content ? "Save" : editing ? "Close" : "Edit"}</button>
+        <div className="absolute top-1 right-2 flex gap-5">
+            <button onClick={() => removeEntry()} className="flex gap-2 items-center hover:text-light-red"> <FaTrash /> Remove </button>
+            <button onClick={() => handleSave()} className="flex gap-2 items-center hover:text-light-blue" >< FaPen /> {currentContent !== initialEntry.content ? "Save" : editing ? "Close" : "Edit"}</button>
         </div>
         <textarea value={currentContent || ""} disabled={!editing} onChange={(e) => setCurrentContent(e.target.value)} className={`${expand ? "opacity-100 pointer-events-auto h-52 overflow-y-scroll" : "opacity-0 pointer-events-none h-0 overflow-y-hidden"} ${editing ? "ring-background-dark" : "ring-transparent"}  scrollthumb resize-none ring-2 transition-all rounded-md relative p-2 mt-8  bg-background-light text-white  w-full `}></textarea>
     </div>

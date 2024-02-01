@@ -56,24 +56,32 @@ struct UpdateQuery {
     crm_uuid: String,
     #[serde(rename(deserialize = "clientUuid"))]
     client_uuid: String,
-
+    id: i32
 }
-
 
 #[put("")]
 async fn edit_entry(data: web::Data<AppState>, body: web::Json<UpdateRequestBody>, query: web::Query<UpdateQuery>) -> impl Responder {
-    let entry: Entry = Entry::new(&body.content, Uuid::parse_str(&query.client_uuid).unwrap_or_default(), match &body.added_at_meeting { Some(str_uuid) => Some(Uuid::parse_str(&str_uuid).unwrap_or_default()), None => None});
+    let mut entry: Entry = Entry::new(&body.content, Uuid::parse_str(&query.client_uuid).unwrap_or_default(), match &body.added_at_meeting { Some(str_uuid) => Some(Uuid::parse_str(&str_uuid).unwrap_or_default()), None => None});
+    entry.id = query.id.clone();
     match entry.update(Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), &data).await {
             Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
             Ok(_) => HttpResponse::Ok().json(Response::<String>::ok("Successfully updated entry", None))
         }
 }
 
+#[derive(Serialize, Deserialize)]
+struct AllRequestQuery {
+    #[serde(rename(deserialize = "crmUuid"))]
+    crm_uuid: String,
+    #[serde(rename(deserialize = "clientUuid"))]
+    client_uuid: String,
+}
+
 #[get("/all")]
-async fn get_all_by_client_uuid(data: web::Data<AppState>, query: web::Query<UpdateQuery>) -> impl Responder {
+async fn get_all_by_client_uuid(data: web::Data<AppState>, query: web::Query<AllRequestQuery>) -> impl Responder {
     match Entry::get_all_by_client_uuid(&Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), &Uuid::parse_str(&query.client_uuid).unwrap_or_default(), &data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
-        Ok(entries) => HttpResponse::Ok().json(Response::ok("Successfully updated entry", Some(entries)))
+        Ok(entries) => HttpResponse::Ok().json(Response::ok("Successfully fetched entries", Some(entries)))
     }
 }
 

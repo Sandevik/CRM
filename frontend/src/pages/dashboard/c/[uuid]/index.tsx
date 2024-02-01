@@ -11,10 +11,14 @@ export default function index() {
         <Navbar />
         <div>
           Some statistics?
+          <br />
           Some info?  
-
+          <br />
           num of meetings today
+          <br />
           things todo from different clients
+          <br />
+          wishlist for functions that customers want (votable) and status for wishlist votes
         </div>
 
       </main>

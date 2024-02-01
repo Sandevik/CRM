@@ -51,13 +51,14 @@ Deletes a specific meeting
 
 
 ## /entries
-###     /entries?crmUuid={crm_uuid}&clientUuid={client_uuid} | PUT | JSON: content (string), addedAtMeeting (string | null)
+###     /entries?crmUuid={crm_uuid}&clientUuid={client_uuid}&id={entry_id} | PUT | JSON: content (string), addedAtMeeting (string | null)
 Updates an entry
 ###     /entries/create | POST | JSON: crmUuid (string), clientUuid (string), content (string), addedAtMeeting (string | null)
 Creates a new entry for a specific client
 ###     /entries/all?crmUuid={crm_uuid}&clientUuid={client_uuid} | GET, Secured by ownership
 gets all entries for a specific client
 ###     /entries?crmUuid={crm_uuid}&id={entry_id} | DELETE, Secured by ownership
+removes a specific entry by its id
 
 
 

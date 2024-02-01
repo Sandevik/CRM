@@ -62,11 +62,12 @@ impl Entry {
     }
 
     pub async fn update(&self, crm_uuid: Uuid, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
-        match sqlx::query(&format!("UPDATE `crm`.`{}-entries` SET `content` = ?, `added_at_meeting` = ?, `updated` = ? WHERE `client_uuid` = ?", crm_uuid.hyphenated().to_string()))
+        match sqlx::query(&format!("UPDATE `crm`.`{}-entries` SET `content` = ?, `added_at_meeting` = ?, `updated` = ? WHERE `client_uuid` = ? AND `id` = ?", crm_uuid.hyphenated().to_string()))
             .bind(&self.content)
             .bind(&self.added_at_meeting)
             .bind(Utc::now())
             .bind(&self.client_uuid.hyphenated().to_string())
+            .bind(&self.id )
             .execute(&data.pool)
             .await {
                 Err(err) => Err(err),

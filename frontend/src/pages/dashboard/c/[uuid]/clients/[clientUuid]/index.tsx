@@ -10,6 +10,8 @@ import EditClient from './EditClient';
 import Entries from './Entries';
 import Button from '@/components/Button';
 import QuickInfo from './QuickInfo';
+import request from '@/utils/request';
+import NewEntryForm from './NewEntryForm';
 
 
 export default function index() {
@@ -17,7 +19,8 @@ export default function index() {
   const {crm} = useContext(CurrentCrmContext);
   const [client, setClient] = useState<Client | null>(null);
   const [edit, setEdit] = useState<boolean>(false);
-
+  const [entries, setEntries] = useState<Entry[]>([]);
+  const [newEntryActive, setNewEntryActive] = useState<boolean>(false);
   const [currentView, setCurrentView] = useState<"quick" | "entries" | "meetings">("quick");
 
   useEffect(()=>{
@@ -29,8 +32,23 @@ export default function index() {
     })();
   },[crm, params])
 
+  useEffect(()=>{
+    (async () => {
+      await fetchEntries()
+    })();
+  },[client])
 
-    return (
+  const fetchEntries = async () => {
+    if (crm?.crmUuid && client) {
+      let res = await request<Entry[]>(`/entries/all?crmUuid=${crm?.crmUuid}&clientUuid=${client?.uuid}`, {}, "GET");
+      if (res.code === 200 && res.data) {
+        setEntries(res.data);
+      }
+
+    }
+  }
+
+  return (
       <div className='relative p-4'>
         <Navbar />
         <Link href={`/dashboard/c/${crm?.crmUuid}/clients`} className="flex gap-2 items-center text-lg bg-light-blue hover:bg-greenish transition-colors absolute top-[4.2em] px-2 text-black rounded-md"><FaChevronLeft /> <div>Clients</div> </Link>
@@ -46,13 +64,13 @@ export default function index() {
               </ul>
             </nav>
 
-            <Button className='absolute top-0 right-0'>New Entry</Button>
+            {currentView === "entries" && <Button onClick={() => setNewEntryActive(true)} className='absolute top-0 right-0'>New Entry</Button>}
 
             <div className="mt-3">
             {currentView === "quick" ?
               <QuickInfo />
               : currentView === "entries" ?
-              <Entries />
+              <Entries refetchEntries={fetchEntries} entries={entries} client={client} />
               : 
               <div>meetings</div>
             }
@@ -60,6 +78,7 @@ export default function index() {
 
           </div>
         </main>
+        <NewEntryForm active={newEntryActive} refetchEntries={fetchEntries} close={() => setNewEntryActive(false)} client={client}/>
         <EditClient initialClient={client} active={edit} onSuccessfulSubmit={() => {}} setEdit={setEdit}/>
       </div>
     )
