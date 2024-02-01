@@ -66,7 +66,7 @@ export default function Entry({entry, client, refetchEntries}: {entry: Entry, cl
             </div>
             <span className={`${!expand ? "opacity-100" : "opacity-0"} " truncate w-32`}>{currentContent}</span>
         </div>
-        <div className="absolute top-1 right-2 flex gap-5">
+        <div className={`absolute right-2 flex gap-5 ${!expand ? "top-[1.7em]" : "top-2 cursor-pointer"}`}>
             <button onClick={() => removeEntry()} className="flex gap-2 items-center hover:text-light-red"> <FaTrash /> Remove </button>
             <button onClick={() => handleSave()} className="flex gap-2 items-center hover:text-light-blue" >< FaPen /> {currentContent !== initialEntry.content ? "Save" : editing ? "Close" : "Edit"}</button>
         </div>
