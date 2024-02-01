@@ -86,6 +86,16 @@ impl Entry {
             }
     }
 
+    pub async fn delete_by_id(id: i32, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+        match sqlx::query(&format!("DELETE FROM `{}-entries` WHERE `id` = ?", crm_uuid.hyphenated().to_string()))
+            .bind(id)
+            .execute(&data.pool)
+            .await {
+                Err(err) => Err(err),
+                Ok(_) => Ok(())
+            }
+    }
+
 
 
 }

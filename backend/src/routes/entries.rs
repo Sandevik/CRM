@@ -1,5 +1,5 @@
 use actix_http::body::{BoxBody, EitherBody};
-use actix_web::{dev::{ServiceFactory, ServiceRequest, ServiceResponse}, get, post, put, web, Error, HttpResponse, Responder, Scope};
+use actix_web::{delete, dev::{ServiceFactory, ServiceRequest, ServiceResponse}, get, post, put, web, Error, HttpResponse, Responder, Scope};
 use actix_web_httpauth::middleware::HttpAuthentication;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -15,7 +15,8 @@ pub fn entries() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Respo
         .wrap(owns_or_admin_middleware)
         .service(create_entry)
         .service(edit_entry)
-        .service(get_all_by_client_uuid);
+        .service(get_all_by_client_uuid)
+        .service(delete_entry);
         
     scope
 }
@@ -73,5 +74,22 @@ async fn get_all_by_client_uuid(data: web::Data<AppState>, query: web::Query<Upd
     match Entry::get_all_by_client_uuid(&Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), &Uuid::parse_str(&query.client_uuid).unwrap_or_default(), &data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
         Ok(entries) => HttpResponse::Ok().json(Response::ok("Successfully updated entry", Some(entries)))
+    }
+}
+
+
+#[derive(Serialize, Deserialize)]
+struct DeleteRequest {
+    id: i32,
+    #[serde(rename(deserialize = "crmUuid"))]
+    crm_uuid: String
+
+}
+
+#[delete("")]
+async fn delete_entry(data: web::Data<AppState>, query: web::Query<DeleteRequest>) -> impl Responder {
+    match Entry::delete_by_id(query.id.clone(), &Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), &data).await {
+        Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
+        Ok(_) => HttpResponse::Ok().json(Response::<String>::ok("Successfully deleted entry", None))
     }
 }
