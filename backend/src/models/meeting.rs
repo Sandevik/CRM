@@ -142,7 +142,16 @@ impl Meeting {
             }
     }
 
-
+    pub async fn delete_all_by_user_uuid(client_uuid: &Uuid, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+        let query = format!("DELETE FROM `crm`.`{}-meetings` WHERE `client_uuid` = ?", crm_uuid.hyphenated().to_string());
+        match sqlx::query(&query)
+            .bind(client_uuid.hyphenated().to_string())
+            .execute(&data.pool)
+            .await {
+                Err(err) => Err(err),
+                Ok(_) => Ok(())
+            }
+    }
 
 
 }

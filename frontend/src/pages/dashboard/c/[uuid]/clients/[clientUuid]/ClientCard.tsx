@@ -1,11 +1,25 @@
 import Button from '@/components/Button';
+import { CurrentCrmContext } from '@/context/CurrentCrmContext';
+import request from '@/utils/request';
 import Link from 'next/link';
-import React from 'react'
+import { useRouter } from 'next/router';
+import React, { useContext } from 'react'
 import { FaUser } from "react-icons/fa";
 
 
 export default function ClientCard({client, edit, setEdit}: {client: Client | null, edit: boolean, setEdit: React.Dispatch<React.SetStateAction<boolean>>}) {
-  return (
+    const {crm} = useContext(CurrentCrmContext);
+    const router = useRouter();
+    const deleteClient = async () => {
+        if (crm?.crmUuid && client?.uuid) {
+            const res = await request(`/clients?crmUuid=${crm?.crmUuid}&uuid=${client?.uuid}`, {}, "DELETE");
+            if (res.code === 200) {
+                router.push(`/dashboard/c/${crm.crmUuid}/clients`);
+            }
+        }
+    }
+  
+    return (
     <div className="w-[30em] h-full bg-background-dark p-2 rounded-md flex flex-col justify-between">
         
         <div className="flex flex-col h-[20%] mt-10">
@@ -41,7 +55,7 @@ export default function ClientCard({client, edit, setEdit}: {client: Client | nu
 
         <div className="flex-1 justify-center gap-6 flex py-2 items-end">
             <Button onClick={() => setEdit(!edit)}>{edit ? "Close" : "Edit"}</Button>
-            <Button>Delete</Button>
+            <Button onClick={() => deleteClient()}>Delete</Button>
         </div>
 
     </div>

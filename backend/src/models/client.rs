@@ -6,7 +6,7 @@ use uuid::Uuid;
 
 use crate::{AppState, routes::Limit};
 
-use super::Model;
+use super::{entry::Entry, meeting::Meeting, Model};
 
 #[derive(Serialize, Deserialize)]
 
@@ -199,8 +199,28 @@ impl Client {
                 .await {
                     Err(err) => Err(err),
                     Ok(_) => Ok(())
+                }   
+    }
+
+    pub async fn delete_client(client_uuid: &Uuid, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+        //Remve Entries, Meetings, and then client
+        match Entry::delete_all_by_user_uuid(crm_uuid, &client_uuid, data).await {
+            Err(err) => Err(err),
+            Ok(_) => {
+                match Meeting::delete_all_by_user_uuid(&client_uuid, crm_uuid, data).await {
+                    Err(err) => Err(err),
+                    Ok(_) => {
+                        match sqlx::query(&format!("DELETE FROM `crm` . `{}-clients` WHERE `uuid` = ?", crm_uuid.hyphenated().to_string()))
+                            .bind(&client_uuid.hyphenated().to_string())
+                            .execute(&data.pool)
+                            .await {
+                                Err(err) => Err(err),
+                                Ok(_) => Ok(())
+                            }
+                    }
                 }
-        
+            }
+        }
     }
 
 

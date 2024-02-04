@@ -1,4 +1,4 @@
-use actix_web::{body::{EitherBody, BoxBody}, dev::{ServiceFactory, ServiceRequest, ServiceResponse}, get, post, put, web, Error, HttpResponse, Responder, Scope};
+use actix_web::{body::{EitherBody, BoxBody}, delete, dev::{ServiceFactory, ServiceRequest, ServiceResponse}, get, post, put, web, Error, HttpResponse, Responder, Scope};
 use actix_web_httpauth::middleware::HttpAuthentication;
 use chrono::{NaiveDate, Utc};
 use serde::{Serialize, Deserialize};
@@ -17,7 +17,8 @@ pub fn clients() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Respo
         .service(create_client)
         .service(get_all)
         .service(search)
-        .service(update_client);
+        .service(update_client)
+        .service(delete_client);
         
     scope
 }
@@ -155,4 +156,19 @@ async fn update_client(data: web::Data<AppState>, body: web::Json<UpdateRequest>
             Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
             Ok(_) => HttpResponse::Ok().json(Response::<String>::ok("Successfully updated client", None))
         }
+}
+
+#[derive(Deserialize)]
+struct DeleteRequest {
+    uuid: String,
+    #[serde(rename(deserialize = "crmUuid"))]
+    crm_uuid: String,
+}
+
+#[delete("")]
+async fn delete_client(data: web::Data<AppState>, query: web::Query<DeleteRequest>) -> impl Responder {
+    match Client::delete_client(&Uuid::parse_str(&query.uuid).unwrap_or_default(), &Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), &data).await {
+        Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
+        Ok(_) => HttpResponse::Ok().json(Response::<String>::ok("Successfully deleted client", None))
+    }
 }
