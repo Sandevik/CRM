@@ -96,7 +96,7 @@ impl Client {
 
     pub async fn search(crm_uuid: &Uuid, q: &str, limit: Limit, data: &web::Data<AppState>) -> Result<Vec<Self>, sqlx::Error> {
         let mut clients: Vec<Client> = Vec::new();
-        let mut query = format!("SELECT * FROM `crm`.`{}-clients` WHERE `first_name` LIKE ? OR `last_name` LIKE ? OR `email` LIKE ?", crm_uuid);
+        let mut query = format!("SELECT * FROM `crm`.`{}-clients` WHERE `first_name` LIKE ? OR `last_name` LIKE ? OR `email` LIKE ? OR `phone_number` LIKE ? OR `city` LIKE ?", crm_uuid);
         //todo: create limits on how many clients a person can get
         match limit {
             Limit::None => (),
@@ -105,6 +105,8 @@ impl Client {
         let parsed_q: String = format!("%{}%",q);
 
         let res = sqlx::query(&query)
+            .bind(&parsed_q)
+            .bind(&parsed_q)
             .bind(&parsed_q)
             .bind(&parsed_q)
             .bind(&parsed_q)

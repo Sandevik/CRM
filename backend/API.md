@@ -49,7 +49,8 @@ Creates a new meeting in a crm system with a specific client
 Gets a specific meeting
 ###     /meetings?crmUuid={crm_uuid}&uuid={meeting.uuid} | DELETE, Secured by ownership
 Deletes a specific meeting
-
+###     /meetings/by-client?crmUuid={crm_uuid}&clientUuid={client_uuid} | GET, Secured by ownership
+Gets all meetings of a certain client
 
 ## /entries
 ###     /entries?crmUuid={crm_uuid}&clientUuid={client_uuid}&id={entry_id} | PUT | JSON: content (string), addedAtMeeting (string | null)

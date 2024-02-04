@@ -12,6 +12,8 @@ import Button from '@/components/Button';
 import QuickInfo from './QuickInfo';
 import request from '@/utils/request';
 import NewEntryForm from './NewEntryForm';
+import Meetings from './Meetings';
+import AddMeeting from '@/components/AddMeeting';
 
 
 export default function index() {
@@ -20,7 +22,9 @@ export default function index() {
   const [client, setClient] = useState<Client | null>(null);
   const [edit, setEdit] = useState<boolean>(false);
   const [entries, setEntries] = useState<Entry[]>([]);
+  const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [newEntryActive, setNewEntryActive] = useState<boolean>(false);
+  const [newMeetingActive, setNewMeetingActive] = useState<boolean>(false);
   const [currentView, setCurrentView] = useState<"quick" | "entries" | "meetings">("quick");
 
   useEffect(()=>{
@@ -32,6 +36,7 @@ export default function index() {
   useEffect(()=>{
     (async () => {
       await fetchEntries()
+      await fetchMeetings()
     })();
   },[client])
 
@@ -48,9 +53,21 @@ export default function index() {
       if (res.code === 200 && res.data) {
         setEntries(res.data);
       }
-
     }
   }
+  const fetchMeetings = async () => {
+    if (crm?.crmUuid && client) {
+      let res = await request<Meeting[]>(`/meetings/by-client?crmUuid=${crm?.crmUuid}&clientUuid=${client?.uuid}`, {}, "GET");
+      if (res.code === 200 && res.data) {
+        setMeetings(res.data);
+      }
+    }
+  }
+
+  useEffect(()=>{
+    setNewEntryActive(false);
+    setNewMeetingActive(false);
+  },[currentView])
 
   return (
       <div className='relative p-4'>
@@ -68,7 +85,12 @@ export default function index() {
               </ul>
             </nav>
 
-            {currentView === "entries" && <Button onClick={() => setNewEntryActive(true)} className='absolute top-0 right-0'>New Entry</Button>}
+            {currentView === "entries" ? 
+              <Button onClick={() => setNewEntryActive(true)} className='absolute top-0 right-0'>New Entry</Button>
+              : currentView === "meetings" ?
+              <Button onClick={() => setNewMeetingActive(true)} className='absolute top-0 right-0'>New Meeting</Button>
+              : ""
+            }
 
             <div className="mt-3">
             {currentView === "quick" ?
@@ -76,12 +98,15 @@ export default function index() {
               : currentView === "entries" ?
               <Entries refetchEntries={fetchEntries} entries={entries} client={client} />
               : 
-              <div>meetings</div>
+              <Meetings meetings={meetings}/>
             }
             </div>
 
           </div>
         </main>
+        <div className='absolute bottom-0 right-[15dvh]'>
+          <AddMeeting closePopup={() => setNewMeetingActive(false)} active={newMeetingActive} onSuccessfulSubmit={fetchMeetings} withClientUuid={client?.uuid} />
+        </div>
         <NewEntryForm active={newEntryActive} refetchEntries={fetchEntries} close={() => setNewEntryActive(false)} client={client}/>
         <EditClient initialClient={client} active={edit} _setClient={setClient} setEdit={setEdit}/>
       </div>

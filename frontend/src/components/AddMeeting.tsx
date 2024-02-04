@@ -7,9 +7,19 @@ import { CurrentCrmContext } from '@/context/CurrentCrmContext';
 
 type NewMeeting = Omit<Meeting, "added" | "updated" | "uuid" | "entryId">;
 
-export default function AddMeeting({closePopup, active, onSuccessfulSubmit}: {closePopup: () => void, active: boolean, onSuccessfulSubmit: () => void}) {
+interface BaseProps {
+    closePopup: () => void, 
+    active: boolean, 
+    onSuccessfulSubmit: () => void, 
+    withClientUuid?: string
+}
+
+
+
+
+export default function AddMeeting({closePopup, active, onSuccessfulSubmit, withClientUuid}: BaseProps) {
     const {crm} = useContext(CurrentCrmContext);
-    const [meeting, setMeeting] = useState<NewMeeting>({clientUuid: "", from: "", to: ""})
+    const [meeting, setMeeting] = useState<NewMeeting>({clientUuid: withClientUuid || "", from: "", to: ""})
 
 
     const createMeeting = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -18,7 +28,7 @@ export default function AddMeeting({closePopup, active, onSuccessfulSubmit}: {cl
         const to = new Date(meeting.to);
         if (crm?.crmUuid) {
             const res = await request("/meetings/create", {
-                ...meeting,
+                clientUuid: withClientUuid || meeting.clientUuid,
                 crmUuid: crm?.crmUuid,
                 from: from.getTime(),
                 to: to.getTime(),
@@ -31,7 +41,7 @@ export default function AddMeeting({closePopup, active, onSuccessfulSubmit}: {cl
     }
   
     return (
-    <form className={`absolute bottom-3 left-[50%] translate-x-[-47%] w-[85%] z-20 rounded-md bg-background-light p-4 ${active ? "pointer-events-auto opacity-100 translate-y-0" : "pointer-events-none opacity-0 translate-y-12"} transition-all`}>
+    <form className={`absolute bottom-3 left-[50%] translate-x-[-50%] w-[300px] z-20 rounded-md bg-background-light bg-opacity- p-4 ${active ? "pointer-events-auto opacity-100 translate-y-0" : "pointer-events-none opacity-0 translate-y-12"} transition-all`}>
         <IoClose className="absolute top-2 right-2 text-4xl text-gray-400 cursor-pointer" onClick={() => closePopup()}/>
         <div className="flex flex-col gap-4 mt-6">
             <div className="flex flex-col">
@@ -44,10 +54,10 @@ export default function AddMeeting({closePopup, active, onSuccessfulSubmit}: {cl
                 <Input type="datetime-local" name="to" value={meeting.to} onChange={(e) => setMeeting({...meeting, to: e.target.value})}/>
             </div>
 
-            <div className="flex flex-col">
+            {!withClientUuid && <div className="flex flex-col">
                 <label htmlFor="clientUuid">Client uuid</label>
                 <Input type="text" name="clientUuid" placeholder='dc586882-5a1c-4f35-b4d4-08c695427090' value={meeting.clientUuid} onChange={(e) => setMeeting({...meeting, clientUuid: e.target.value})}/>
-            </div>
+            </div>}
 
             <Button type='submit' className='mt-4' onClick={(e) => createMeeting(e)}>Create</Button>
         </div>

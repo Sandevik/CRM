@@ -153,6 +153,47 @@ impl Meeting {
             }
     }
 
+    pub async fn get_all_by_client_uuid(client_uuid: &Uuid, crm_uuid: &Uuid, meeting_option: MeetingsOption, limit: Limit, data: &web::Data<AppState>) -> Result<Vec<Self>, sqlx::Error> {
+        let mut query = format!("SELECT * FROM `crm` . `{}-meetings` WHERE `client_uuid` = ? ORDER BY `from` DESC", crm_uuid.hyphenated().to_string());
+        match meeting_option {
+            MeetingsOption::All => (),
+            MeetingsOption::Future => query.push_str("WHERE `from` >= ? ORDER BY `from` ASC"),
+            MeetingsOption::Past => query.push_str("WHERE `to` <= ? ORDER BY `from` DESC"),
+            MeetingsOption::ThisMonth => {
+                let year = Utc::now().year();
+                let month = Utc::now().month();
+                let days = get_days_from_month(year, month);
+                let mut start_date: String = NaiveDate::from_ymd_opt(year, month, 1).unwrap().to_string();
+                start_date.push_str("T00:00:00Z");
+                let mut end_date = NaiveDate::from_ymd_opt(year, month, days as u32).unwrap().to_string();
+                end_date.push_str("T23:59:59Z");
+                query.push_str(format!(r#"WHERE `from` >= "{start_date}" AND `to` <= "{end_date}""#).as_str())
+            },
+            MeetingsOption::ByYearAndMonth((year, month)) => {
+                let days = get_days_from_month(year, month.into());
+                let mut start_date: String = NaiveDate::from_ymd_opt(year, month.into(), 1).unwrap().to_string();
+                start_date.push_str("T00:00:00Z");
+                let mut end_date = NaiveDate::from_ymd_opt(year, month.into(), days as u32).unwrap().to_string();
+                end_date.push_str("T23:59:59Z");
+                query.push_str(format!(r#"WHERE `from` >= "{start_date}" AND `to` <= "{end_date}""#).as_str())
+            }
+        }
+
+        match limit {
+            Limit::None => (),
+            Limit::Some(limit) => query.push_str(format!(" LIMIT {}", limit).as_str()),
+        }
+        
+        match sqlx::query(&query)
+            .bind(client_uuid.hyphenated().to_string())
+            .fetch_all(&data.pool)
+            .await {
+                Err(err) => Err(err),
+                Ok(rows) => Ok(rows.iter().map(|row| Self::from_row(row)).collect())
+            }
+
+
+    }
 
 }
 
