@@ -1,9 +1,9 @@
-use actix_web::{Scope, dev::{ServiceFactory, ServiceRequest, ServiceResponse}, body::{EitherBody, BoxBody}, Error, web, Responder, HttpResponse, get, post};
+use actix_web::{body::{EitherBody, BoxBody}, dev::{ServiceFactory, ServiceRequest, ServiceResponse}, get, post, put, web, Error, HttpResponse, Responder, Scope};
 use actix_web_httpauth::middleware::HttpAuthentication;
-use chrono::NaiveDate;
+use chrono::{NaiveDate, Utc};
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
-use crate::routes::Response;
+use crate::{middleware::owns_or_admin_middleware::RequiresUuid, routes::Response};
 use crate::{middleware::owns_or_admin_middleware::validator, AppState, models::client::Client};
 
 use super::Limit;
@@ -16,7 +16,8 @@ pub fn clients() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Respo
         .service(by_uuid)
         .service(create_client)
         .service(get_all)
-        .service(search);
+        .service(search)
+        .service(update_client);
         
     scope
 }
@@ -106,4 +107,52 @@ async fn create_client(data: web::Data<AppState>, body: web::Json<CreateClientRe
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
         Ok(_) => HttpResponse::Created().json(Response::<String>::created("Successfully created client"))
     }
+}
+
+#[derive(Deserialize)]
+
+struct UpdateRequest {
+    uuid: String,
+    #[serde(rename(serialize = "firstName", deserialize = "firstName"))]
+    first_name: Option<String>,
+    #[serde(rename(serialize = "lastName", deserialize = "lastName"))]
+    last_name: Option<String>,
+    #[serde(rename(serialize = "dateOfBirth", deserialize = "dateOfBirth"))]
+    date_of_birth: Option<NaiveDate>,
+    email: String,
+    address: Option<String>,
+    #[serde(rename(serialize = "zipCode", deserialize = "zipCode"))]
+    zip_code: Option<String>,
+    city: Option<String>,
+    country: Option<String>,
+    company: Option<String>,
+    #[serde(rename(serialize = "phoneNumber", deserialize = "phoneNumber"))]
+    phone_number: Option<String>,
+    #[serde(rename(serialize = "newsLetter", deserialize = "newsLetter"))]
+    news_letter: bool,
+}
+
+#[put("")]
+async fn update_client(data: web::Data<AppState>, body: web::Json<UpdateRequest>, query: web::Query<RequiresUuid>) -> impl Responder {
+    let client: Client = Client {
+        uuid: Uuid::parse_str(&body.uuid).unwrap_or_default(),
+        first_name: body.first_name.clone(),
+        last_name: body.last_name.clone(),
+        date_of_birth: body.date_of_birth.clone(),
+        email: body.email.clone(),
+        address: body.address.clone(),
+        zip_code: body.zip_code.clone(),
+        city: body.city.clone(),
+        country: body.country.clone(),
+        company: body.company.clone(),
+        phone_number: body.phone_number.clone(),
+        news_letter: body.news_letter,
+        added: Utc::now(),
+        updated: Utc::now()
+    };
+    
+    match client.update(&Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), &data).await {
+            Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
+            Ok(_) => HttpResponse::Ok().json(Response::<String>::ok("Successfully updated client", None))
+        }
 }

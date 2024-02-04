@@ -31,7 +31,7 @@ creates a new crm
 gets a specific client with the client uuid
 ###     /clients/create | POST | JSON: crmUUid (string), firstName (string), lastName (string), dateOfBirth (string), email (string), address (string), zipCode (string), city (string), country (string), company (string), phoneNumber (string), newsLetter (string)
 creates a new client on a certain crm
-
+##      /clients?crmUuid={crm_uuid} | PUT | JSON: uuid (string), firstName (string), lastName (string), dateOfBirth (string), email (string), address (string), zipCode (string), city (string), country (string), company (string), phoneNumber (string), newsLetter (string)
 
 
 

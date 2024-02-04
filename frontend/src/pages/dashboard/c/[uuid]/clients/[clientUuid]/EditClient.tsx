@@ -1,10 +1,11 @@
 import Button from '@/components/Button'
 import Input from '@/components/Input'
 import { CurrentCrmContext } from '@/context/CurrentCrmContext';
+import request from '@/utils/request';
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { FaCircleChevronDown } from "react-icons/fa6";
 
-export default function EditClient({active, setEdit, onSuccessfulSubmit, initialClient}: {initialClient: Client | null, active: boolean, onSuccessfulSubmit: () => void, setEdit: React.Dispatch<React.SetStateAction<boolean>>}) {
+export default function EditClient({active, setEdit, _setClient, initialClient}: {initialClient: Client | null, active: boolean, _setClient: React.Dispatch<React.SetStateAction<Client | null>>, setEdit: React.Dispatch<React.SetStateAction<boolean>>}) {
     const {crm} = useContext(CurrentCrmContext);
     const [client, setClient] = useState<Client>(initialClient || {
         firstName: null,
@@ -54,7 +55,11 @@ export default function EditClient({active, setEdit, onSuccessfulSubmit, initial
     const submit = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();
         if (crm?.crmUuid) {
-            
+            let res = await request(`/clients?crmUuid=${crm.crmUuid}`, client, "PUT");
+            if (res.code === 200) {
+                setEdit(false);
+                _setClient(client);
+            }
         }
     }
   

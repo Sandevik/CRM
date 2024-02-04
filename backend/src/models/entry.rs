@@ -97,6 +97,15 @@ impl Entry {
             }
     }
 
+    pub async fn delete_all_by_user_uuid(crm_uuid: &Uuid, client_uuid: &Uuid, data: web::Data<AppState>) -> Result<(), sqlx::Error> {
+        match sqlx::query(&format!("DELETE FROM `{}-entries` WHERE `client_uuid` = ?", crm_uuid.hyphenated().to_string()))
+            .bind(client_uuid.hyphenated().to_string())
+            .execute(&data.pool)
+            .await {
+                Err(err) => Err(err),
+                Ok(_) => Ok(())
+            }
+    }
 
 
 }

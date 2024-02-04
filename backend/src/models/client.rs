@@ -56,25 +56,6 @@ impl Model for Client {
 
 impl Client {
 
-    pub fn default() -> Self {
-        Client {
-            uuid: Uuid::new_v4(),
-            first_name: None,
-            last_name: None,
-            date_of_birth: None,
-            email: "".to_string(),
-            address: None,
-            zip_code: None,
-            city: None,
-            country: None,
-            company: None,
-            phone_number: None,
-            news_letter: false,
-            added: Utc::now(),
-            updated: Utc::now(),
-        }
-    }
-
     pub fn new(first_name: Option<String>, last_name: Option<String>, date_of_birth: Option<NaiveDate>, email: String, address: Option<String>, zip_code: Option<String>, city: Option<String>, country: Option<String>, company: Option<String>, phone_number: Option<String>, news_letter: bool) -> Self {
         Client {
             uuid: Uuid::new_v4(),
@@ -199,6 +180,28 @@ impl Client {
             }
     }
 
+    pub async fn update(&self, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+            match sqlx::query(&format!("UPDATE `crm`.`{}-clients` SET `first_name` = ?, `last_name` = ?, `date_of_birth` = ?, `email` = ?, `address` = ?, `zip_code` = ?, `city` = ?, `country` = ?, `company` = ?, `phone_number` = ?, `news_letter` = ?, `updated` = ? WHERE `uuid` = ?", crm_uuid.hyphenated().to_string()))
+                .bind(&self.first_name)
+                .bind(&self.last_name)
+                .bind(&self.date_of_birth)
+                .bind(&self.email)
+                .bind(&self.address)
+                .bind(&self.zip_code)
+                .bind(&self.city)
+                .bind(&self.country)
+                .bind(&self.company)
+                .bind(&self.phone_number)
+                .bind(&self.news_letter)
+                .bind(Utc::now())
+                .bind(&self.uuid.hyphenated().to_string())
+                .execute(&data.pool)
+                .await {
+                    Err(err) => Err(err),
+                    Ok(_) => Ok(())
+                }
+        
+    }
 
 
 

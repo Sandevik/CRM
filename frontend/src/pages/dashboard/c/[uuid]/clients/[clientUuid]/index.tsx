@@ -25,10 +25,7 @@ export default function index() {
 
   useEffect(()=>{
     (async () => {
-      if (crm?.crmUuid && params?.clientUuid) {
-        const client = await fetchClientDetails(crm?.crmUuid, params?.clientUuid as string);
-        setClient(client)
-      }
+      await fetchClient();
     })();
   },[crm, params])
 
@@ -37,6 +34,13 @@ export default function index() {
       await fetchEntries()
     })();
   },[client])
+
+  const fetchClient = async () => {
+    if (crm?.crmUuid && params?.clientUuid) {
+      const client = await fetchClientDetails(crm?.crmUuid, params?.clientUuid as string);
+      setClient(client)
+    }
+  }
 
   const fetchEntries = async () => {
     if (crm?.crmUuid && client) {
@@ -79,7 +83,7 @@ export default function index() {
           </div>
         </main>
         <NewEntryForm active={newEntryActive} refetchEntries={fetchEntries} close={() => setNewEntryActive(false)} client={client}/>
-        <EditClient initialClient={client} active={edit} onSuccessfulSubmit={() => {}} setEdit={setEdit}/>
+        <EditClient initialClient={client} active={edit} _setClient={setClient} setEdit={setEdit}/>
       </div>
     )
 }
