@@ -14,7 +14,9 @@ interface BaseProps {
     withClientUuid?: string
 }
 
-
+const calcDateWithTimezoneOffset = (date: Date): Date => {
+    return new Date(date.getTime() - (new Date().getTimezoneOffset() * 60 * 1000));
+}
 
 
 export default function AddMeeting({closePopup, active, onSuccessfulSubmit, withClientUuid}: BaseProps) {

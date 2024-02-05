@@ -51,6 +51,11 @@ Gets a specific meeting
 Deletes a specific meeting
 ###     /meetings/by-client?crmUuid={crm_uuid}&clientUuid={client_uuid} | GET, Secured by ownership
 Gets all meetings of a certain client
+###     /meetings?crmUuid={crm_uuid}&uuid={meeting_uuid} | PUT | JSON: from (number), to (number), clientUuid (string)
+Updates a meeting 
+
+
+
 
 ## /entries
 ###     /entries?crmUuid={crm_uuid}&clientUuid={client_uuid}&id={entry_id} | PUT | JSON: content (string), addedAtMeeting (string | null)

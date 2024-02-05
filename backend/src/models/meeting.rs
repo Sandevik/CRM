@@ -16,8 +16,8 @@ pub struct Meeting {
     pub client_uuid: Uuid,
     #[serde(rename(serialize = "entryId", deserialize = "entryId"))]
     pub entry_id: Option<i32>,
-    pub from: NaiveDateTime,
-    pub to: NaiveDateTime,
+    pub from: DateTime<Utc>,
+    pub to: DateTime<Utc>,
     pub added: DateTime<Utc>,
     pub updated: DateTime<Utc>,
 }
@@ -86,7 +86,7 @@ impl Meeting {
         Ok(meetings)
     }
 
-    pub fn new(from: NaiveDateTime, to: NaiveDateTime, client_uuid: &Uuid) -> Self {
+    pub fn new(from: DateTime<Utc>, to: DateTime<Utc>, client_uuid: &Uuid) -> Self {
         Meeting {
             uuid: Uuid::new_v4(),
             from,
@@ -195,10 +195,27 @@ impl Meeting {
 
     }
 
+    pub async fn update(&self, data: &web::Data<AppState>, crm_uuid: &Uuid) -> Result<(), sqlx::Error> {
+        let query = format!("UPDATE `crm`.`{}-meetings` SET `client_uuid` = ?, `from` = ?, `to` = ?, `updated` = ? WHERE `uuid` = ?", crm_uuid.hyphenated().to_string());
+        match sqlx::query(&query)
+        .bind(&self.client_uuid.hyphenated().to_string())
+        .bind(&self.from)
+        .bind(&self.to)
+        .bind(&self.updated)
+        .bind(&self.uuid.hyphenated().to_string())
+            .execute(&data.pool)
+            .await {
+                Err(err) => Err(err),
+                Ok(_) => Ok(())
+            }
+    }
+
+
+
 }
 
 
-pub fn get_days_from_month(year: i32, month: u32) -> i64 {
+pub fn get_days_from_month(year: i32, month: u32) -> u8 {
     NaiveDate::from_ymd_opt(
         match month {
             12 => year + 1,
@@ -211,5 +228,5 @@ pub fn get_days_from_month(year: i32, month: u32) -> i64 {
         1,
     ).unwrap()
     .signed_duration_since(NaiveDate::from_ymd_opt(year, month, 1).unwrap())
-    .num_days()
+    .num_days() as u8
 }

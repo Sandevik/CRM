@@ -14,6 +14,7 @@ import request from '@/utils/request';
 import NewEntryForm from './NewEntryForm';
 import Meetings from './Meetings';
 import AddMeeting from '@/components/AddMeeting';
+import EditMeeting from './EditMeeting';
 
 
 export default function index() {
@@ -26,6 +27,7 @@ export default function index() {
   const [newEntryActive, setNewEntryActive] = useState<boolean>(false);
   const [newMeetingActive, setNewMeetingActive] = useState<boolean>(false);
   const [currentView, setCurrentView] = useState<"quick" | "entries" | "meetings">("quick");
+  const [editMeeting, setEditMeeting] = useState<Meeting | null>(null);
 
   useEffect(()=>{
     (async () => {
@@ -67,6 +69,7 @@ export default function index() {
   useEffect(()=>{
     setNewEntryActive(false);
     setNewMeetingActive(false);
+    setEditMeeting(null);
   },[currentView])
 
   return (
@@ -98,7 +101,7 @@ export default function index() {
               : currentView === "entries" ?
               <Entries refetchEntries={fetchEntries} entries={entries} client={client} />
               : 
-              <Meetings meetings={meetings}/>
+              <Meetings refetchMeetings={fetchMeetings} setEditMeeting={setEditMeeting} meetings={meetings}/>
             }
             </div>
 
@@ -106,6 +109,7 @@ export default function index() {
         </main>
         <div className='absolute bottom-0 right-[15dvh]'>
           <AddMeeting closePopup={() => setNewMeetingActive(false)} active={newMeetingActive} onSuccessfulSubmit={fetchMeetings} withClientUuid={client?.uuid} />
+          <EditMeeting closePopup={() => setEditMeeting(null)} _meeting={editMeeting} onSuccessfulSubmit={fetchMeetings} />
         </div>
         <NewEntryForm active={newEntryActive} refetchEntries={fetchEntries} close={() => setNewEntryActive(false)} client={client}/>
         <EditClient initialClient={client} active={edit} _setClient={setClient} setEdit={setEdit}/>

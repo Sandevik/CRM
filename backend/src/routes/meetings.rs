@@ -1,6 +1,6 @@
-use actix_web::{Scope, dev::{ServiceFactory, ServiceRequest, ServiceResponse}, body::{EitherBody, BoxBody}, Error, web, get, Responder, HttpResponse, post, delete};
+use actix_web::{body::{EitherBody, BoxBody}, delete, dev::{ServiceFactory, ServiceRequest, ServiceResponse}, get, post, put, web, Error, HttpResponse, Responder, Scope};
 use actix_web_httpauth::middleware::HttpAuthentication;
-use chrono::{Datelike, NaiveDateTime};
+use chrono::{Datelike, NaiveDateTime, TimeZone, Utc};
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 
@@ -21,7 +21,8 @@ pub fn meetings() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Resp
         .service(upcoming_meetings)
         .service(read_meeting)
         .service(delete_meeting)
-        .service(get_by_client_uuid);
+        .service(get_by_client_uuid)
+        .service(update_meeting);
         
     scope
 }
@@ -94,8 +95,8 @@ struct CreateMeetingRequest {
 
 #[post("/create")]
 pub async fn create_meeting(data: web::Data<AppState>, body: web::Json<CreateMeetingRequest>) -> impl Responder {
-    let from = NaiveDateTime::from_timestamp_millis(body.from).expect("Could not convert milliseconds to date");
-    let to = NaiveDateTime::from_timestamp_millis(body.to).expect("Could not convert milliseconds to date");
+    let from = Utc.from_local_datetime(&NaiveDateTime::from_timestamp_millis(body.from).expect("Could not convert milliseconds to date")).unwrap();
+    let to = Utc.from_local_datetime(&NaiveDateTime::from_timestamp_millis(body.to).expect("Could not convert milliseconds to date")).unwrap();
     match Meeting::new(from, to, &Uuid::parse_str(&body.client_uuid.as_str()).unwrap_or_default()).insert(&data, &Uuid::parse_str(body.crm_uuid.as_str()).unwrap_or_default()).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
         Ok(_) => HttpResponse::Created().json(Response::<String>::created("Successfully created meeting"))
@@ -140,5 +141,39 @@ pub async fn get_by_client_uuid(data: web::Data<AppState>, query: web::Query<Mee
     match Meeting::get_all_by_client_uuid(&Uuid::parse_str(&query.client_uuid).unwrap_or_default(), &Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), MeetingsOption::All, Limit::Some(20), &data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
         Ok(meetings) => HttpResponse::Ok().json(Response::ok("Successfully fetched meetings", Some(meetings)))
+    }
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+struct UpdateMeetingRequest {
+    from: i64,
+    to: i64,
+    #[serde(rename(deserialize = "clientUuid"))]
+    client_uuid: String,
+}
+
+#[derive(Deserialize)]
+struct UpdateQuery {
+    #[serde(rename(deserialize = "crmUuid"))]
+    crm_uuid: String,
+    uuid: String,
+}
+
+
+#[put("")]
+async fn update_meeting(data: web::Data<AppState>, body: web::Json<UpdateMeetingRequest>, query: web::Query<UpdateQuery>) -> impl Responder {
+    let meeting = Meeting {
+        uuid: Uuid::parse_str(&query.uuid).unwrap_or_default(),
+        from: Utc.from_local_datetime(&NaiveDateTime::from_timestamp_millis(body.from).unwrap_or_default()).unwrap(),
+        to: Utc.from_local_datetime(&NaiveDateTime::from_timestamp_millis(body.to).unwrap_or_default()).unwrap(),
+        added: Utc::now(),
+        updated: Utc::now(),
+        client_uuid: Uuid::parse_str(&body.client_uuid).unwrap_or_default(),
+        entry_id: None
+    };
+
+    match meeting.update(&data, &Uuid::parse_str(&query.crm_uuid).unwrap_or_default()).await {
+        Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
+        Ok(_) => HttpResponse::Ok().json(Response::<String>::ok("Successfully updated meeting", None))
     }
 }
