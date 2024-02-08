@@ -41,7 +41,7 @@ removes a specific client
 ## /meetings
 ###     /meetings/this-month?uuid={crm_uuid} | GET, Secured by ownership
 gets all meetings this month
-###     /meetings?crmUuid={crm_uuid}&year={year}&month={month, 1-12} | GET, Secured by ownership, 
+###     /meetings/by-month?crmUuid={crm_uuid}&year={year}&month={month, 1-12} | GET, Secured by ownership, 
 returns all meetings based on year and month in query
 ###     /meetings/create | POST | JSON: crmUuid (string), from (string), to (string), clientUuid (string), Secured by ownership
 Creates a new meeting in a crm system with a specific client

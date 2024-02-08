@@ -5,13 +5,13 @@ import React, { useContext, useEffect, useState } from 'react'
 import CalendarPart from './CalendarPart';
 
 export interface MeetingWithDay {
-    meeting: Meeting,
+    meetings: Meeting[],
     day: number,
 }
 
 export default function Calendar() {
     const {crm} = useContext(CurrentCrmContext);
-    const currentDate = new Date();
+    const [currentDate] = useState<Date>(new Date());
     const [activeDate, setActiveDate] = useState<Date>(new Date());
     const [meetingsWithDays, setMeetingsWithDays] = useState<MeetingWithDay[]>([]);
 
@@ -24,12 +24,26 @@ export default function Calendar() {
         setActiveDate(new Date(activeDate.getMonth() == 0 ? activeDate.getFullYear() - 1 : activeDate.getFullYear(), activeDate.getMonth() === 0 ? 11 : activeDate.getMonth() - 1))
     }
 
-
     const getMeetings = async () => {
         if(crm?.crmUuid) {
-            const res = await request<MeetingWithDay[]>(`/meetings?crmUuid=${crm?.crmUuid}&year=${activeDate.getFullYear()}&month=${activeDate.getMonth()+1}`, {}, "GET")
+            const res = await request<{day: number, meeting: Meeting}[]>(`/meetings?crmUuid=${crm?.crmUuid}&year=${activeDate.getFullYear()}&month=${activeDate.getMonth()+1}`, {}, "GET")
             if (res.code === 200 && res.data) {
-                setMeetingsWithDays(res.data)
+                const finalArr: MeetingWithDay[] = []
+                const skipable: number[] = []
+                for(let i = 0; i < res.data.length; i++){
+                    if (!skipable?.includes(res.data[i].day)) skipable.push(res.data[i].day);
+                    const day = finalArr.find(d => d.day === res?.data[i].day);
+                    if (day){
+                        day.meetings.push(res.data[i].meeting);
+                    }else{
+                        finalArr.push({day: res.data[i].day, meetings: [res.data[i].meeting]});
+                    }
+                }
+                for(let i = 1; i < numDaysThisMonth(activeDate.getFullYear(), activeDate.getMonth() + 1); i++){
+                    if (skipable.includes(i)) continue;
+                    finalArr.push({day: i, meetings: []});
+                }
+                setMeetingsWithDays(finalArr.sort((a,b) => (a.day - b.day)))
             }
         }
     }
@@ -38,10 +52,6 @@ export default function Calendar() {
         getMeetings();
     },[activeDate, crm])
 
-
-    useEffect(()=>{console.log(meetingsWithDays)},[meetingsWithDays])
-
-    const arr = Array(numDaysThisMonth(activeDate.getFullYear(), activeDate.getMonth() + 1)).fill("");
 
   return (
     <div className='max-w-[1440px] m-auto p-4 flex flex-col gap-4'>
@@ -53,8 +63,8 @@ export default function Calendar() {
         </div>
 
         <ul className="grid grid-cols-auto-fill md:grid-cols-calendar gap-2 ">
-            {arr.map((_, i) => (
-                <CalendarPart key={i} i={i} meetings={meetingsWithDays.filter(mWD => mWD.day === i+1).map(mWD => mWD.meeting)} currentDate={currentDate} activeDate={activeDate} />
+            {meetingsWithDays.map((meetingWithDay) => (
+                <CalendarPart key={meetingWithDay.day} meetingWithDay={meetingWithDay} currentDate={currentDate} activeDate={activeDate} />
             ))}
         </ul>
     </div>

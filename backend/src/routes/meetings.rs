@@ -52,12 +52,13 @@ async fn meetings_this_month(data: web::Data<AppState>, query: web::Query<Requir
 struct ByYearAndMonthRequest{
     year: i32,
     month: u8,
-    uuid: String,
+    #[serde(rename(deserialize = "crmUuid"))]
+    crm_uuid: String,
 }
 
 #[get("")]
 async fn meetings_by_year_and_month(data: web::Data<AppState>, query: web::Query<ByYearAndMonthRequest>) -> impl Responder {
-    let crm_uuid = Uuid::parse_str(&query.uuid).unwrap_or_default();
+    let crm_uuid = Uuid::parse_str(&query.crm_uuid).unwrap_or_default();
     match Meeting::get_all(&crm_uuid, MeetingsOption::ByYearAndMonth((query.year, query.month)), Limit::None, &data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
         Ok(meetings) => {

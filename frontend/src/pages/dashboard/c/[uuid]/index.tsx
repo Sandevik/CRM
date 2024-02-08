@@ -6,7 +6,7 @@ export default function index() {
   
 
   return (
-    <div className='flex h-[calc(100dvh-3em)] p-4'>
+    <div className='flex h-[calc(100dvh-3em)] p-2'>
       <main className="flex-grow">
         <Navbar />
         <div>

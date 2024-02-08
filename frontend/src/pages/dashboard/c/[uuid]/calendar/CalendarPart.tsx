@@ -2,39 +2,40 @@ import React, { useContext, useEffect, useState } from 'react'
 import { MeetingWithDay } from './Calendar';
 import fetchClientDetails from '@/utils/fetchClientDetails';
 import { CurrentCrmContext } from '@/context/CurrentCrmContext';
+import ClientList from './ClientList';
 
-export default function CalendarPart({activeDate, meetings, i, currentDate}: {activeDate: Date, meetings: Meeting[], i: number, currentDate: Date}) {
+export default function CalendarPart({activeDate, meetingWithDay, currentDate}: {activeDate: Date, meetingWithDay: MeetingWithDay, currentDate: Date}) {
     
     const [clients, setClients] = useState<Client[]>([]);
     const {crm} = useContext(CurrentCrmContext);
 
-    useEffect(()=>{},[meetings])
-
-    
     useEffect(()=>{
-        (async () => {
-            const _clients: Client[] = [];
-            if (crm?.crmUuid) {
-                meetings.forEach(async (mWD) =>  {
-                    const cl = await fetchClientDetails(crm?.crmUuid, mWD.clientUuid);
-                    if (cl) _clients.push(cl);
-                })
-            }
-            setClients(_clients);
-        })();
-    },[crm, meetings, activeDate, i, currentDate])
+        if(crm?.crmUuid){
+           getClients(crm);
+        }
+    },[meetingWithDay, crm])
+
+    const getClients = async (crm: Crm) => {
+        let res: Client[] = [];
+        meetingWithDay.meetings.forEach( async (meeting) => {
+            let c = await fetchClientDetails(crm?.crmUuid, meeting.clientUuid)
+            if (c) res.push(c)
+        });
+        console.log(res);
+        setClients(res)
+    }
+
+    /* useEffect(()=>{
+        console.log("clients")
+    },[clients]) */
   
     return (
-    <li className={`h-32 p-2 hover:bg-light-purple transition-colors ${new Date(activeDate.getFullYear(), activeDate.getMonth(), i + 1).toDateString() === currentDate.toDateString() ? "bg-light-purple bg-opacity-60" : new Date(activeDate.getFullYear(), activeDate.getMonth(), i + 1).getTime() < currentDate.getTime() ? "bg-background-light bg-opacity-50" : "bg-background-light" }`} key={i + 1}>
+    <li className={`h-32 p-2 hover:bg-light-purple transition-colors ${new Date(activeDate.getFullYear(), activeDate.getMonth(), meetingWithDay.day).toDateString() === currentDate.toDateString() ? "bg-light-purple bg-opacity-60" : new Date(activeDate.getFullYear(), activeDate.getMonth(), meetingWithDay.day).getTime() < currentDate.getTime() ? "bg-background-light bg-opacity-50" : "bg-background-light" }`} key={meetingWithDay.day}>
         <div className="flex justify-between text-light-blue">
-            <span className="text-2xl font-semibold">{i + 1}</span>
-            <span className="text-md">{matchWeekDay(new Date(activeDate.getFullYear(), activeDate.getMonth() + 1, i + 1).getDay())}</span>
+            <span className="text-2xl font-semibold">{meetingWithDay.day}</span>
+            <span className="text-md">{matchWeekDay(new Date(activeDate.getFullYear(), activeDate.getMonth() + 1, meetingWithDay.day).getDay())}</span>
         </div>
-        {clients.map((client, i) => 
-        <div key={client.uuid + i}>
-            {client.firstName}
-        </div>
-        )}
+        <ClientList clients={clients} />
     </li>
   )
 }

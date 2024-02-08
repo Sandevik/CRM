@@ -4,7 +4,7 @@ import Calendar from './Calendar'
 
 export default function index() {
   return (
-    <main>
+    <main className="p-2">
         <Navbar />
 
         <Calendar />
