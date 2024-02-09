@@ -19,7 +19,8 @@ impl Database {
         `phone_number` TEXT,
         `news_letter` BOOLEAN NOT NULL DEFAULT FALSE,
         `added` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        `updated` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+        `updated` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        `note` TEXT
         "#.to_string()
     }
     fn default_entries_table() -> String {

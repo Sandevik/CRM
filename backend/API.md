@@ -35,6 +35,7 @@ creates a new client on a certain crm
 Updates a specific client
 ##      /clients?crmUuid={crm_uuid}&uuid={client_uuid} | DELETE
 removes a specific client
+##      /clients/note?crmUuid={crm_uuid} | PUT | JSON: uuid (string), note (string)
 
 
 

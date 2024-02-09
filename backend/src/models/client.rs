@@ -31,6 +31,7 @@ pub struct Client {
     pub news_letter: bool,
     pub added: DateTime<Utc>,
     pub updated: DateTime<Utc>,
+    pub note: Option<String>,
 }
 
 impl Model for Client {
@@ -51,6 +52,7 @@ impl Model for Client {
             news_letter: row.get("news_letter"),
             added: row.get("added"),
             updated: row.get("updated"),
+            note: row.get("note"),
         }
     }
 }
@@ -73,7 +75,8 @@ impl Client {
             phone_number,
             news_letter,
             added: Utc::now(),
-            updated: Utc::now()
+            updated: Utc::now(),
+            note: None,
         }
     }
 
@@ -172,7 +175,7 @@ impl Client {
             }
     }
 
-    pub async fn update(&self, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+    pub async fn update(&self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
             match sqlx::query("UPDATE `crm`.`clients` SET `first_name` = ?, `last_name` = ?, `date_of_birth` = ?, `email` = ?, `address` = ?, `zip_code` = ?, `city` = ?, `country` = ?, `company` = ?, `phone_number` = ?, `news_letter` = ?, `updated` = ? WHERE `uuid` = ? AND `crm_uuid` = ?")
                 .bind(&self.first_name)
                 .bind(&self.last_name)
@@ -187,12 +190,24 @@ impl Client {
                 .bind(&self.news_letter)
                 .bind(Utc::now())
                 .bind(&self.uuid.hyphenated().to_string())
-                .bind(crm_uuid.hyphenated().to_string())
+                .bind(&self.crm_uuid.hyphenated().to_string())
                 .execute(&data.pool)
                 .await {
                     Err(err) => Err(err),
                     Ok(_) => Ok(())
                 }   
+    }
+
+    pub async fn update_note(&self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+        match sqlx::query("UPDATE `crm`.`clients` SET `note` = ?, WHERE `uuid` = ? AND `crm_uuid` = ?")
+            .bind(&self.note)
+            .bind(&self.uuid.hyphenated().to_string())
+            .bind(&self.crm_uuid.hyphenated().to_string())
+            .execute(&data.pool)
+            .await {
+                Err(err) => Err(err),
+                Ok(_) => Ok(())
+            }
     }
 
     pub async fn delete_client(client_uuid: &Uuid, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {

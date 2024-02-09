@@ -18,7 +18,8 @@ pub fn clients() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Respo
         .service(get_all)
         .service(search)
         .service(update_client)
-        .service(delete_client);
+        .service(delete_client)
+        .service(update_client_note);
         
     scope
 }
@@ -150,14 +151,50 @@ async fn update_client(data: web::Data<AppState>, body: web::Json<UpdateRequest>
         phone_number: body.phone_number.clone(),
         news_letter: body.news_letter,
         added: Utc::now(),
-        updated: Utc::now()
+        updated: Utc::now(),
+        note: None
     };
     
-    match client.update(&Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), &data).await {
+    match client.update(&data).await {
             Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
             Ok(_) => HttpResponse::Ok().json(Response::<String>::ok("Successfully updated client", None))
         }
 }
+
+
+#[derive(Serialize, Deserialize)]
+struct UpdateNoteBodyRequest {
+    note: String,
+    uuid: String,
+}
+
+#[put("/note")]
+async fn update_client_note(data: web::Data<AppState>, body: web::Json<UpdateNoteBodyRequest>, query: web::Query<RequiresUuid>) -> impl Responder {
+    let client: Client = Client {
+        crm_uuid: Uuid::parse_str(&query.crm_uuid).unwrap_or_default(),
+        uuid: Uuid::parse_str(&body.uuid).unwrap_or_default(),
+        first_name: None,
+        last_name: None,
+        date_of_birth: None,
+        email: "".to_string(),
+        address: None,
+        zip_code: None,
+        city: None,
+        country: None,
+        company: None,
+        phone_number: None,
+        news_letter: false,
+        added: Utc::now(),
+        updated: Utc::now(),
+        note: None
+    };
+    match client.update_note(&data).await {
+        Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
+        Ok(_) => HttpResponse::Ok().json(Response::<String>::ok("Successfully updated client note", None))
+    }
+}
+
+
 
 #[derive(Deserialize)]
 struct DeleteRequest {
