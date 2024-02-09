@@ -98,7 +98,7 @@ struct CreateMeetingRequest {
 pub async fn create_meeting(data: web::Data<AppState>, body: web::Json<CreateMeetingRequest>) -> impl Responder {
     let from = Utc.from_local_datetime(&NaiveDateTime::from_timestamp_millis(body.from).expect("Could not convert milliseconds to date")).unwrap();
     let to = Utc.from_local_datetime(&NaiveDateTime::from_timestamp_millis(body.to).expect("Could not convert milliseconds to date")).unwrap();
-    match Meeting::new(from, to, &Uuid::parse_str(&body.client_uuid.as_str()).unwrap_or_default()).insert(&data, &Uuid::parse_str(body.crm_uuid.as_str()).unwrap_or_default()).await {
+    match Meeting::new(from, to, &Uuid::parse_str(&body.client_uuid.as_str()).unwrap_or_default(), &Uuid::parse_str(&body.crm_uuid).unwrap_or_default(),).insert(&data, &Uuid::parse_str(body.crm_uuid.as_str()).unwrap_or_default()).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
         Ok(_) => HttpResponse::Created().json(Response::<String>::created("Successfully created meeting"))
     }
@@ -164,6 +164,7 @@ struct UpdateQuery {
 #[put("")]
 async fn update_meeting(data: web::Data<AppState>, body: web::Json<UpdateMeetingRequest>, query: web::Query<UpdateQuery>) -> impl Responder {
     let meeting = Meeting {
+        crm_uuid: Uuid::parse_str(&query.crm_uuid).unwrap_or_default(),
         uuid: Uuid::parse_str(&query.uuid).unwrap_or_default(),
         from: Utc.from_local_datetime(&NaiveDateTime::from_timestamp_millis(body.from).unwrap_or_default()).unwrap(),
         to: Utc.from_local_datetime(&NaiveDateTime::from_timestamp_millis(body.to).unwrap_or_default()).unwrap(),

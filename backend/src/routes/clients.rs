@@ -103,7 +103,7 @@ struct CreateClientRequest {
 
 #[post("/create")]
 async fn create_client(data: web::Data<AppState>, body: web::Json<CreateClientRequest>) -> impl Responder {
-    let client: Client = Client::new(body.first_name.clone(), body.last_name.clone(), body.date_of_birth.clone(), body.email.clone(), body.address.clone(), body.zip_code.clone(), body.city.clone(), body.country.clone(), body.company.clone(), body.phone_number.clone(), body.news_letter.clone());
+    let client: Client = Client::new(&Uuid::parse_str(&body.crm_uuid).unwrap_or_default(), body.first_name.clone(), body.last_name.clone(), body.date_of_birth.clone(), body.email.clone(), body.address.clone(), body.zip_code.clone(), body.city.clone(), body.country.clone(), body.company.clone(), body.phone_number.clone(), body.news_letter.clone());
     match client.insert(&Uuid::parse_str(&body.crm_uuid).unwrap_or_default(), &data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
         Ok(_) => HttpResponse::Created().json(Response::<String>::created("Successfully created client"))
@@ -136,6 +136,7 @@ struct UpdateRequest {
 #[put("")]
 async fn update_client(data: web::Data<AppState>, body: web::Json<UpdateRequest>, query: web::Query<RequiresUuid>) -> impl Responder {
     let client: Client = Client {
+        crm_uuid: Uuid::parse_str(&query.crm_uuid).unwrap_or_default(),
         uuid: Uuid::parse_str(&body.uuid).unwrap_or_default(),
         first_name: body.first_name.clone(),
         last_name: body.last_name.clone(),

@@ -36,7 +36,7 @@ struct CreateEntryRequest {
 
 #[post("/create")]
 async fn create_entry(data: web::Data<AppState>, body: web::Json<CreateEntryRequest>) -> impl Responder {
-    match Entry::new(&body.content, Uuid::parse_str(&body.client_uuid).unwrap_or_default(), match &body.added_at_meeting { Some(str_uuid) => Some(Uuid::parse_str(&str_uuid).unwrap_or_default()), None => None})
+    match Entry::new(&body.content, Uuid::parse_str(&body.crm_uuid).unwrap_or_default(), Uuid::parse_str(&body.client_uuid).unwrap_or_default(), match &body.added_at_meeting { Some(str_uuid) => Some(Uuid::parse_str(&str_uuid).unwrap_or_default()), None => None})
         .insert(Uuid::parse_str(&body.crm_uuid).unwrap_or_default(), &data).await {
             Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
             Ok(_) => HttpResponse::Created().json(Response::<String>::created("Successfully created entry"))
@@ -61,7 +61,7 @@ struct UpdateQuery {
 
 #[put("")]
 async fn edit_entry(data: web::Data<AppState>, body: web::Json<UpdateRequestBody>, query: web::Query<UpdateQuery>) -> impl Responder {
-    let mut entry: Entry = Entry::new(&body.content, Uuid::parse_str(&query.client_uuid).unwrap_or_default(), match &body.added_at_meeting { Some(str_uuid) => Some(Uuid::parse_str(&str_uuid).unwrap_or_default()), None => None});
+    let mut entry: Entry = Entry::new(&body.content, Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), Uuid::parse_str(&query.client_uuid).unwrap_or_default(), match &body.added_at_meeting { Some(str_uuid) => Some(Uuid::parse_str(&str_uuid).unwrap_or_default()), None => None});
     entry.id = query.id.clone();
     match entry.update(Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), &data).await {
             Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),

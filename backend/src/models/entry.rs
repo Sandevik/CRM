@@ -11,6 +11,8 @@ use super::Model;
 #[derive(Serialize, Deserialize)]
 
 pub struct Entry {
+    #[serde(rename(serialize = "crmUuid", deserialize = "crmUuid"))]
+    pub crm_uuid: Uuid,
     pub id: i32,
     #[serde(rename(serialize = "clientUuid", deserialize = "clientUuid"))]
     pub client_uuid: Uuid,
@@ -24,6 +26,7 @@ pub struct Entry {
 impl Model for Entry {
     fn from_row(row: &MySqlRow) -> Self {
         Entry {
+            crm_uuid: Uuid::parse_str(row.get("crm_uuid")).unwrap_or_default(),
             id: row.get("id"),
             client_uuid: Uuid::parse_str(row.get("client_uuid")).unwrap_or_default(),
             added_at_meeting: match row.get("added_at_meeting") {None => None, Some(uuid) => Some(Uuid::parse_str(uuid).unwrap_or_default())},
@@ -35,8 +38,9 @@ impl Model for Entry {
 }
 
 impl Entry {
-    pub fn new(content: &str, client_uuid: Uuid, added_at_meeting: Option<Uuid>) -> Self {
+    pub fn new(content: &str, crm_uuid: Uuid, client_uuid: Uuid, added_at_meeting: Option<Uuid>) -> Self {
         Entry {
+            crm_uuid,
             id: -1,
             content: Some(content.to_string()),
             client_uuid,
@@ -47,8 +51,9 @@ impl Entry {
     }
 
     pub async fn insert(&self, crm_uuid: Uuid, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
-        let query = format!("INSERT INTO `crm`.`{}-entries` (`client_uuid`, `added`, `added_at_meeting`, `updated`, `content`) VALUES (?,?,?,?,?)", crm_uuid.hyphenated().to_string());
+        let query = "INSERT INTO `crm`.`entries` (`crm_uuid`, `client_uuid`, `added`, `added_at_meeting`, `updated`, `content`) VALUES (?,?,?,?,?,?)";
         match sqlx::query(&query)
+            .bind(crm_uuid.hyphenated().to_string())
             .bind(&self.client_uuid.hyphenated().to_string())
             .bind(&self.added)
             .bind(&self.added_at_meeting)
@@ -62,12 +67,13 @@ impl Entry {
     }
 
     pub async fn update(&self, crm_uuid: Uuid, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
-        match sqlx::query(&format!("UPDATE `crm`.`{}-entries` SET `content` = ?, `added_at_meeting` = ?, `updated` = ? WHERE `client_uuid` = ? AND `id` = ?", crm_uuid.hyphenated().to_string()))
+        match sqlx::query("UPDATE `crm`.`entries` SET `content` = ?, `added_at_meeting` = ?, `updated` = ? WHERE `client_uuid` = ? AND `id` = ? AND `crm_uuid` = ? ")
             .bind(&self.content)
             .bind(&self.added_at_meeting)
             .bind(Utc::now())
             .bind(&self.client_uuid.hyphenated().to_string())
             .bind(&self.id )
+            .bind(crm_uuid.hyphenated().to_string())
             .execute(&data.pool)
             .await {
                 Err(err) => Err(err),
@@ -76,8 +82,9 @@ impl Entry {
     }
 
     pub async fn get_all_by_client_uuid(crm_uuid: &Uuid, client_uuid: &Uuid, data: &web::Data<AppState>) -> Result<Vec<Self>, sqlx::Error> {
-        match sqlx::query(&format!("SELECT * FROM `crm`.`{}-entries` WHERE `client_uuid` = ? ORDER BY `added` DESC", crm_uuid.hyphenated().to_string()))
+        match sqlx::query("SELECT * FROM `crm`.`entries` WHERE `client_uuid` = ? AND `crm_uuid` = ? ORDER BY `added` DESC", )
             .bind(client_uuid.hyphenated().to_string())
+            .bind(crm_uuid.hyphenated().to_string())
             .fetch_all(&data.pool)
             .await {
                 Err(err) => Err(err),
@@ -88,8 +95,9 @@ impl Entry {
     }
 
     pub async fn delete_by_id(id: i32, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
-        match sqlx::query(&format!("DELETE FROM `{}-entries` WHERE `id` = ?", crm_uuid.hyphenated().to_string()))
+        match sqlx::query("DELETE FROM `entries` WHERE `id` = ? AND `crm_uuid` = ?")
             .bind(id)
+            .bind(crm_uuid.hyphenated().to_string())
             .execute(&data.pool)
             .await {
                 Err(err) => Err(err),
@@ -98,8 +106,9 @@ impl Entry {
     }
 
     pub async fn delete_all_by_user_uuid(crm_uuid: &Uuid, client_uuid: &Uuid, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
-        match sqlx::query(&format!("DELETE FROM `{}-entries` WHERE `client_uuid` = ?", crm_uuid.hyphenated().to_string()))
+        match sqlx::query("DELETE FROM `entries` WHERE `client_uuid` = ? AND `crm_uuid` = ?")
             .bind(client_uuid.hyphenated().to_string())
+            .bind(crm_uuid.hyphenated().to_string())
             .execute(&data.pool)
             .await {
                 Err(err) => Err(err),

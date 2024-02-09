@@ -8,6 +8,8 @@ use super::Model;
 #[derive(Serialize, Deserialize)]
 
 pub struct Deal {
+    #[serde(rename(serialize = "crmUuid", deserialize = "crmUuid"))]
+    pub crm_uuid: Uuid,
     pub uuid: Uuid,
     #[serde(rename(serialize = "addedBy", deserialize = "addedBy"))]
     pub added_by: Uuid,
@@ -23,6 +25,7 @@ pub struct Deal {
 impl Model for Deal {
     fn from_row(row: &MySqlRow) -> Self {
         Deal {
+            crm_uuid: Uuid::parse_str(row.get("crm_uuid")).unwrap_or_default(),
             uuid: Uuid::parse_str(row.get("uuid")).unwrap_or_default(),
             added_by: Uuid::parse_str(row.get("added_by")).unwrap_or_default(),
             title: row.get("title"),

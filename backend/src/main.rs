@@ -28,10 +28,7 @@ async fn main() -> std::io::Result<()> {
         .await
         .expect("ERROR: Could not connect to database");
 
-    //println!("Setting up users table...");
-    Database::setup_users_table(&pool).await.expect("ERROR: User table setup failed.");
-    Database::setup_crm_users_table(&pool).await.expect("ERROR: Crm-users table setup failed");
-    //println!("Users table set up!");
+    Database::setup_tables(&pool).await.expect("Could not setup tables");
 
     println!("Server running on http://{}:{}", server_address, server_port);
     HttpServer::new(move|| {
