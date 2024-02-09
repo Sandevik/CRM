@@ -25,7 +25,7 @@ export default function index() {
   return (
     <main className='relative p-2'>
         <Navbar />
-        <div className='sticky mt-4 flex justify-center top-[130px]'>
+        <div className='sticky mt-4 flex justify-center top-[110px]'>
         {data.length > 0 ? 
           <div className="flex gap-2 bg-background-dark bg-opacity-60">
             <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search" className="w-[30em]"/>
