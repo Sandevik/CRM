@@ -1,4 +1,5 @@
 interface Meeting {
+    crmUuid: string,
     uuid: string,
     clientUuid: string,
     to: string,

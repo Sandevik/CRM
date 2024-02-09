@@ -1,4 +1,5 @@
 interface Entry {
+    crmUuid: string,
     id: number,
     clientUuid: string,
     addedAtMeeting: string | null,

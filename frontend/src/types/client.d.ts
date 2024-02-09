@@ -1,4 +1,5 @@
 interface Client {
+    crmUuid: string,
     uuid: string,
     firstName: string | null,
     lastName: string | null,

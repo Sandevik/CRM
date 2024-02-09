@@ -123,7 +123,7 @@ impl Client {
 
     pub async fn get_all(crm_uuid: &Uuid, limit: Limit, offset: Option<u16>, data: &web::Data<AppState>) -> Result<Vec<Self>, sqlx::Error> {
         let mut clients: Vec<Client> = Vec::new();
-        let mut query = format!("SELECT * FROM `crm`.`clients`");
+        let mut query = String::from("SELECT * FROM `crm`.`clients` WHERE `crm_uuid` = ?");
         //todo: create limits on how many clients a person can get
         match limit {
             Limit::None => (),
@@ -135,16 +135,15 @@ impl Client {
         }
         match sqlx::query(&query)
             .bind(crm_uuid.hyphenated().to_string())
-            .bind(Utc::now())
             .fetch_all(&data.pool)
             .await {
                 Err(err) => println!("{err}"),
                 Ok(rows) => {
-                rows.iter().for_each(|row| {
-                    clients.push(Client::from_row(row));
-                });
+                    rows.iter().for_each(|row| {
+                        clients.push(Client::from_row(row));
+                    });
+                }
             }
-        }
         Ok(clients)
     }
 
