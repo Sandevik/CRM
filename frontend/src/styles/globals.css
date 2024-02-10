@@ -60,3 +60,13 @@ html::-webkit-scrollbar-thumb {
 .clippath{
   clip-path: polygon(7% 0, 100% 0, 93% 100%, 0% 100%);
 }
+
+.fast-spinner {
+  animation: fast-spin 0.35s linear infinite;
+}
+
+@keyframes fast-spin {
+  to {
+      transform: rotate(360deg);
+  }
+}
