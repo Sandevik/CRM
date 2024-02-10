@@ -16,10 +16,12 @@ export default function<T extends Object>({offset, limit, fetchUriNoParams, sear
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [searchResult, setSearchResult] = useState<T[] | undefined>(undefined);
     const [cached, setCached] = useState<(T[])[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(()=>{
         (async () => {
             if (requestOptions.offset / requestOptions.limit >= cached.length){
+                setLoading(true)
                 let res = await refetch();
                 if (res && res.length > 0) {
                     setCached([...cached, res])
@@ -27,6 +29,7 @@ export default function<T extends Object>({offset, limit, fetchUriNoParams, sear
             } else {
                 setResult(cached[requestOptions.offset / requestOptions.limit])
             }
+          setLoading(false);
         })();
     },[crm, requestOptions])
   
@@ -68,5 +71,5 @@ export default function<T extends Object>({offset, limit, fetchUriNoParams, sear
         }
     }
 
-    return {data: searchResult && searchResult.length > 0 ? searchResult : result || [], nextResult, prevResult, setSearchQuery, refetch, searchQuery, searchResult, currentPage: (requestOptions.offset / requestOptions.limit) + 1}
+    return {data: searchResult && searchResult.length > 0 ? searchResult : result || [], nextResult, prevResult, setSearchQuery, refetch, searchQuery, searchResult, currentPage: (requestOptions.offset / requestOptions.limit) + 1, loading}
 }
