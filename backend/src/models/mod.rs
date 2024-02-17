@@ -7,6 +7,7 @@ pub mod entry;
 pub mod employee;
 pub mod deal;
 pub mod meeting;
+pub mod task;
 
 
 trait Model {

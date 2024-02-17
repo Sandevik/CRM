@@ -36,7 +36,7 @@ Updates a specific client
 ##      /clients?crmUuid={crm_uuid}&uuid={client_uuid} | DELETE
 removes a specific client
 ##      /clients/note?crmUuid={crm_uuid} | PUT | JSON: uuid (string), note (string)
-
+##      /clients/statistics?crmUuid={crm_uuid}&clientUuid={client_uuid} | GET
 
 
 ## /meetings
@@ -69,7 +69,11 @@ gets all entries for a specific client
 removes a specific entry by its id
 
 
-
+## /tasks
+###     /tasks/create | POST | JSON: title (string | null), crmUuid (string), deadline (number | null), status (string | null), clientUuid (string | null)
+Creates a new Task
+###     /tasks/by-client?crmUuid={crm_uuid}&clientUuid={client_uuid}
+Gets all task revolving a certain customer
 
 
 

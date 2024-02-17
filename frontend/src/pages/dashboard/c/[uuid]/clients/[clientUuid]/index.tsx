@@ -15,6 +15,14 @@ import NewEntryForm from './NewEntryForm';
 import Meetings from './Meetings';
 import AddMeeting from '@/components/AddMeeting';
 import EditMeeting from './EditMeeting';
+import AddTask from './AddTask';
+
+export interface Statistics {
+  meetings_count: number,
+  entries_count: number,
+  task_count: number,
+  tasks_todo_count: number,
+}
 
 
 export default function index() {
@@ -28,6 +36,9 @@ export default function index() {
   const [newMeetingActive, setNewMeetingActive] = useState<boolean>(false);
   const [currentView, setCurrentView] = useState<"quick" | "entries" | "meetings">("quick");
   const [editMeeting, setEditMeeting] = useState<Meeting | null>(null);
+  const [statistics, setStatistics] = useState<Statistics>({meetings_count: 0, entries_count: 0, task_count: 0, tasks_todo_count: 0});
+  const [addTask, setAddTask] = useState<boolean>(false);
+  const [tasks, setTasks] = useState<Task[]>([]);
 
   useEffect(()=>{
     (async () => {
@@ -37,10 +48,21 @@ export default function index() {
 
   useEffect(()=>{
     (async () => {
-      await fetchEntries()
-      await fetchMeetings()
+      await fetchEntries();
+      await fetchMeetings();
+      await fetchTasks();
+      await fetchStatistics();
     })();
   },[client])
+
+  const fetchStatistics = async () => {
+    if (crm?.crmUuid && client) {
+      let res = await request<Statistics>(`/clients/statistics?crmUuid=${crm.crmUuid}&clientUuid=${client.uuid}`, {}, "GET");
+      if (res.code === 200 && res.data) {
+        setStatistics(res.data);
+      }
+    }
+  }
 
   const fetchClient = async () => {
     if (crm?.crmUuid && params?.clientUuid) {
@@ -54,6 +76,7 @@ export default function index() {
       let res = await request<Entry[]>(`/entries/all?crmUuid=${crm?.crmUuid}&clientUuid=${client?.uuid}`, {}, "GET");
       if (res.code === 200 && res.data) {
         setEntries(res.data);
+        await fetchStatistics();
       }
     }
   }
@@ -62,14 +85,26 @@ export default function index() {
       let res = await request<Meeting[]>(`/meetings/by-client?crmUuid=${crm?.crmUuid}&clientUuid=${client?.uuid}`, {}, "GET");
       if (res.code === 200 && res.data) {
         setMeetings(res.data);
+        await fetchStatistics();
       }
     }
   }
+  const fetchTasks = async () => {
+    if (crm?.crmUuid && client) {
+      let res = await request<Task[]>(`/tasks/by-client?crmUuid=${crm?.crmUuid}&clientUuid=${client?.uuid}`, {}, "GET");
+      if (res.code === 200 && res.data) {
+        setTasks(res.data);
+        await fetchStatistics();
+      }
+    }
+  }
+  
 
   useEffect(()=>{
     setNewEntryActive(false);
     setNewMeetingActive(false);
     setEditMeeting(null);
+    setAddTask(false);
   },[currentView])
 
   return (
@@ -97,7 +132,7 @@ export default function index() {
 
             <div className="mt-3">
             {currentView === "quick" ?
-              <QuickInfo />
+              <QuickInfo client={client} statistics={statistics} addingTask={addTask} setAddTask={setAddTask} tasks={tasks}/>
               : currentView === "entries" ?
               <Entries refetchEntries={fetchEntries} entries={entries} client={client} />
               : 
@@ -111,6 +146,7 @@ export default function index() {
           <AddMeeting closePopup={() => setNewMeetingActive(false)} active={newMeetingActive} onSuccessfulSubmit={fetchMeetings} withClientUuid={client?.uuid} />
           <EditMeeting closePopup={() => setEditMeeting(null)} _meeting={editMeeting} onSuccessfulSubmit={fetchMeetings} />
         </div>
+        <AddTask active={addTask} setActive={setAddTask} client={client} refetchTasks={fetchTasks} />
         <NewEntryForm active={newEntryActive} refetchEntries={fetchEntries} close={() => setNewEntryActive(false)} client={client}/>
         <EditClient initialClient={client} active={edit} _setClient={setClient} setEdit={setEdit}/>
       </div>

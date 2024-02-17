@@ -1,7 +1,7 @@
 use actix_web::web;
 use chrono::{DateTime, Utc, NaiveDate};
 use serde::{Serialize, Deserialize};
-use sqlx::{mysql::MySqlRow, Row};
+use sqlx::{mysql::MySqlRow, ColumnIndex, Row};
 use uuid::Uuid;
 use crate::{AppState, routes::Limit};
 use super::{entry::Entry, meeting::Meeting, Model};
@@ -59,6 +59,9 @@ impl Model for Client {
 
 impl Client {
 
+    pub fn default() -> Self {
+        Client { crm_uuid: Uuid::new_v4(), uuid: Uuid::new_v4(), first_name: None, last_name: None, date_of_birth: None, email: "".to_string(), address: None, zip_code: None, city: None, country: None, company: None, phone_number: None, news_letter: false, added: Utc::now(), updated: Utc::now(), note: None }
+    }
     pub fn new(crm_uuid: &Uuid, first_name: Option<String>, last_name: Option<String>, date_of_birth: Option<NaiveDate>, email: String, address: Option<String>, zip_code: Option<String>, city: Option<String>, country: Option<String>, company: Option<String>, phone_number: Option<String>, news_letter: bool) -> Self {
         Client {
             crm_uuid: crm_uuid.clone(),
@@ -199,8 +202,9 @@ impl Client {
     }
 
     pub async fn update_note(&self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
-        match sqlx::query("UPDATE `crm`.`clients` SET `note` = ?, WHERE `uuid` = ? AND `crm_uuid` = ?")
+        match sqlx::query("UPDATE `crm`.`clients` SET `note` = ?, `updated` = ? WHERE `uuid` = ? AND `crm_uuid` = ?")
             .bind(&self.note)
+            .bind(Utc::now())
             .bind(&self.uuid.hyphenated().to_string())
             .bind(&self.crm_uuid.hyphenated().to_string())
             .execute(&data.pool)
@@ -232,6 +236,50 @@ impl Client {
         }
     }
 
+    pub async fn get_statistics(&self, data: &web::Data<AppState>) -> Result<Option<ClientStatistics>, sqlx::Error> {
+        match sqlx::query(r#"SELECT 
+        (SELECT COUNT(*) FROM `crm` . `entries` WHERE `crm_uuid` = ? AND `client_uuid` = ?) AS entries_count, 
+        (SELECT COUNT(*) FROM `crm` . `meetings` WHERE `crm_uuid` = ? AND `client_uuid` = ?) AS meetings_count, 
+        (SELECT COUNT(*) FROM `crm` . `tasks` WHERE `crm_uuid` = ? AND `client_uuid` = ?) as `tasks_count`, 
+        (SELECT COUNT(*) FROM `crm` . `tasks` WHERE `crm_uuid` = ? AND `client_uuid` = ? AND NOT `status` = 'completed') as `tasks_todo_count`
+        "#)
+        .bind(&self.crm_uuid.hyphenated().to_string())
+        .bind(&self.uuid.hyphenated().to_string())
+        .bind(&self.crm_uuid.hyphenated().to_string())
+        .bind(&self.uuid.hyphenated().to_string())
+        .bind(&self.crm_uuid.hyphenated().to_string())
+        .bind(&self.uuid.hyphenated().to_string())
+        .bind(&self.crm_uuid.hyphenated().to_string())
+        .bind(&self.uuid.hyphenated().to_string())
+        .fetch_optional(&data.pool)
+        .await {
+            Err(err) => Err(err),
+            Ok(stats) => {
+                if let None = stats {
+                    return Ok(None);
+                }
+                let unwrapped = stats.unwrap();
+                let meetings_count = unwrapped.get::<i32, &str>("meetings_count") as usize;
+                let entries_count = unwrapped.get::<i32, &str>("entries_count") as usize;
+                let task_count = unwrapped.get::<i32, &str>("tasks_count") as usize;
+                let tasks_todo_count = unwrapped.get::<i32, &str>("tasks_todo_count") as usize;
+                return Ok(Some(ClientStatistics {
+                    meetings_count,
+                    entries_count,
+                    task_count,
+                    tasks_todo_count
+                }))
+            }
+        }
+    }
+
+}
 
 
+#[derive(Serialize)]
+pub struct ClientStatistics {
+    pub meetings_count: usize,
+    pub entries_count: usize,
+    pub task_count: usize,
+    tasks_todo_count: usize,
 }

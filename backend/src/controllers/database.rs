@@ -74,7 +74,17 @@ impl Database {
         `updated` DATETIME
         "#.to_string()
     }
-  
+    fn default_task_table() -> String {
+        r#"
+        `crm_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
+        `deadline` DATETIME,
+        `status` VARCHAR(10),
+        `client_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci,
+        `title` VARCHAR(50),
+        `added` DATETIME,
+        `updated` DATETIME
+        "#.to_string()
+    }
     // Sets up the inital users table for people who sign up
     pub async fn setup_users_table(pool: &Pool<MySql>) -> Result<MySqlQueryResult, sqlx::Error> {
         let create_table_users_query: &str = r#"
@@ -141,6 +151,11 @@ impl Database {
         Self::default_deals_table());
         sqlx::query(&query).execute(pool).await
     }
+    pub async fn setup_todos_table(pool: &Pool<MySql>) -> Result<MySqlQueryResult, sqlx::Error> {
+        let query: String = format!(r#"CREATE TABLE IF NOT EXISTS `tasks` ({}) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;"#,
+        Self::default_task_table());
+        sqlx::query(&query).execute(pool).await
+    }
 
     pub async fn setup_tables(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
         if let Err(err) = Self::setup_users_table(pool).await {
@@ -162,6 +177,9 @@ impl Database {
             return Err(err);
         }
         if let Err(err) = Self::setup_deals_table(pool).await {
+            return Err(err);
+        }
+        if let Err(err) = Self::setup_todos_table(pool).await {
             return Err(err);
         }
         Ok(())

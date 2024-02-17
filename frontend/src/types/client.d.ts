@@ -14,4 +14,5 @@ interface Client {
     newsLetter: boolean,
     added: string,
     updated: string,
+    note: string,
 }

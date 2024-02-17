@@ -19,7 +19,8 @@ pub fn clients() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Respo
         .service(search)
         .service(update_client)
         .service(delete_client)
-        .service(update_client_note);
+        .service(update_client_note)
+        .service(get_statistics);
         
     scope
 }
@@ -150,9 +151,7 @@ async fn update_client(data: web::Data<AppState>, body: web::Json<UpdateRequest>
         company: body.company.clone(),
         phone_number: body.phone_number.clone(),
         news_letter: body.news_letter,
-        added: Utc::now(),
-        updated: Utc::now(),
-        note: None
+        ..Client::default()
     };
     
     match client.update(&data).await {
@@ -173,20 +172,8 @@ async fn update_client_note(data: web::Data<AppState>, body: web::Json<UpdateNot
     let client: Client = Client {
         crm_uuid: Uuid::parse_str(&query.crm_uuid).unwrap_or_default(),
         uuid: Uuid::parse_str(&body.uuid).unwrap_or_default(),
-        first_name: None,
-        last_name: None,
-        date_of_birth: None,
-        email: "".to_string(),
-        address: None,
-        zip_code: None,
-        city: None,
-        country: None,
-        company: None,
-        phone_number: None,
-        news_letter: false,
-        added: Utc::now(),
-        updated: Utc::now(),
-        note: None
+        note: Some(body.note.clone()),
+        ..Client::default()
     };
     match client.update_note(&data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
@@ -208,5 +195,20 @@ async fn delete_client(data: web::Data<AppState>, query: web::Query<DeleteReques
     match Client::delete_client(&Uuid::parse_str(&query.uuid).unwrap_or_default(), &Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), &data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
         Ok(_) => HttpResponse::Ok().json(Response::<String>::ok("Successfully deleted client", None))
+    }
+}
+
+
+#[get("/statistics")]
+async fn get_statistics(data: web::Data<AppState>, query: web::Query<ClientByUuidRequest>) -> impl Responder {
+    let client: Client = Client {crm_uuid: Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), uuid: Uuid::parse_str(&query.client_uuid).unwrap_or_default(), ..Client::default()};
+    match client.get_statistics(&data).await {
+        Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
+        Ok(stats) => {
+            if let None = stats {
+                return HttpResponse::Ok().json(Response::<String>::ok("No statistics was found", None));
+            } 
+            HttpResponse::Ok().json(Response::ok("Successfully fetched client statistics", stats))
+        }
     }
 }
