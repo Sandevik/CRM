@@ -20,10 +20,9 @@ export default function Task({task}: {task: Task}) {
 }
 
 const LoadingBar = ({percentage, completed}: {percentage: number, completed: boolean}) => {
-  console.log(percentage)
   return (
     <div className={`absolute bottom-2 h-1 bg-white w-full -m-2 `}>
-      <div style={{"--percentage": percentage.toString()+"%"} as any} className={`h-1 w-full ${completed ? "rounded-none bg-green-200 left-0" : percentage === 100 ? "rounded-none bg-light-red left-0" : percentage >= 90 ? "rounded-none bg-yellow-200 left-0" : "rounded-r-md bg-blue-500 left-0 translate-x-[calc(-100%+var(--percentage))]"} absolute bottom-0  `}></div>
+      <div style={{"--percentage": percentage.toString()+"%"} as any} className={`h-1 w-full ${completed ? "rounded-none bg-green-200 left-0" : percentage === 100 ? "rounded-none bg-light-red left-0" : percentage >= 90 ? "rounded-none bg-yellow-200 left-0 translate-x-[calc(-100%+var(--percentage))]" : "rounded-r-md bg-blue-500 left-0 translate-x-[calc(-100%+var(--percentage))]"} absolute bottom-0  `}></div>
     </div>
   )
 }

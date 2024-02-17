@@ -98,7 +98,7 @@ impl Task {
     }
 
     pub async fn get_by_client_uuid(client_uuid: &Uuid, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<Vec<Self>, sqlx::Error> {
-        match sqlx::query("SELECT *, FLOOR((((UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(`added`)) / (UNIX_TIMESTAMP(`deadline`) - UNIX_TIMESTAMP(`added`))) * 100)) as percentage FROM `crm` . `tasks` WHERE `crm_uuid` = ? AND `client_uuid` = ? ORDER BY ISNULL(`percentage`), `percentage` DESC")
+        match sqlx::query("SELECT *, FLOOR((((UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(`added`)) / (UNIX_TIMESTAMP(`deadline`) - UNIX_TIMESTAMP(`added`))) * 100)) as percentage FROM `crm` . `tasks` WHERE `crm_uuid` = ? AND `client_uuid` = ? ORDER BY `status` DESC, ISNULL(`percentage`), `percentage` DESC")
             .bind(crm_uuid.hyphenated().to_string())
             .bind(client_uuid.hyphenated().to_string())
             .fetch_all(&data.pool)
