@@ -13,11 +13,11 @@ export default function Task({task}: {task: Task}) {
 
 const LoadingBar = ({task}: {task: Task}) => {
   
-
+  const percentage = (100-(task?.percentage || 100)) > 100 ? 100 : (100-(task?.percentage || 100)) < 0 ? 0 : (100-(task?.percentage || 100));
 
   return (
     <div className={`absolute bottom-2 h-1 bg-white w-full -m-2 overflolw-hidden`}>
-      <div style={{"--percentage": (100-(task?.percentage || 100)).toString()+"%"} as any} className={`h-1 w-full ${(task.percentage || 100) === 100 ? "rounded-r-md" : "rounded-none"} bg-blue-500 absolute bottom-0 -left-[var(--percentage)] `}></div>
+      <div style={{"--percentage": percentage.toString()+"%"} as any} className={`h-1 w-full ${percentage === 100 ? "rounded-r-md" : "rounded-none"} bg-blue-500 absolute bottom-0 -left-[var(--percentage)] `}></div>
     </div>
   )
 }
