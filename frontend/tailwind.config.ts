@@ -19,8 +19,7 @@ const config: Config = {
           "light-blue": "#C3DFE0",
           "light-purple": "#8D86C9",
           "light-red": "#EF798A",
-          "yellow": "#DDD92A",
-          "light-yellow": "#EAE151"
+          
   
       },
       gridTemplateColumns: {

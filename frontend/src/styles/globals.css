@@ -74,3 +74,14 @@ html::-webkit-scrollbar-thumb {
       transform: rotate(360deg);
   }
 }
+
+
+
+.task-warning {
+  display: none;
+  position:absolute;
+  top: -1em;
+}
+.task-warning-icon:hover ~ .task-warning {
+  display: block;
+}
