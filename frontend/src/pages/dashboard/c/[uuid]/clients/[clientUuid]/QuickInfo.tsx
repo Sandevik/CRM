@@ -40,18 +40,19 @@ export default function QuickInfo({client, statistics, addingTask, setAddTask, t
       
         <div className='relative mt-2 p-1'>
 
-          <ul className="grid grid-cols-4 gap-4 ">
-            <Button className='' onClick={()=>setAddTask(true)}>New Task</Button>
-            {tasks.map(task => (<Task key={task.added} task={task}/>))}
-          </ul>
+          <div className="h-full flex flex-col gap-6">
+            <div className="flex justify-between items-end">
+              <span>Tasks</span>
+              <Button className='' onClick={()=>setAddTask(true)}>New Task</Button>
+            </div>
+            <ul className="flex flex-wrap items-center justify-center gap-4 ">
+              {tasks.map(task => (<Task key={task.added} task={task}/>))}
+              {tasks.length === 0 && <div>No tasks found</div>}
+            </ul>
+          </div>
+          
 
-          <br />
-          <br />
-          Övergripande info mut anteckningar, antal möten / besök
-          <br />
-          Status till att göra saker (ex ägare ska kontakta kund eller likanade, ex ägare ska boka in något,) (todos)
-          <br />
-          Annat mindre viktigt, anteckningar om person m.m.
+          
           <br />
           filer??
         </div>

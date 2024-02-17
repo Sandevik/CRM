@@ -76,6 +76,7 @@ impl Database {
     }
     fn default_task_table() -> String {
         r#"
+        `uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL UNIQUE,
         `crm_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
         `deadline` DATETIME,
         `status` VARCHAR(10),

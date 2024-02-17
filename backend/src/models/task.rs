@@ -34,6 +34,7 @@ impl TaskStatus {
 
 #[derive(Serialize, Deserialize)]
 pub struct Task {
+    pub uuid: Uuid,
     #[serde(rename(deserialize = "crmUuid", serialize = "crmUuid"))]
     pub crm_uuid: Uuid,
     pub deadline: Option<DateTime<Utc>>,
@@ -49,6 +50,7 @@ pub struct Task {
 impl Model for Task {
     fn from_row(row: &sqlx::mysql::MySqlRow) -> Self {
         Task {
+            uuid: Uuid::parse_str(row.get("uuid")).unwrap_or_default(),
             crm_uuid: Uuid::parse_str(row.get("crm_uuid")).unwrap_or_default(),
             client_uuid: match Uuid::parse_str(row.get("client_uuid")) {Err(_) => None, Ok(uuid) => Some(uuid)},
             deadline: row.get("deadline"),
@@ -65,6 +67,7 @@ impl Task {
 
     pub fn default() -> Self {
         Task {
+            uuid: Uuid::new_v4(),
             crm_uuid: Uuid::new_v4(),
             client_uuid: None,
             deadline: None,
@@ -78,7 +81,8 @@ impl Task {
 
 
     pub async fn insert(&self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
-        match sqlx::query("INSERT INTO `crm` . `tasks` (`crm_uuid`, `client_uuid`, `deadline`, `status`, `title`, `added`, `updated`) VALUES (?,?,?,?,?,?,?)")
+        match sqlx::query("INSERT INTO `crm` . `tasks` (`uuid`, `crm_uuid`, `client_uuid`, `deadline`, `status`, `title`, `added`, `updated`) VALUES (?,?,?,?,?,?,?,?)")
+            .bind(&self.uuid.hyphenated().to_string())
             .bind(&self.crm_uuid.hyphenated().to_string())
             .bind(match &self.client_uuid { None => None, Some(uuid) => Some(uuid.hyphenated().to_string())})
             .bind(&self.deadline)
