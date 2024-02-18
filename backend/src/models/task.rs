@@ -1,12 +1,12 @@
 use actix_web::web;
-use chrono::{DateTime, Days, Months, Utc};
+use chrono::{DateTime, Datelike, Days, Months, NaiveDate, NaiveDateTime, NaiveTime, Timelike, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::Row;
 use uuid::Uuid;
 
 use crate::AppState;
 
-use super::Model;
+use super::{meeting::get_days_from_month, Model};
 
 #[derive(Serialize, Deserialize)]
 pub enum TaskStatus {
@@ -104,11 +104,15 @@ impl Model for Task {
 impl Task {
 
     pub fn default() -> Self {
+        let year: i32 = Utc::now().year();
+        let month: u32 = Utc::now().month();
+        let day: u32 = Utc::now().day();
+        let date: DateTime<Utc> = NaiveDate::from_ymd_opt(year, month, day).unwrap().and_time(NaiveTime::from_hms_opt(0, 0, 0).unwrap()).and_utc();
         Task {
             uuid: Uuid::new_v4(),
             crm_uuid: Uuid::new_v4(),
             client_uuid: None,
-            start: None,
+            start: Some(date),
             deadline: None,
             reaccurance: None,
             status: None,
@@ -121,11 +125,12 @@ impl Task {
 
 
     pub async fn insert(&self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+        let start: Option<DateTime<Utc>> = match &self.start {None => None, Some(start) => Some(start.with_hour(0).unwrap().with_minute(0).unwrap().with_second(0).unwrap())};
         match sqlx::query("INSERT INTO `crm` . `tasks` (`uuid`, `crm_uuid`, `client_uuid`, `start`, `deadline`, `reaccurance`, `status`, `title`, `added`, `updated`) VALUES (?,?,?,?,?,?,?,?,?,?)")
             .bind(&self.uuid.hyphenated().to_string())
             .bind(&self.crm_uuid.hyphenated().to_string())
             .bind(match &self.client_uuid { None => None, Some(uuid) => Some(uuid.hyphenated().to_string())})
-            .bind(&self.start)
+            .bind(start)
             .bind(&self.deadline)
             .bind(match &self.reaccurance {None => None, Some(reaccurance) => Some(reaccurance.stringify())})
             .bind(match &self.status {None => None, Some(status) => Some(status.stringify())})
