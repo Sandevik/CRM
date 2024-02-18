@@ -132,7 +132,7 @@ export default function index() {
 
             <div className="mt-3">
             {currentView === "quick" ?
-              <QuickInfo client={client} statistics={statistics} addingTask={addTask} setAddTask={setAddTask} tasks={tasks}/>
+              <QuickInfo client={client} statistics={statistics} addingTask={addTask} setAddTask={setAddTask} tasks={tasks} refetchTasks={fetchTasks}/>
               : currentView === "entries" ?
               <Entries refetchEntries={fetchEntries} entries={entries} client={client} />
               : 

@@ -78,7 +78,9 @@ impl Database {
         r#"
         `uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL UNIQUE,
         `crm_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
+        `start` DATETIME,
         `deadline` DATETIME,
+        `reaccurance` VARCHAR(7),
         `status` VARCHAR(10),
         `client_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci,
         `title` VARCHAR(50),

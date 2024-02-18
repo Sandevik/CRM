@@ -8,7 +8,7 @@ import Task from './Task';
 
 
 
-export default function QuickInfo({client, statistics, addingTask, setAddTask, tasks}: {client: Client | null, statistics: Statistics, addingTask: boolean, setAddTask: React.Dispatch<React.SetStateAction<boolean>>, tasks: Task[]}) {
+export default function QuickInfo({client, statistics, addingTask, setAddTask, tasks, refetchTasks}: {client: Client | null, statistics: Statistics, addingTask: boolean, setAddTask: React.Dispatch<React.SetStateAction<boolean>>, tasks: Task[], refetchTasks: () => Promise<void>}) {
   const {crm} = useContext(CurrentCrmContext);
   const [currentNote, setCurrentNote] = useState<string>(client?.note || "");
   const [editing, setEditing] = useState<boolean>(false);
@@ -46,7 +46,7 @@ export default function QuickInfo({client, statistics, addingTask, setAddTask, t
               <Button className='' onClick={()=>setAddTask(true)}>New Task</Button>
             </div>
             <ul className="flex flex-wrap items-center justify-center gap-4 ">
-              {tasks.map(task => (<Task key={task.added} task={task}/>))}
+              {tasks.map(task => (<Task key={task.added} task={task} refetchTasks={refetchTasks}/>))}
               {tasks.length === 0 && <div>No tasks found</div>}
             </ul>
           </div>

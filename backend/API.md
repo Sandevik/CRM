@@ -74,6 +74,8 @@ removes a specific entry by its id
 Creates a new Task
 ###     /tasks/by-client?crmUuid={crm_uuid}&clientUuid={client_uuid}
 Gets all task revolving a certain customer
+###     /tasks/complete | POST | JSON: crmUuid (string), taskUuid (string)
+Completes a task regardless if it is reaccuring or not
 
 
 

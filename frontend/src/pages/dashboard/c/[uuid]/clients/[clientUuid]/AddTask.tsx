@@ -3,27 +3,26 @@ import Input from '@/components/Input';
 import { CurrentCrmContext } from '@/context/CurrentCrmContext';
 import request from '@/utils/request';
 import React, { useContext, useEffect, useState } from 'react'
-import { IoClose } from 'react-icons/io5';
+import { IoClose, IoCalendar } from 'react-icons/io5';
 
 
 
 
 export default function AddTask({active, setActive, client, refetchTasks}: {active: boolean, client: Client | null, setActive: React.Dispatch<React.SetStateAction<boolean>>, refetchTasks: () => Promise<void>}) {
     const {crm} = useContext(CurrentCrmContext);
-    const [form, setForm] = useState<Omit<Task, "added" | "updated">>({
+    const [form, setForm] = useState<Omit<Task, "added" | "updated" | "start" | "uuid">>({
         deadline: null,
         crmUuid: crm?.crmUuid || "" ,
         title: null,
         status: null,
+        reaccurance: null,
         clientUuid: client?.uuid || null,
     })
     const [deadline, setDeadline] = useState<1|0>(0);
-    const [status, setStatus] = useState<"ongoing" | "completed" | "none">("none");
 
     useEffect(()=>{setForm({...form, clientUuid: client?.uuid || null})},[client])
     useEffect(()=>{setForm({...form, crmUuid: crm?.crmUuid || ""})},[crm])
     
-    useEffect(()=>{status === "none" && setForm({...form, status: null})},[status])
 
     const close = () => {
         setActive(false);
@@ -40,6 +39,7 @@ export default function AddTask({active, setActive, client, refetchTasks}: {acti
                     crmUuid: crm?.crmUuid || "" ,
                     title: null,
                     status: null,
+                    reaccurance: null,
                     clientUuid: client?.uuid || null,
                 })
                 await refetchTasks();
@@ -50,7 +50,7 @@ export default function AddTask({active, setActive, client, refetchTasks}: {acti
   
     return (
         <div className={`${active ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"} transition-opacity absolute top-0 left-0 h-full w-full bg-background-dark bg-opacity-40 backdrop-blur-md grid place-items-center`}>
-        <form className="h-[70%] w-[40em] bg-background-light p-4 rounded-md relative flex flex-col gap-5">
+        <form className=" w-[40em] bg-background-light p-4 rounded-md relative flex flex-col gap-5">
             <h3 className="text-2xl font-semibold">Create a new task for {client?.firstName || "unknown client"}</h3>
             <IoClose onClick={() => close()} className="absolute top-2 right-2 text-4xl cursor-pointer"/>
             
@@ -68,17 +68,35 @@ export default function AddTask({active, setActive, client, refetchTasks}: {acti
 
             {deadline == 1 && <div className="flex flex-col gap-2">
                 <label htmlFor="datetime" className="text-lg">Date and time</label>
-                <Input name="datetime" type='datetime-local' value={form.deadline || ""} onChange={(e) => setForm({...form, deadline: e.target.value})} className="w-full flex-1 rounded-md overflow-y-scroll scrollthumb transition-all relative p-2 bg-background-dark text-white" placeholder='Schedule a call...'></Input>   
+                <div className='relative'>
+                    <Input name="datetime" type='datetime-local' value={form.deadline || ""} onChange={(e) => setForm({...form, deadline: e.target.value})} className="w-full flex-1 rounded-md overflow-y-scroll scrollthumb transition-all relative p-2 bg-background-dark text-white" placeholder='Schedule a call...'></Input>   
+                    <IoCalendar className="text-white absolute right-2 top-3 text-lg pointer-events-none" />
+                </div>
             </div>}
+
+            <div className="flex flex-col gap-2">
+                <label htmlFor="status-select" className="text-lg">Reaccurance</label>
+                <select value={form.status || "none"} disabled={deadline === 0}  onChange={(e) => {setForm({...form, reaccurance: e.target.value === "none" ? null : e.target.value as TaskReaccurance})}} name="deadline-select" className={` ${deadline === 0 ? "opacity-50" : "opacity-100" } w-full flex-1 rounded-md overflow-y-scroll scrollthumb transition-all relative p-2 bg-background-dark text-white`}>
+                    <option value={"none"}>None</option>
+                    <option value={"dayly"}>Dayly</option>
+                    <option value={"weekly"}>Weekly</option>
+                    <option value={"monthly"}>Monthly</option>
+                    <option value={"yearly"}>Yearly</option>
+                    <option value={"everyOtherWeek"}>Every Other Week</option>
+                    <option value={"everyOtherMonth"}>Every Other Month</option>
+                </select>   
+            </div>
             
             <div className="flex flex-col gap-2">
                 <label htmlFor="status-select" className="text-lg">Status</label>
-                <select value={status}  onChange={(e) => {setStatus(e.target.value as "ongoing" | "completed" | "none"); setForm({...form, status: e.target.value})}} name="deadline-select" className="w-full flex-1 rounded-md overflow-y-scroll scrollthumb transition-all relative p-2 bg-background-dark text-white">
+                <select value={form.status || "none"}  onChange={(e) => {setForm({...form, status: e.target.value === "none" ? null : e.target.value as TaskStatus})}} name="deadline-select" className="w-full flex-1 rounded-md overflow-y-scroll scrollthumb transition-all relative p-2 bg-background-dark text-white">
                     <option value={"none"}>None</option>
                     <option value={"ongoing"}>Ongoing</option>
                     <option value={"completed"}>Completed</option>
                 </select>   
             </div>
+
+            
             
 
             <Button onClick={(e) => addTask(e)}>Add</Button>

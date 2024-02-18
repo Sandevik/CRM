@@ -1,20 +1,36 @@
 import Button from '@/components/Button';
-import React from 'react'
+import { CurrentCrmContext } from '@/context/CurrentCrmContext';
+import request from '@/utils/request';
+import React, { useContext } from 'react'
 import { FaTriangleExclamation, FaCircleCheck } from "react-icons/fa6";
+import { RiRestartLine } from "react-icons/ri";
 
 
-export default function Task({task}: {task: Task}) {
-  const percentage:number = (task?.percentage || 100) > 100 ? 100 : (task?.percentage || 100) < 0 ? 0 : (task?.percentage || 100);
+export default function Task({task, refetchTasks}: {task: Task, refetchTasks: () => Promise<void>}) {
+  const {crm} = useContext(CurrentCrmContext);
+  const percentage:number = (task?.percentage || 0) > 100 ? 100 : (task?.percentage || 0) < 0 ? 0 : (task?.percentage || 0);
+
+  const completeTask = async () => {
+    if(crm?.crmUuid) {
+      const res = await request("/tasks/complete", {crmUuid: crm.crmUuid, taskUuid: task.uuid}, "POST")
+      if (res.code === 200) {
+        await refetchTasks();
+      } 
+    }
+  }
 
   return (
     <li className='min-w-40 max-w-72 rounded-sm bg-background-light p-2 relative overflow-hidden h-11 hover:h-32 transition-all flex flex-col items-center hover:items-start gap-2'>
-      {task.deadline !== null && <LoadingBar completed={task.status === "Completed"} percentage={percentage} />}
+      {task.deadline !== null && <LoadingBar completed={task.status === "Completed" || (task.reaccurance !== null && Date.now() < new Date(task.start || "").getTime())} percentage={percentage} />}
       <div className='flex justify-between w-full items-center gap-6 capitalize'>
-        <div className="truncate font-semibold">{task.title}</div>
-        {task.status === "Completed" ? <FaCircleCheck className="text-green-200"/> : task.deadline !== null && percentage >= 90 && <FaTriangleExclamation className={`${percentage === 100 ? "text-light-red" : "text-yellow-200"}`} /> }
+        <div className="truncate font-semibold flex gap-2 items-center">{task.reaccurance !== null && <RiRestartLine className="text-gray-400" />} <span>{task.title}</span></div>
+        {task.status === "Completed" || (task.reaccurance !== null && Date.now() < new Date(task.start || "").getTime()) ? <FaCircleCheck className="text-green-200"/> : task.deadline !== null && percentage !== 0 && (percentage >= 90 && <FaTriangleExclamation className={`${percentage === 100 ? "text-light-red" : "text-yellow-200"}`} />)}
       </div>
-      {percentage >= 90 && <div className={`${percentage === 100 ? "text-light-red" : "text-yellow-200"}`}>{percentage === 100 ? "This task has exceeded its deadline" : "This task is about to exceed its deadline"}</div>}
-      {!(task.status === "Completed") && <Button>Complete</Button>}
+      {(percentage >= 90 && <div className={`${percentage === 100 ? "text-light-red" : "text-yellow-200"}`}>{percentage === 100 ? "This task has exceeded its deadline" : "This task is about to exceed its deadline"}</div>)}
+      <div className="capitalize">{task.reaccurance !== null && "This task reaccurs " + task.reaccurance}</div>
+      <div>{(task.reaccurance !== null && Date.now() < new Date(task.start || "").getTime()) && "This task has been completed for this period"}</div>
+      {!(task.status === "Completed") && <Button onClick={()=>completeTask()}>Complete</Button>}
+
     </li>
   )
 }
