@@ -20,7 +20,7 @@ export default function Task({task, refetchTasks}: {task: Task, refetchTasks: ()
   }
 
   return (
-    <li className='min-w-40 max-w-72 rounded-sm bg-background-light p-2 relative overflow-hidden h-11 hover:h-32 transition-all flex flex-col items-center hover:items-start gap-2'>
+    <li className='min-w-40 max-w-72 rounded-sm bg-background-light p-2 relative overflow-hidden h-11 hover:h-44 transition-all flex flex-col items-center hover:items-start gap-2'>
       {task.deadline !== null && <LoadingBar completed={task.status === "Completed" || (task.reaccurance !== null && Date.now() < new Date(task.start || "").getTime())} percentage={percentage} />}
       <div className='flex justify-between w-full items-center gap-6 capitalize'>
         <div className="truncate font-semibold flex gap-2 items-center">{task.reaccurance !== null && <RiRestartLine className="text-gray-400" />} <span>{task.title}</span></div>
@@ -28,8 +28,8 @@ export default function Task({task, refetchTasks}: {task: Task, refetchTasks: ()
       </div>
       {(percentage >= 90 && <div className={`${percentage === 100 ? "text-light-red" : "text-yellow-200"}`}>{percentage === 100 ? "This task has exceeded its deadline" : "This task is about to exceed its deadline"}</div>)}
       <div className="capitalize">{task.reaccurance !== null && "This task reaccurs " + task.reaccurance}</div>
-      <div>{(task.reaccurance !== null && Date.now() < new Date(task.start || "").getTime()) && "This task has been completed for this period"}</div>
-      {!(task.status === "Completed") && <Button onClick={()=>completeTask()}>Complete</Button>}
+      <div>{(task.reaccurance !== null && Date.now() < new Date(task.start || "").getTime()) && "This task has been completed for this period, reaccurs: " + new Date(task.start || "").toLocaleDateString()}</div>
+      {(!(task.status === "Completed")  && !(task.reaccurance !== null && Date.now() < new Date(task.start || "").getTime())) && <Button onClick={()=>completeTask()}>Complete</Button>}
 
     </li>
   )
