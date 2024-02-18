@@ -31,12 +31,12 @@ export default function QuickInfo({client, statistics, addingTask, setAddTask, t
 
   return (
     <div className='flex gap-4 h-[calc(100dvh-16em)] w-full overflow-y-scroll scrollthumb pr-6'>
-      <div className="flex flex-col w-full gap-2 flex-1">
+      <div className="flex flex-col w-full gap-2 flex-1 ml-2">
         <div className='flex justify-between w-full'>
           <label htmlFor="note" >Note</label>
         <button onClick={() => handleSaveNote(editing)} className="flex gap-2 items-center hover:text-light-blue" >< FaPen /> {!editing ? "Edit" : "Save"}</button>
         </div>
-        <textarea name="note" disabled={!editing} className={`min-h-52 ${editing ? "ring-light-purple" : "ring-background-dark"} scrollthumb resize-none ring-2 tranition-all rounded-md relative p-2  bg-background-light text-white  w-full `} value={currentNote} onChange={(e) => setCurrentNote(e.target.value)}></textarea>
+        <textarea name="note" disabled={!editing} className={`min-h-52 ${editing ? "ring-light-purple" : "ring-background-dark"} scrollthumb resize-none ring-2 tranition-all rounded-md relative p-2 bg-background-light text-white  w-full `} value={currentNote} onChange={(e) => setCurrentNote(e.target.value)}></textarea>
       
         <div className='relative mt-2 p-1'>
 
