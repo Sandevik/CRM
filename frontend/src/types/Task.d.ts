@@ -3,7 +3,8 @@ interface Task {
     crmUuid: string,
     start: string | null,
     deadline: string | null,
-    reaccurance: TaskReaccurance,
+    recurrence: TaskReaccurance,
+    recurrenceCount: number,
     status: TaskStatus,
     clientUuid: string | null,
     title: string | null,
@@ -12,5 +13,5 @@ interface Task {
     percentage?: number;
 }
 
-type TaskReaccurance = "dayly" | "weekly" | "monthly" | "yearly" | "everyOtherWeek" | "everyOtherMonth" | null;
+type TaskRecurrence = "dayly" | "weekly" | "monthly" | "yearly" | "everyOtherWeek" | "everyOtherMonth" | null;
 type TaskStatus = "Ongoing" | "Completed" | null

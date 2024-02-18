@@ -4,7 +4,7 @@ use chrono::{DateTime, NaiveDateTime, TimeZone, Utc};
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 
-use crate::{middleware::owns_or_admin_middleware::{validator, RequiresUuid}, models::task::{Reaccurance, Task, TaskStatus}, AppState};
+use crate::{middleware::owns_or_admin_middleware::{validator, RequiresUuid}, models::task::{Recurrence, Task, TaskStatus}, AppState};
 use crate::routes::Response;
 
 
@@ -25,7 +25,8 @@ struct CreateTodoRequest {
     #[serde(rename(deserialize = "crmUuid"))]
     crm_uuid: String,
     deadline: Option<i64>,
-    reaccurance: Option<String>,
+    start: Option<i64>,
+    recurrence: Option<String>,
     status: Option<String>,
     #[serde(rename(deserialize = "clientUuid"))]
     client_uuid: Option<String>,
@@ -34,16 +35,18 @@ struct CreateTodoRequest {
 
 #[post("/create")]
 async fn create_task(data: web::Data<AppState>, body: web::Json<CreateTodoRequest>) -> impl Responder {
+    let custom_start_date: Option<DateTime<Utc>> = match body.start {None => Task::default().start, Some(i) => Some(Utc.from_local_datetime(&NaiveDateTime::from_timestamp_millis(i).expect("Could not convert milliseconds to date")).unwrap())};
     let deadline: Option<DateTime<Utc>> = match body.deadline {None => None, Some(i) => Some(Utc.from_local_datetime(&NaiveDateTime::from_timestamp_millis(i).expect("Could not convert milliseconds to date")).unwrap())};
     let crm_uuid: Uuid = Uuid::parse_str(&body.crm_uuid).unwrap_or_default();
     let client_uuid: Option<Uuid> = match &body.client_uuid { Some(uuid) => Some(Uuid::parse_str(&uuid).unwrap_or_default()), None => None};
-    let reaccurance: Option<Reaccurance> = match &body.reaccurance {None => None, Some(str) => Reaccurance::from_string(str)};
+    let recurrence: Option<Recurrence> = match &body.recurrence {None => None, Some(str) => Recurrence::from_string(str)};
     let todo: Task = Task {
         client_uuid, 
         crm_uuid, 
-        start: Some(Utc::now()),
+        start: custom_start_date,
         deadline, 
-        reaccurance,
+        recurrence_count: match &recurrence {None => None, Some(_) => Some(1)},
+        recurrence,
         title: body.title.clone(),
         status: if let None = &body.status {None} else {Some(TaskStatus::from_string(&body.status.clone().unwrap()))},
         ..Task::default()
@@ -68,7 +71,7 @@ struct ByClientRequestQuery {
 async fn get_by_client(data: web::Data<AppState>, query: web::Query<ByClientRequestQuery>) -> impl Responder {
     match Task::get_by_client_uuid(&Uuid::parse_str(&query.client_uuid).unwrap_or_default(), &Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), &data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
-        Ok(tasks) => HttpResponse::Ok().json(Response::ok("Successfully fetched tasks", Some(tasks)))
+        Ok(tasks) =>  HttpResponse::Ok().json(Response::ok("Successfully fetched tasks", Some(tasks)))
     }
 }
 

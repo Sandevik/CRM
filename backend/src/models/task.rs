@@ -6,9 +6,9 @@ use uuid::Uuid;
 
 use crate::AppState;
 
-use super::{meeting::get_days_from_month, Model};
+use super::Model;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub enum TaskStatus {
     Completed, 
     Ongoing,
@@ -32,8 +32,8 @@ impl TaskStatus {
     }
 }
 
-#[derive(Serialize, Deserialize)]
-pub enum Reaccurance {
+#[derive(Serialize, Deserialize, Debug)]
+pub enum Recurrence {
     Dayly,
     Weekly,
     Monthly,
@@ -42,38 +42,40 @@ pub enum Reaccurance {
     EveryOtherMonth,
 }
 
-impl Reaccurance {
+impl Recurrence {
     pub fn stringify(&self) -> String {
         match self {
-            Reaccurance::Dayly => "dayly".to_string(),
-            Reaccurance::Weekly => "weekly".to_string(),
-            Reaccurance::Monthly => "monthly".to_string(),
-            Reaccurance::Yearly => "yearly".to_string(),
-            Reaccurance::EveryOtherWeek => "everyOtherWeek".to_string(),
-            Reaccurance::EveryOtherMonth => "everyOtherMonth".to_string()
+            Recurrence::Dayly => "dayly".to_string(),
+            Recurrence::Weekly => "weekly".to_string(),
+            Recurrence::Monthly => "monthly".to_string(),
+            Recurrence::Yearly => "yearly".to_string(),
+            Recurrence::EveryOtherWeek => "everyOtherWeek".to_string(),
+            Recurrence::EveryOtherMonth => "everyOtherMonth".to_string()
         }
     }
     pub fn from_string(string: &str) -> Option<Self> {
         match string {
-            "dayly" => Some(Reaccurance::Dayly),
-            "weekly" => Some(Reaccurance::Weekly),
-            "monthly" => Some(Reaccurance::Monthly),
-            "yearly" => Some(Reaccurance::Yearly),
-            "everyOtherWeek" => Some(Reaccurance::EveryOtherWeek),
-            "everyOtherMonth" => Some(Reaccurance::EveryOtherMonth),
+            "dayly" => Some(Recurrence::Dayly),
+            "weekly" => Some(Recurrence::Weekly),
+            "monthly" => Some(Recurrence::Monthly),
+            "yearly" => Some(Recurrence::Yearly),
+            "everyOtherWeek" => Some(Recurrence::EveryOtherWeek),
+            "everyOtherMonth" => Some(Recurrence::EveryOtherMonth),
             _ => None
         }
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Task {
     pub uuid: Uuid,
     #[serde(rename(deserialize = "crmUuid", serialize = "crmUuid"))]
     pub crm_uuid: Uuid,
     pub start: Option<DateTime<Utc>>,
     pub deadline: Option<DateTime<Utc>>,
-    pub reaccurance: Option<Reaccurance>,
+    pub recurrence: Option<Recurrence>,
+    #[serde(rename(serialize = "recurrenceCount", deserialize = "recurrenceCount"))]
+    pub recurrence_count: Option<i32>,
     pub status: Option<TaskStatus>,
     #[serde(rename(deserialize = "clientUuid", serialize = "clientUuid"))]
     pub client_uuid: Option<Uuid>,
@@ -91,7 +93,8 @@ impl Model for Task {
             client_uuid: match Uuid::parse_str(row.get("client_uuid")) {Err(_) => None, Ok(uuid) => Some(uuid)},
             start: row.get("start"),
             deadline: row.get("deadline"),
-            reaccurance: match row.get("reaccurance") {None => None, Some(str) => Reaccurance::from_string(str)},
+            recurrence: match row.get("recurrence") {None => None, Some(str) => Recurrence::from_string(str)},
+            recurrence_count: row.get("recurrence_count"),
             title: row.get("title"),
             status: match row.get("status") {None => None, Some(status_str) => Some(TaskStatus::from_string(status_str))},
             added: row.get("added"),
@@ -102,7 +105,6 @@ impl Model for Task {
 }
 
 impl Task {
-
     pub fn default() -> Self {
         let year: i32 = Utc::now().year();
         let month: u32 = Utc::now().month();
@@ -114,7 +116,8 @@ impl Task {
             client_uuid: None,
             start: Some(date),
             deadline: None,
-            reaccurance: None,
+            recurrence: None,
+            recurrence_count: None,
             status: None,
             title: None,
             added: Utc::now(),
@@ -125,14 +128,14 @@ impl Task {
 
 
     pub async fn insert(&self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
-        let start: Option<DateTime<Utc>> = match &self.start {None => None, Some(start) => Some(start.with_hour(0).unwrap().with_minute(0).unwrap().with_second(0).unwrap())};
-        match sqlx::query("INSERT INTO `crm` . `tasks` (`uuid`, `crm_uuid`, `client_uuid`, `start`, `deadline`, `reaccurance`, `status`, `title`, `added`, `updated`) VALUES (?,?,?,?,?,?,?,?,?,?)")
+        match sqlx::query("INSERT INTO `crm` . `tasks` (`uuid`, `crm_uuid`, `client_uuid`, `start`, `deadline`, `recurrence`, `recurrence_count`, `status`, `title`, `added`, `updated`) VALUES (?,?,?,?,?,?,?,?,?,?,?)")
             .bind(&self.uuid.hyphenated().to_string())
             .bind(&self.crm_uuid.hyphenated().to_string())
             .bind(match &self.client_uuid { None => None, Some(uuid) => Some(uuid.hyphenated().to_string())})
-            .bind(start)
+            .bind(&self.start)
             .bind(&self.deadline)
-            .bind(match &self.reaccurance {None => None, Some(reaccurance) => Some(reaccurance.stringify())})
+            .bind(match &self.recurrence {None => None, Some(rec) => Some(rec.stringify())})
+            .bind(0)
             .bind(match &self.status {None => None, Some(status) => Some(status.stringify())})
             .bind(&self.title)
             .bind(&self.added)
@@ -145,7 +148,7 @@ impl Task {
     }
 
     pub async fn get_by_client_uuid(client_uuid: &Uuid, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<Vec<Self>, sqlx::Error> {
-        match sqlx::query("SELECT *, FLOOR((((UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(`start`)) / (UNIX_TIMESTAMP(`deadline`) - UNIX_TIMESTAMP(`added`))) * 100)) as percentage FROM `crm` . `tasks` WHERE `crm_uuid` = ? AND `client_uuid` = ? ORDER BY `status` DESC, ISNULL(`percentage`), `percentage` DESC")
+        match sqlx::query("SELECT *, FLOOR((((UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(`start`)) / (UNIX_TIMESTAMP(`deadline`) - UNIX_TIMESTAMP(`start`))) * 100)) as percentage FROM `crm` . `tasks` WHERE `crm_uuid` = ? AND `client_uuid` = ? ORDER BY `status` DESC, ISNULL(`percentage`), `percentage` DESC, `recurrence` DESC")
             .bind(crm_uuid.hyphenated().to_string())
             .bind(client_uuid.hyphenated().to_string())
             .fetch_all(&data.pool)
@@ -175,7 +178,7 @@ impl Task {
                 if let None = task_optn {return Err(sqlx::Error::RowNotFound)} else {
                     let task = task_optn.unwrap();
 
-                    match task.reaccurance {
+                    match task.recurrence {
                         None => {
                             query.push_str("`status` = 'completed' WHERE `uuid` = ? AND `crm_uuid` = ?");
                             return match sqlx::query(&query)
@@ -187,13 +190,14 @@ impl Task {
                                 Ok(_) => Ok(())
                             };
                         },
-                        Some(reaccurance) => {
-                            query.push_str("`status` = 'ongoing', `start` = ?, `deadline` = ? WHERE `uuid` = ? AND `crm_uuid` = ?");
-                            match reaccurance {
-                                Reaccurance::Dayly => {
+                        Some(rec) => {
+                            query.push_str("`status` = 'ongoing', `start` = ?, `deadline` = ?, `recurrence_coun` = ? WHERE `uuid` = ? AND `crm_uuid` = ?");
+                            match rec {
+                                Recurrence::Dayly => {
                                     return match sqlx::query(&query)
                                         .bind(&task.start.unwrap().checked_add_days(Days::new(1)).unwrap())
                                         .bind(&task.deadline.unwrap().checked_add_days(Days::new(1)).unwrap())
+                                        .bind(match &self.recurrence_count {None => Some(1), Some(i) => Some(i+1)})
                                         .bind(&self.uuid.hyphenated().to_string())
                                         .bind(&self.crm_uuid.hyphenated().to_string())
                                         .execute(&data.pool)
@@ -202,10 +206,11 @@ impl Task {
                                             Ok(_) => Ok(())
                                         };
                                 },
-                                Reaccurance::Weekly => {
+                                Recurrence::Weekly => {
                                     return match sqlx::query(&query)
                                         .bind(&task.start.unwrap().checked_add_days(Days::new(7)).unwrap())
                                         .bind(&task.deadline.unwrap().checked_add_days(Days::new(7)).unwrap())
+                                        .bind(match &self.recurrence_count {None => Some(1), Some(i) => Some(i+1)})
                                         .bind(&self.uuid.hyphenated().to_string())
                                         .bind(&self.crm_uuid.hyphenated().to_string())
                                         .execute(&data.pool)
@@ -214,10 +219,11 @@ impl Task {
                                             Ok(_) => Ok(())
                                         };
                                 },
-                                Reaccurance::Monthly => {
+                                Recurrence::Monthly => {
                                     return match sqlx::query(&query)
                                         .bind(&task.start.unwrap().checked_add_months(Months::new(1)).unwrap())
                                         .bind(&task.deadline.unwrap().checked_add_months(Months::new(1)).unwrap())
+                                        .bind(match &self.recurrence_count {None => Some(1), Some(i) => Some(i+1)})
                                         .bind(&self.uuid.hyphenated().to_string())
                                         .bind(&self.crm_uuid.hyphenated().to_string())
                                         .execute(&data.pool)
@@ -226,10 +232,11 @@ impl Task {
                                             Ok(_) => Ok(())
                                         };
                                 },
-                                Reaccurance::Yearly => {
+                                Recurrence::Yearly => {
                                     return match sqlx::query(&query)
                                     .bind(&task.start.unwrap().checked_add_months(Months::new(12)).unwrap())
                                     .bind(&task.deadline.unwrap().checked_add_months(Months::new(12)).unwrap())
+                                    .bind(match &self.recurrence_count {None => Some(1), Some(i) => Some(i+1)})
                                     .bind(&self.uuid.hyphenated().to_string())
                                     .bind(&self.crm_uuid.hyphenated().to_string())
                                     .execute(&data.pool)
@@ -238,10 +245,11 @@ impl Task {
                                         Ok(_) => Ok(())
                                     };
                                 },
-                                Reaccurance::EveryOtherWeek => {
+                                Recurrence::EveryOtherWeek => {
                                     return match sqlx::query(&query)
                                     .bind(&task.start.unwrap().checked_add_days(Days::new(14)).unwrap())
                                     .bind(&task.deadline.unwrap().checked_add_days(Days::new(14)).unwrap())
+                                    .bind(match &self.recurrence_count {None => Some(1), Some(i) => Some(i+1)})
                                     .bind(&self.uuid.hyphenated().to_string())
                                     .bind(&self.crm_uuid.hyphenated().to_string())
                                     .execute(&data.pool)
@@ -250,10 +258,11 @@ impl Task {
                                         Ok(_) => Ok(())
                                     };
                                 },
-                                Reaccurance::EveryOtherMonth => {
+                                Recurrence::EveryOtherMonth => {
                                     return match sqlx::query(&query)
                                     .bind(&task.start.unwrap().checked_add_months(Months::new(2)).unwrap())
                                     .bind(&task.deadline.unwrap().checked_add_months(Months::new(2)).unwrap())
+                                    .bind(match &self.recurrence_count {None => Some(1), Some(i) => Some(i+1)})
                                     .bind(&self.uuid.hyphenated().to_string())
                                     .bind(&self.crm_uuid.hyphenated().to_string())
                                     .execute(&data.pool)
