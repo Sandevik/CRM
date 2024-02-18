@@ -1,5 +1,5 @@
 use actix_web::web;
-use chrono::{DateTime, Datelike, Days, Months, NaiveDate, NaiveDateTime, NaiveTime, Timelike, Utc};
+use chrono::{DateTime, Datelike, Days, Months, NaiveDate, NaiveTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::Row;
 use uuid::Uuid;
@@ -191,7 +191,7 @@ impl Task {
                             };
                         },
                         Some(rec) => {
-                            query.push_str("`status` = 'ongoing', `start` = ?, `deadline` = ?, `recurrence_coun` = ? WHERE `uuid` = ? AND `crm_uuid` = ?");
+                            query.push_str("`status` = 'ongoing', `start` = ?, `deadline` = ?, `recurrence_count` = ? WHERE `uuid` = ? AND `crm_uuid` = ?");
                             match rec {
                                 Recurrence::Dayly => {
                                     return match sqlx::query(&query)
