@@ -45,7 +45,7 @@ export default function QuickInfo({client, statistics, addingTask, setAddTask, t
               <span>Tasks</span>
               <Button className='' onClick={()=>setAddTask(true)}>New Task</Button>
             </div>
-            <ul className="flex flex-wrap items-center justify-center gap-4 ">
+            <ul className="flex flex-wrap items-center justify-center sm:justify-start  gap-4 ">
               {tasks.map(task => (<Task key={task.added} task={task} refetchTasks={refetchTasks}/>))}
               {tasks.length === 0 && <div>No tasks found</div>}
             </ul>

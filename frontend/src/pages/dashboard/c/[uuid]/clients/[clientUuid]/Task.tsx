@@ -20,14 +20,15 @@ export default function Task({task, refetchTasks}: {task: Task, refetchTasks: ()
   }
 
   return (
-    <li className='min-w-40 max-w-72 rounded-sm bg-background-light p-2 relative overflow-hidden h-11 hover:h-44 transition-all flex flex-col items-center hover:items-start gap-2'>
+    <li className='min-w-40 sm:w-full max-w-72 rounded-sm bg-background-light p-2 relative overflow-hidden h-11 hover:h-44 transition-all flex flex-col items-center hover:items-start gap-2 '>
       {task.deadline !== null && <LoadingBar completed={task.status === "Completed" || (task.reaccurance !== null && Date.now() < new Date(task.start || "").getTime())} percentage={percentage} />}
       <div className='flex justify-between w-full items-center gap-6 capitalize'>
         <div className="truncate font-semibold flex gap-2 items-center">{task.reaccurance !== null && <RiRestartLine className="text-gray-400" />} <span>{task.title}</span></div>
         {task.status === "Completed" || (task.reaccurance !== null && Date.now() < new Date(task.start || "").getTime()) ? <FaCircleCheck className="text-green-200"/> : task.deadline !== null && percentage !== 0 && (percentage >= 90 && <FaTriangleExclamation className={`${percentage === 100 ? "text-light-red" : "text-yellow-200"}`} />)}
       </div>
+
       {(percentage >= 90 && <div className={`${percentage === 100 ? "text-light-red" : "text-yellow-200"}`}>{percentage === 100 ? "This task has exceeded its deadline" : "This task is about to exceed its deadline"}</div>)}
-      <div className="capitalize">{task.reaccurance !== null && "This task reaccurs " + task.reaccurance}</div>
+      {task.reaccurance !== null && <div className="">This task reaccurs <span className="underline">{task.reaccurance}</span></div>}
       <div>{(task.reaccurance !== null && Date.now() < new Date(task.start || "").getTime()) && "This task has been completed for this period, reaccurs: " + new Date(task.start || "").toLocaleDateString()}</div>
       {(!(task.status === "Completed")  && !(task.reaccurance !== null && Date.now() < new Date(task.start || "").getTime())) && <Button onClick={()=>completeTask()}>Complete</Button>}
 
