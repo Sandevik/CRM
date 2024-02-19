@@ -79,6 +79,8 @@ pub struct Task {
     pub status: Option<TaskStatus>,
     #[serde(rename(deserialize = "clientUuid", serialize = "clientUuid"))]
     pub client_uuid: Option<Uuid>,
+    #[serde(rename(deserialize = "employeeUuid", serialize = "employeeUuid"))]
+    pub employee_uuid: Option<Uuid>,
     pub title: Option<String>,
     pub added: DateTime<Utc>,
     pub updated: DateTime<Utc>,
@@ -91,6 +93,7 @@ impl Model for Task {
             uuid: Uuid::parse_str(row.get("uuid")).unwrap_or_default(),
             crm_uuid: Uuid::parse_str(row.get("crm_uuid")).unwrap_or_default(),
             client_uuid: match Uuid::parse_str(row.get("client_uuid")) {Err(_) => None, Ok(uuid) => Some(uuid)},
+            employee_uuid: match row.get::<Option<String>, &str>("employee_uuid") {None => None, Some(uuid_str) => match Uuid::parse_str(&uuid_str) {Err(_) => None, Ok(uuid) => Some(uuid)}},
             start: row.get("start"),
             deadline: row.get("deadline"),
             recurrence: match row.get("recurrence") {None => None, Some(str) => Recurrence::from_string(str)},
@@ -114,6 +117,7 @@ impl Task {
             uuid: Uuid::new_v4(),
             crm_uuid: Uuid::new_v4(),
             client_uuid: None,
+            employee_uuid: None,
             start: Some(date),
             deadline: None,
             recurrence: None,
@@ -128,10 +132,11 @@ impl Task {
 
 
     pub async fn insert(&self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
-        match sqlx::query("INSERT INTO `crm` . `tasks` (`uuid`, `crm_uuid`, `client_uuid`, `start`, `deadline`, `recurrence`, `recurrence_count`, `status`, `title`, `added`, `updated`) VALUES (?,?,?,?,?,?,?,?,?,?,?)")
+        match sqlx::query("INSERT INTO `crm` . `tasks` (`uuid`, `crm_uuid`, `client_uuid`, `employee_uuid`, `start`, `deadline`, `recurrence`, `recurrence_count`, `status`, `title`, `added`, `updated`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)")
             .bind(&self.uuid.hyphenated().to_string())
             .bind(&self.crm_uuid.hyphenated().to_string())
             .bind(match &self.client_uuid { None => None, Some(uuid) => Some(uuid.hyphenated().to_string())})
+            .bind(match &self.employee_uuid { None => None, Some(uuid) => Some(uuid.hyphenated().to_string())})
             .bind(&self.start)
             .bind(&self.deadline)
             .bind(match &self.recurrence {None => None, Some(rec) => Some(rec.stringify())})
@@ -148,7 +153,7 @@ impl Task {
     }
 
     pub async fn get_by_client_uuid(client_uuid: &Uuid, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<Vec<Self>, sqlx::Error> {
-        match sqlx::query("SELECT *, FLOOR((((UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(`start`)) / (UNIX_TIMESTAMP(`deadline`) - UNIX_TIMESTAMP(`start`))) * 100)) as percentage FROM `crm` . `tasks` WHERE `crm_uuid` = ? AND `client_uuid` = ? ORDER BY `status` DESC, ISNULL(`percentage`), `percentage` DESC, `recurrence` DESC")
+        match sqlx::query("SELECT *, FLOOR((((UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(`start`)) / (UNIX_TIMESTAMP(`deadline`) - UNIX_TIMESTAMP(`start`))) * 100)) as percentage FROM `crm` . `tasks` WHERE `crm_uuid` = ? AND `client_uuid` = ? ORDER BY ISNULL(`percentage`), `percentage` DESC, `recurrence` DESC, `status` DESC")
             .bind(crm_uuid.hyphenated().to_string())
             .bind(client_uuid.hyphenated().to_string())
             .fetch_all(&data.pool)

@@ -5,12 +5,17 @@ import request from '@/utils/request';
 import React, { useContext, useEffect, useState } from 'react'
 import { IoClose, IoCalendar } from 'react-icons/io5';
 
+interface Props {
+    active: boolean, 
+    client: Client | null, 
+    setActive: React.Dispatch<React.SetStateAction<boolean>>, 
+    refetchTasks: () => Promise<void>
+}
 
 
-
-export default function AddTask({active, setActive, client, refetchTasks}: {active: boolean, client: Client | null, setActive: React.Dispatch<React.SetStateAction<boolean>>, refetchTasks: () => Promise<void>}) {
+export default function AddTask({active, setActive, client, refetchTasks}: Props) {
     const {crm} = useContext(CurrentCrmContext);
-    const [form, setForm] = useState<Omit<Task, "added" | "updated" | "recurrenceCount" | "uuid">>({
+    const [form, setForm] = useState<Omit<Task, "added" | "updated" | "recurrenceCount" | "uuid" | "employeeUuid">>({
         deadline: null,
         crmUuid: crm?.crmUuid || "" ,
         title: null,

@@ -84,6 +84,7 @@ impl Database {
         `recurrence_count` INT,
         `status` VARCHAR(10),
         `client_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci,
+        `employee_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci,
         `title` VARCHAR(50),
         `added` DATETIME,
         `updated` DATETIME

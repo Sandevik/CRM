@@ -8,7 +8,7 @@ import Task from './Task';
 
 
 
-export default function QuickInfo({client, statistics, addingTask, setAddTask, tasks, refetchTasks}: {client: Client | null, statistics: Statistics, addingTask: boolean, setAddTask: React.Dispatch<React.SetStateAction<boolean>>, tasks: Task[], refetchTasks: () => Promise<void>}) {
+export default function QuickInfo({client, statistics, addingTask, setAddTask, tasks, refetchTasks, focusTask}: {client: Client | null, statistics: Statistics, addingTask: boolean, setAddTask: React.Dispatch<React.SetStateAction<boolean>>, tasks: Task[], refetchTasks: () => Promise<void>, focusTask: (task: Task) => void}) {
   const {crm} = useContext(CurrentCrmContext);
   const [currentNote, setCurrentNote] = useState<string>(client?.note || "");
   const [editing, setEditing] = useState<boolean>(false);
@@ -34,7 +34,7 @@ export default function QuickInfo({client, statistics, addingTask, setAddTask, t
       <div className="flex flex-col w-full gap-2 flex-1 ml-2">
         <div className='flex justify-between w-full'>
           <label htmlFor="note" >Note</label>
-        <button onClick={() => handleSaveNote(editing)} className="flex gap-2 items-center hover:text-light-blue" >< FaPen /> {!editing ? "Edit" : "Save"}</button>
+          <button onClick={() => handleSaveNote(editing)} className="flex gap-2 items-center hover:text-light-blue" >< FaPen /> {!editing ? "Edit" : "Save"}</button>
         </div>
         <textarea name="note" disabled={!editing} className={`min-h-52 ${editing ? "ring-light-purple" : "ring-background-dark"} scrollthumb resize-none ring-2 tranition-all rounded-md relative p-2 bg-background-light text-white  w-full `} value={currentNote} onChange={(e) => setCurrentNote(e.target.value)}></textarea>
       
@@ -46,18 +46,11 @@ export default function QuickInfo({client, statistics, addingTask, setAddTask, t
               <Button className='' onClick={()=>setAddTask(true)}>New Task</Button>
             </div>
             <ul className="flex flex-wrap items-center justify-center sm:justify-start  gap-4 ">
-              {tasks.map(task => (<Task key={task.added} task={task} refetchTasks={refetchTasks}/>))}
+              {tasks.map(task => (<Task key={task.added} focusTask={focusTask} task={task} refetchTasks={refetchTasks}/>))}
               {tasks.length === 0 && <div>No tasks found</div>}
             </ul>
           </div>
-          
-
-          
-          <br />
-          filer??
         </div>
-      
-      
       </div>
 
       <div className="w-[17em] bg-background-light p-2 rounded-md flex justify-between flex-col mt-8">

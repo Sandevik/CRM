@@ -16,6 +16,7 @@ import Meetings from './Meetings';
 import AddMeeting from '@/components/AddMeeting';
 import EditMeeting from './EditMeeting';
 import AddTask from './AddTask';
+import FocusedTask from './FocusedTask';
 
 export interface Statistics {
   meetings_count: number,
@@ -39,6 +40,7 @@ export default function index() {
   const [statistics, setStatistics] = useState<Statistics>({meetings_count: 0, entries_count: 0, task_count: 0, tasks_todo_count: 0});
   const [addTask, setAddTask] = useState<boolean>(false);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [focusedTask, setFocusedTask] = useState<Task | null>(null);
 
   useEffect(()=>{
     (async () => {
@@ -98,6 +100,8 @@ export default function index() {
       }
     }
   }
+
+  
   
 
   useEffect(()=>{
@@ -105,6 +109,7 @@ export default function index() {
     setNewMeetingActive(false);
     setEditMeeting(null);
     setAddTask(false);
+    setFocusedTask(null);
   },[currentView])
 
   return (
@@ -132,7 +137,7 @@ export default function index() {
 
             <div className="mt-3">
             {currentView === "quick" ?
-              <QuickInfo client={client} statistics={statistics} addingTask={addTask} setAddTask={setAddTask} tasks={tasks} refetchTasks={fetchTasks}/>
+              <QuickInfo focusTask={(task: Task) => {setFocusedTask(task)}} client={client} statistics={statistics} addingTask={addTask} setAddTask={setAddTask} tasks={tasks} refetchTasks={fetchTasks}/>
               : currentView === "entries" ?
               <Entries refetchEntries={fetchEntries} entries={entries} client={client} />
               : 
@@ -146,6 +151,7 @@ export default function index() {
           <AddMeeting closePopup={() => setNewMeetingActive(false)} active={newMeetingActive} onSuccessfulSubmit={fetchMeetings} withClientUuid={client?.uuid} />
           <EditMeeting closePopup={() => setEditMeeting(null)} _meeting={editMeeting} onSuccessfulSubmit={fetchMeetings} />
         </div>
+        {/* <FocusedTask setTask={setFocusedTask} task={focusedTask} refetchTasks={fetchTasks} /> */}
         <AddTask active={addTask} setActive={setAddTask} client={client} refetchTasks={fetchTasks} />
         <NewEntryForm active={newEntryActive} refetchEntries={fetchEntries} close={() => setNewEntryActive(false)} client={client}/>
         <EditClient initialClient={client} active={edit} _setClient={setClient} setEdit={setEdit}/>

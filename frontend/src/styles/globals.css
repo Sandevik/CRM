@@ -76,12 +76,10 @@ html::-webkit-scrollbar-thumb {
 }
 
 
-
-.task-warning {
-  display: none;
-  position:absolute;
-  top: -1em;
+.task-content {
+  display:none;
 }
-.task-warning-icon:hover ~ .task-warning {
-  display: block;
+
+.task:hover .task-content {
+  display: flex;
 }
