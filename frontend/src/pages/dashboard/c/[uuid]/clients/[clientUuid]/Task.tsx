@@ -7,7 +7,7 @@ import { RiRestartLine } from "react-icons/ri";
 import { TiCog } from "react-icons/ti";
 
 
-export default function Task({task, refetchTasks, focusTask}: {task: Task, refetchTasks: () => Promise<void>, focusTask: (task: Task) => void}) {
+export default function Task({task, refetchTasks, focusTask}: {task: Task, refetchTasks: () => Promise<void>, focusTask: (task: Task | null) => void}) {
   const {crm} = useContext(CurrentCrmContext);
   const percentage: number = (task?.percentage || 0) > 100 ? 100 : (task?.percentage || 0) < 0 ? 0 : (task?.percentage || 0);
 
@@ -31,11 +31,11 @@ export default function Task({task, refetchTasks, focusTask}: {task: Task, refet
       </div>
 
       <div className=' flex-col justify-between h-full w-full task-content'>
-        {(percentage >= 90 && <div className={`${percentage === 100 ? "text-light-red" : "text-yellow-200"}`}>{percentage === 100 ? "This task has exceeded its deadline" : "This task is about to exceed its deadline"}</div>)}
+        {!(task.status === "Completed") && (percentage >= 90 && <div className={`${percentage === 100 ? "text-light-red" : "text-yellow-200"}`}>{percentage === 100 ? "This task has exceeded its deadline" : "This task is about to exceed its deadline"}</div>)}
         {task.recurrence !== null && <div className="">This task reccurs <span className="underline">{task.recurrence}</span></div>}
         <div>{(task.recurrence !== null && Date.now() < new Date(task.start || "").getTime()) && "This task has been completed for this period, reaccurs: " + new Date(task.start || "").toLocaleDateString()}</div>
         <div className='w-full flex justify-between items-center'>
-          {(!(task.status === "Completed")  && !(task.recurrence !== null && Date.now() < new Date(task.start || "").getTime())) && <Button onClick={()=>completeTask()}>Complete</Button>}
+          {(!(task.status === "Completed") && !(task.recurrence !== null && Date.now() < new Date(task.start || "").getTime())) && <Button onClick={()=>completeTask()}>Complete</Button>}
           <TiCog onClick={() => focusTask(task)} className="text-3xl hover:rotate-45 transition-all hover:text-light-blue cursor-pointer"/>
         </div>
       </div>

@@ -5,10 +5,11 @@ import { FaPen } from 'react-icons/fa';
 import { Statistics } from '.';
 import Button from '@/components/Button';
 import Task from './Task';
+import TaskList from './TaskList';
 
 
 
-export default function QuickInfo({client, statistics, addingTask, setAddTask, tasks, refetchTasks, focusTask}: {client: Client | null, statistics: Statistics, addingTask: boolean, setAddTask: React.Dispatch<React.SetStateAction<boolean>>, tasks: Task[], refetchTasks: () => Promise<void>, focusTask: (task: Task) => void}) {
+export default function QuickInfo({client, statistics, addingTask, setAddTask, tasks, refetchTasks, focusTask}: {client: Client | null, statistics: Statistics, addingTask: boolean, setAddTask: React.Dispatch<React.SetStateAction<boolean>>, tasks: Task[], refetchTasks: () => Promise<void>, focusTask: React.Dispatch<React.SetStateAction<Task | null>>}) {
   const {crm} = useContext(CurrentCrmContext);
   const [currentNote, setCurrentNote] = useState<string>(client?.note || "");
   const [editing, setEditing] = useState<boolean>(false);
@@ -45,10 +46,7 @@ export default function QuickInfo({client, statistics, addingTask, setAddTask, t
               <span>Tasks</span>
               <Button className='' onClick={()=>setAddTask(true)}>New Task</Button>
             </div>
-            <ul className="flex flex-wrap items-center justify-center sm:justify-start  gap-4 ">
-              {tasks.map(task => (<Task key={task.added} focusTask={focusTask} task={task} refetchTasks={refetchTasks}/>))}
-              {tasks.length === 0 && <div>No tasks found</div>}
-            </ul>
+            <TaskList tasks={tasks} refetchTasks={refetchTasks} focusTask={focusTask}/>
           </div>
         </div>
       </div>

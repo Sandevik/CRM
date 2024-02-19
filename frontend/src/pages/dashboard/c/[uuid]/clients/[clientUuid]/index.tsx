@@ -137,7 +137,7 @@ export default function index() {
 
             <div className="mt-3">
             {currentView === "quick" ?
-              <QuickInfo focusTask={(task: Task) => {setFocusedTask(task)}} client={client} statistics={statistics} addingTask={addTask} setAddTask={setAddTask} tasks={tasks} refetchTasks={fetchTasks}/>
+              <QuickInfo focusTask={setFocusedTask} client={client} statistics={statistics} addingTask={addTask} setAddTask={setAddTask} tasks={tasks} refetchTasks={fetchTasks}/>
               : currentView === "entries" ?
               <Entries refetchEntries={fetchEntries} entries={entries} client={client} />
               : 
