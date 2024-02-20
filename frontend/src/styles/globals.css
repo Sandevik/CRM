@@ -77,9 +77,12 @@ html::-webkit-scrollbar-thumb {
 
 
 .task-content {
-  display:none;
+  pointer-events: none;
+  opacity: 0;
 }
 
 .task:hover .task-content {
-  display: flex;
+  transition: opacity .15s .05s ease-in-out;
+  pointer-events: all;
+  opacity: 100;
 }
