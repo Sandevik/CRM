@@ -4,7 +4,7 @@ use chrono::{DateTime, NaiveDateTime, TimeZone, Utc};
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 
-use crate::{middleware::owns_or_admin_middleware::validator, models::task::{Recurrence, Task, TaskStatus}, AppState};
+use crate::{middleware::owns_or_admin_middleware::{validator, RequiresUuid}, models::task::{Recurrence, Task, TaskStatus}, AppState};
 use crate::routes::Response;
 
 
@@ -15,7 +15,8 @@ pub fn tasks() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Respons
         .wrap(owns_or_admin_middleware)
         .service(create_task)
         .service(get_by_client)
-        .service(complete_task);
+        .service(complete_task)
+        .service(get_by_crm);
         
     scope
 }
@@ -70,6 +71,15 @@ struct ByClientRequestQuery {
 #[get("/by-client")]
 async fn get_by_client(data: web::Data<AppState>, query: web::Query<ByClientRequestQuery>) -> impl Responder {
     match Task::get_by_client_uuid(&Uuid::parse_str(&query.client_uuid).unwrap_or_default(), &Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), &data).await {
+        Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
+        Ok(tasks) =>  HttpResponse::Ok().json(Response::ok("Successfully fetched tasks", Some(tasks)))
+    }
+}
+
+
+#[get("/by-crm")]
+async fn get_by_crm(data: web::Data<AppState>, query: web::Query<RequiresUuid>) -> impl Responder {
+    match Task::get_by_crm_uuid(&Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), &data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
         Ok(tasks) =>  HttpResponse::Ok().json(Response::ok("Successfully fetched tasks", Some(tasks)))
     }

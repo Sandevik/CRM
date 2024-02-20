@@ -5,7 +5,7 @@ import { FaPen } from 'react-icons/fa';
 import { Statistics } from '.';
 import Button from '@/components/Button';
 import Task from './Task';
-import TaskList from './TaskList';
+import TaskList from '../../../../../../components/TaskList';
 
 
 
@@ -46,7 +46,7 @@ export default function QuickInfo({client, statistics, addingTask, setAddTask, t
               <span>Tasks</span>
               <Button className='' onClick={()=>setAddTask(true)}>New Task</Button>
             </div>
-            <TaskList tasks={tasks} refetchTasks={refetchTasks} focusTask={focusTask}/>
+            <TaskList showClients={false} tasks={tasks} refetchTasks={refetchTasks} focusTask={focusTask}/>
           </div>
         </div>
       </div>

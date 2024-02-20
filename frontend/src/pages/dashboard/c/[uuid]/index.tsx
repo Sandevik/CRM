@@ -1,15 +1,42 @@
+import TaskList from '@/components/TaskList';
 import Meetings from '../../../../components/Meetings';
 import Navbar from './Navbar';
+import { useContext, useEffect, useState } from 'react';
+import { CurrentCrmContext } from '@/context/CurrentCrmContext';
+import request from '@/utils/request';
 
 export default function index() {
+  const {crm} = useContext(CurrentCrmContext);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [focusedTask, setFocusedTask] = useState<Task | null>(null);
   
-  
+  useEffect(()=>{
+    (async () => {
+      await fetchTasks();
+    })();
+  },[crm])
+
+  const fetchTasks = async () => {
+    if (crm?.crmUuid) {
+      let res = await request<Task[]>(`/tasks/by-crm?crmUuid=${crm?.crmUuid}`, {}, "GET");
+      if (res.code === 200 && res.data) {
+        setTasks(res.data);
+      }
+    }
+  }
 
   return (
     <div className='flex h-[calc(100dvh-3em)] p-2'>
-      <main className="flex-grow">
+      <main className="flex-grow ">
         <Navbar />
-        <div>
+        <div className="p-2">
+          
+          <div className="flex flex-col gap-2 my-2">
+            <h3>Tasks</h3>
+            <TaskList showClients={true} tasks={tasks} refetchTasks={fetchTasks} focusTask={setFocusedTask}/>
+          </div>
+
+          <br />
           Some statistics?
           <br />
           Some info?  
