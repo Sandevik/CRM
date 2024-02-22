@@ -1,1 +1,42 @@
-.env 
+# dependencies
+**/node_modules
+**/.pnp
+.pnp.js
+.yarn/install-state.gz
+!*/node_modules/   # Include node_modules in all directories
+
+# testing
+**/coverage
+
+# next.js
+**/.next/
+**/out/
+
+# production
+**/build
+
+# misc
+.DS_Store
+*.pem
+!*/.pem            # Include .pem files in all directories
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+!*/npm-debug.log*  # Include npm-debug.log files in all directories
+!*/yarn-debug.log*  # Include yarn-debug.log files in all directories
+!*/yarn-error.log*  # Include yarn-error.log files in all directories
+
+# local env files
+.env*.local
+!*/.env*          # Include .env files in all directories
+!.env             # Include .env in the current directory
+!**/.env          # Include .env in all directories
+
+# vercel
+**/.vercel
+
+# typescript
+*.tsbuildinfo
+**/next-env.d.ts
