@@ -1,0 +1,4 @@
+-   landing page -> {domain_name}.xyz
+-   crm          -> crm.{domain_name}.xyz
+-   booking      -> booking.{domain_name}.xyz
+-   employee     -> employee.{domain_name}.xyz
