@@ -174,7 +174,7 @@ impl Task {
     }
 
     pub async fn get_task(task_uuid: &Uuid, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<Option<Self>, sqlx::Error> {
-        match sqlx::query("SELECT * FROM `tasks` WHERE `uuid` = ? AND `crm_uuid` = ?")
+        match sqlx::query("SELECT * FROM `crm`.`tasks` WHERE `uuid` = ? AND `crm_uuid` = ?")
             .bind(task_uuid.hyphenated().to_string())
             .bind(crm_uuid.hyphenated().to_string())
             .fetch_optional(&data.pool)
@@ -185,7 +185,7 @@ impl Task {
     }
 
     pub async fn complete_task(&self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
-        let mut query = String::from("UPDATE `tasks` SET ");
+        let mut query = String::from("UPDATE `crm`.`tasks` SET ");
         let task_res = Self::get_task(&self.uuid, &self.crm_uuid, data).await;
         match task_res {
             Err(err) => Err(err),
