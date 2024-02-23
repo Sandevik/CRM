@@ -13,7 +13,7 @@ services:
       context: .
       target: final
     ports:
-      - 8083:8083
+      - 8081:8081
     environment:
       - DATABASE_URL=mysql://avnadmin:AVNS_QkPkFbpLkTB8cco87t7@crm-mysql-crm-9786.a.aivencloud.com:27107/defaultdb?ssl-mode=REQUIRED
       - BACKEND_ADDRESS=0.0.0.0

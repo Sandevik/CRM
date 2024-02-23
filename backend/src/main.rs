@@ -18,8 +18,8 @@ struct AppState {
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
-    let server_address = env::var("BACKEND_SERVER_ADDRESS").unwrap_or("127.0.0.1".to_string());
-    let server_port: u16 = env::var("BACKEND_SERVER_PORT").unwrap_or("8080".to_string()).parse::<u16>().unwrap();
+    let server_address = env::var("BACKEND_SERVER_ADDRESS").unwrap_or("0.0.0.0".to_string());
+    let server_port: u16 = env::var("BACKEND_SERVER_PORT").unwrap_or("8081".to_string()).parse::<u16>().unwrap();
 
     let db_url: String = env::var("DATABASE_URL").expect("ERROR: env DATABASE_URL was not set");
     let pool: Pool<MySql> = MySqlPoolOptions::new()
