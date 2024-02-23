@@ -58,7 +58,7 @@ impl Model for User {
 impl User {
 
     pub async fn get_all_users(amount: u16, offset: u16, data: &web::Data<AppState>) -> Result<Vec<User>, Error> {
-        let res = sqlx::query("SELECT * FROM users LIMIT ? OFFSET ?")
+        let res = sqlx::query("SELECT * FROM `crm`.`users` LIMIT ? OFFSET ?")
         .bind(amount)
         .bind(offset)
         .fetch_all(&data.pool).await;
@@ -75,7 +75,7 @@ impl User {
     }
 
     pub async fn get_users_count(data: &web::Data<AppState>) -> Result<i32, Error> {
-        let res = sqlx::query("SELECT COUNT(*) AS count FROM users").fetch_one(&data.pool).await;
+        let res = sqlx::query("SELECT COUNT(*) AS count FROM `crm`.`users`").fetch_one(&data.pool).await;
         match res {
             Err(err) => Err(err),
             Ok(mysql_resp) => Ok(mysql_resp.get("count"))
@@ -84,7 +84,7 @@ impl User {
 
 
     pub async fn get_by_email(email: &str, data: &web::Data<AppState>) -> Result<Option<User>, Error> {
-        let res = sqlx::query("SELECT * FROM users WHERE email = ?").bind(email).fetch_optional(&data.pool).await;
+        let res = sqlx::query("SELECT * FROM `crm`.`users` WHERE email = ?").bind(email).fetch_optional(&data.pool).await;
         match res {
             Err(err) => return Err(err),
             Ok(row) => {
@@ -97,7 +97,7 @@ impl User {
     }
 
     pub async fn get_by_email_or_phone_number(email_or_phone_number: &str, data: &web::Data<AppState>) -> Result<Option<User>, Error> {
-        let res = sqlx::query("SELECT * FROM users WHERE email = ? OR phone_number = ?").bind(email_or_phone_number).bind(email_or_phone_number).fetch_optional(&data.pool).await;
+        let res = sqlx::query("SELECT * FROM `crm`.`users` WHERE email = ? OR phone_number = ?").bind(email_or_phone_number).bind(email_or_phone_number).fetch_optional(&data.pool).await;
         match res {
             Err(err) => return Err(err),
             Ok(row) => {
@@ -110,7 +110,7 @@ impl User {
     }
 
     pub async fn get_by_uuid(uuid: &String, data: &web::Data<AppState>) -> Result<Option<User>, Error> {
-        let res = sqlx::query("SELECT * FROM users WHERE uuid = ?").bind(uuid).fetch_optional(&data.pool).await;
+        let res = sqlx::query("SELECT * FROM `crm`.`users` WHERE uuid = ?").bind(uuid).fetch_optional(&data.pool).await;
         match res {
             Err(err) => return Err(err),
             Ok(row) => {
@@ -127,7 +127,7 @@ impl User {
         if res.is_err() {
             return res;
         }
-        let result = sqlx::query("INSERT INTO users (uuid, email, first_name, last_name, phone_number, p_hash, admin, joined, last_sign_in, crm_count, subscription_ends, legacy_user, current_jwt) VALUES (uuid(),?,?,?,?,?,0,?,?,?,NULL,false, \"\")")
+        let result = sqlx::query("INSERT INTO `crm`. `users` (uuid, email, first_name, last_name, phone_number, p_hash, admin, joined, last_sign_in, crm_count, subscription_ends, legacy_user, current_jwt) VALUES (uuid(),?,?,?,?,?,0,?,?,?,NULL,false, \"\")")
             .bind(email)
             .bind(first_name)
             .bind(last_name)
