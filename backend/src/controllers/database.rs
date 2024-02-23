@@ -3,7 +3,7 @@ pub struct Database ();
 
 impl Database {
 
-    fn default_clients_table() -> String {
+    fn default_customers_table() -> String {
         r#"
         `crm_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
         `uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL UNIQUE,
@@ -27,7 +27,7 @@ impl Database {
         r#"
         `crm_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
         `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-        `client_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
+        `customer_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
         `added` DATETIME,
         `added_at_meeting` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci,
         `updated` DATETIME,
@@ -38,7 +38,7 @@ impl Database {
         r#"
         `crm_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
         `uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
-        `client_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
+        `customer_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
         `from` DATETIME,
         `to` DATETIME,
         `added` DATETIME,
@@ -83,7 +83,7 @@ impl Database {
         `recurrence` VARCHAR(7),
         `recurrence_count` INT,
         `status` VARCHAR(10),
-        `client_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci,
+        `customer_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci,
         `employee_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci,
         `title` VARCHAR(50),
         `added` DATETIME,
@@ -132,8 +132,8 @@ impl Database {
         sqlx::query(create_table_crm_query).execute(pool).await
     }
 
-    pub async fn setup_clients_table(pool: &Pool<MySql>) -> Result<MySqlQueryResult, sqlx::Error> {
-        let query: String = format!(r#"CREATE TABLE IF NOT EXISTS `clients` ({}) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;"#, Self::default_clients_table());
+    pub async fn setup_customers_table(pool: &Pool<MySql>) -> Result<MySqlQueryResult, sqlx::Error> {
+        let query: String = format!(r#"CREATE TABLE IF NOT EXISTS `customers` ({}) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;"#, Self::default_customers_table());
         sqlx::query(&query).execute(pool).await
     }
     pub async fn setup_entries_table(pool: &Pool<MySql>) -> Result<MySqlQueryResult, sqlx::Error> {
@@ -169,7 +169,7 @@ impl Database {
         if let Err(err) = Self::setup_crm_users_table(pool).await {
             return Err(err);
         }
-        if let Err(err) = Self::setup_clients_table(pool).await {
+        if let Err(err) = Self::setup_customers_table(pool).await {
             return Err(err);
         } 
         if let Err(err) = Self::setup_entries_table(pool).await {

@@ -4,7 +4,7 @@ use serde::{Serialize, Deserialize};
 use sqlx::{mysql::{MySqlQueryResult, MySqlRow}, Row};
 use uuid::Uuid;
 use crate::{AppState, models::user::User, routes::{Limit, MeetingsOption}};
-use super::{Model, client::Client, employee::Employee, meeting::Meeting, deal::Deal};
+use super::{Model, customer::Customer, employee::Employee, meeting::Meeting, deal::Deal};
 
 
 
@@ -18,7 +18,7 @@ pub struct CRM {
     added: DateTime<Utc>,
     hidden: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
-    clients: Option<Vec<Client>>,
+    customers: Option<Vec<Customer>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     employees: Option<Vec<Employee>>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -35,7 +35,7 @@ impl Model for CRM {
             name: row.get("name"),
             added: row.get("added"),
             hidden: row.get("hidden"),
-            clients: None,
+            customers: None,
             employees: None,
             deals: None,
             meetings: None,
@@ -48,11 +48,11 @@ impl Model for CRM {
 impl CRM {
 
 
-    pub async fn get_clients(&mut self, limit: Limit, offset: Option<u16>, data: &web::Data<AppState>) {
-        match Client::get_all(&self.crm_uuid, limit, offset, data).await {
+    pub async fn get_customers(&mut self, limit: Limit, offset: Option<u16>, data: &web::Data<AppState>) {
+        match Customer::get_all(&self.crm_uuid, limit, offset, data).await {
             Err(err) => println!("{err}"),
-            Ok(clients) => {
-                self.clients = Some(clients);
+            Ok(customers) => {
+                self.customers = Some(customers);
             }
         }
 
@@ -123,7 +123,7 @@ impl CRM {
         if let Err(err) = sqlx::query("DELETE FROM `crm`.`crm_users` WHERE `crm_uuid` = ?").bind(&uuid_string).execute(&data.pool).await {
             return Err(err)
         }
-        if let Err(err) = sqlx::query("DELETE FROM `crm`.`clients` WHERE `crm_uuid` = ?").bind(&uuid_string).execute(&data.pool).await {
+        if let Err(err) = sqlx::query("DELETE FROM `crm`.`customers` WHERE `crm_uuid` = ?").bind(&uuid_string).execute(&data.pool).await {
             return Err(err)
         }
         if let Err(err) = sqlx::query("DELETE FROM `crm`.`entries` WHERE `crm_uuid` = ?").bind(&uuid_string).execute(&data.pool).await {

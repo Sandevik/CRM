@@ -21,7 +21,7 @@ pub fn meetings() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Resp
         .service(upcoming_meetings)
         .service(read_meeting)
         .service(delete_meeting)
-        .service(get_by_client_uuid)
+        .service(get_by_customer_uuid)
         .service(update_meeting);
         
     scope
@@ -88,8 +88,8 @@ async fn upcoming_meetings(data: web::Data<AppState>, query: web::Query<Requires
 struct CreateMeetingRequest {
     from: i64,
     to: i64,
-    #[serde(rename(deserialize = "clientUuid"))]
-    client_uuid: String,
+    #[serde(rename(deserialize = "customerUuid"))]
+    customer_uuid: String,
     #[serde(rename(deserialize = "crmUuid"))]
     crm_uuid: String,
 }
@@ -98,7 +98,7 @@ struct CreateMeetingRequest {
 pub async fn create_meeting(data: web::Data<AppState>, body: web::Json<CreateMeetingRequest>) -> impl Responder {
     let from = Utc.from_local_datetime(&NaiveDateTime::from_timestamp_millis(body.from).expect("Could not convert milliseconds to date")).unwrap();
     let to = Utc.from_local_datetime(&NaiveDateTime::from_timestamp_millis(body.to).expect("Could not convert milliseconds to date")).unwrap();
-    match Meeting::new(from, to, &Uuid::parse_str(&body.client_uuid.as_str()).unwrap_or_default(), &Uuid::parse_str(&body.crm_uuid).unwrap_or_default(),).insert(&data, &Uuid::parse_str(body.crm_uuid.as_str()).unwrap_or_default()).await {
+    match Meeting::new(from, to, &Uuid::parse_str(&body.customer_uuid.as_str()).unwrap_or_default(), &Uuid::parse_str(&body.crm_uuid).unwrap_or_default(),).insert(&data, &Uuid::parse_str(body.crm_uuid.as_str()).unwrap_or_default()).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
         Ok(_) => HttpResponse::Created().json(Response::<String>::created("Successfully created meeting"))
     }
@@ -134,12 +134,12 @@ pub async fn delete_meeting(data: web::Data<AppState>, query: web::Query<Meeting
 struct MeetingsByClientRequest {
     #[serde(rename(deserialize = "crmUuid"))]
     crm_uuid: String, //crm uuid
-    #[serde(rename(deserialize = "clientUuid"))]
-    client_uuid: String,
+    #[serde(rename(deserialize = "customerUuid"))]
+    customer_uuid: String,
 }
-#[get("/by-client")]
-pub async fn get_by_client_uuid(data: web::Data<AppState>, query: web::Query<MeetingsByClientRequest>) -> impl Responder {
-    match Meeting::get_all_by_client_uuid(&Uuid::parse_str(&query.client_uuid).unwrap_or_default(), &Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), MeetingsOption::All, Limit::Some(20), &data).await {
+#[get("/by-customer")]
+pub async fn get_by_customer_uuid(data: web::Data<AppState>, query: web::Query<MeetingsByClientRequest>) -> impl Responder {
+    match Meeting::get_all_by_customer_uuid(&Uuid::parse_str(&query.customer_uuid).unwrap_or_default(), &Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), MeetingsOption::All, Limit::Some(20), &data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
         Ok(meetings) => HttpResponse::Ok().json(Response::ok("Successfully fetched meetings", Some(meetings)))
     }
@@ -149,8 +149,8 @@ pub async fn get_by_client_uuid(data: web::Data<AppState>, query: web::Query<Mee
 struct UpdateMeetingRequest {
     from: i64,
     to: i64,
-    #[serde(rename(deserialize = "clientUuid"))]
-    client_uuid: String,
+    #[serde(rename(deserialize = "customerUuid"))]
+    customer_uuid: String,
 }
 
 #[derive(Deserialize)]
@@ -170,7 +170,7 @@ async fn update_meeting(data: web::Data<AppState>, body: web::Json<UpdateMeeting
         to: Utc.from_local_datetime(&NaiveDateTime::from_timestamp_millis(body.to).unwrap_or_default()).unwrap(),
         added: Utc::now(),
         updated: Utc::now(),
-        client_uuid: Uuid::parse_str(&body.client_uuid).unwrap_or_default(),
+        customer_uuid: Uuid::parse_str(&body.customer_uuid).unwrap_or_default(),
         entry_id: None
     };
 

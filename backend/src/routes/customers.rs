@@ -1,25 +1,25 @@
 use actix_web::{body::{EitherBody, BoxBody}, delete, dev::{ServiceFactory, ServiceRequest, ServiceResponse}, get, post, put, web, Error, HttpResponse, Responder, Scope};
 use actix_web_httpauth::middleware::HttpAuthentication;
-use chrono::{NaiveDate, Utc};
+use chrono::{NaiveDate};
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 use crate::{middleware::owns_or_admin_middleware::RequiresUuid, routes::Response};
-use crate::{middleware::owns_or_admin_middleware::validator, AppState, models::client::Client};
+use crate::{middleware::owns_or_admin_middleware::validator, AppState, models::customer::Customer};
 
 use super::Limit;
 
-pub fn clients() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Response = ServiceResponse<EitherBody<BoxBody>>, Error = Error, InitError = ()>> {
+pub fn customers() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Response = ServiceResponse<EitherBody<BoxBody>>, Error = Error, InitError = ()>> {
     let owner_or_admin_middleware = HttpAuthentication::bearer(validator);
     
-    let scope = web::scope("/clients")
+    let scope = web::scope("/customers")
         .wrap(owner_or_admin_middleware)
         .service(by_uuid)
-        .service(create_client)
+        .service(create_customer)
         .service(get_all)
         .service(search)
-        .service(update_client)
-        .service(delete_client)
-        .service(update_client_note)
+        .service(update_customer)
+        .service(delete_customer)
+        .service(update_customer_note)
         .service(get_statistics);
         
     scope
@@ -29,17 +29,17 @@ pub fn clients() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Respo
 struct ClientByUuidRequest {
     #[serde(rename(deserialize = "crmUuid"))]
     crm_uuid: String, //crm uuid
-    #[serde(rename(deserialize = "clientUuid"))]
-    client_uuid: String,
+    #[serde(rename(deserialize = "customerUuid"))]
+    customer_uuid: String,
 }
 
 #[get("")]
 async fn by_uuid(query: web::Query<ClientByUuidRequest>, data: web::Data<AppState>) -> impl Responder {
-    let client_uuid = Uuid::parse_str(&query.client_uuid).unwrap_or_default();
+    let customer_uuid = Uuid::parse_str(&query.customer_uuid).unwrap_or_default();
     let crm_uuid = Uuid::parse_str(&query.crm_uuid).unwrap_or_default();
-    match Client::get_by_uuid(&client_uuid, &crm_uuid, &data).await {
+    match Customer::get_by_uuid(&customer_uuid, &crm_uuid, &data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
-        Ok(client) => HttpResponse::Ok().json(Response::ok("Successfully fetched client", client))
+        Ok(customer) => HttpResponse::Ok().json(Response::ok("Successfully fetched customer", customer))
     }
 }
 
@@ -56,9 +56,9 @@ struct AllRequest {
 
 #[get("/all")]
 async fn get_all(data: web::Data<AppState>, query: web::Query<AllRequest>) -> impl Responder {
-    match Client::get_all(&Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), match &query.limit {None => Limit::None, Some(u) => Limit::Some(*u)}, query.offset, &data).await {
+    match Customer::get_all(&Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), match &query.limit {None => Limit::None, Some(u) => Limit::Some(*u)}, query.offset, &data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
-        Ok(client) => HttpResponse::Ok().json(Response::ok("Successfully fetched client", Some(client)))
+        Ok(customer) => HttpResponse::Ok().json(Response::ok("Successfully fetched customer", Some(customer)))
     }
 }
 
@@ -72,9 +72,9 @@ struct SearchRequest {
 
 #[get("/search")]
 async fn search(data: web::Data<AppState>, query: web::Query<SearchRequest>) -> impl Responder {
-    match Client::search(&Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), &query.q, Limit::Some(20), &data).await {
+    match Customer::search(&Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), &query.q, Limit::Some(20), &data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
-        Ok(client) => HttpResponse::Ok().json(Response::ok("Successfully searched clients", Some(client)))
+        Ok(customer) => HttpResponse::Ok().json(Response::ok("Successfully searched customers", Some(customer)))
     }
 }
 
@@ -104,11 +104,11 @@ struct CreateClientRequest {
 
 
 #[post("/create")]
-async fn create_client(data: web::Data<AppState>, body: web::Json<CreateClientRequest>) -> impl Responder {
-    let client: Client = Client::new(&Uuid::parse_str(&body.crm_uuid).unwrap_or_default(), body.first_name.clone(), body.last_name.clone(), body.date_of_birth.clone(), body.email.clone(), body.address.clone(), body.zip_code.clone(), body.city.clone(), body.country.clone(), body.company.clone(), body.phone_number.clone(), body.news_letter.clone());
-    match client.insert(&Uuid::parse_str(&body.crm_uuid).unwrap_or_default(), &data).await {
+async fn create_customer(data: web::Data<AppState>, body: web::Json<CreateClientRequest>) -> impl Responder {
+    let customer: Customer = Customer::new(&Uuid::parse_str(&body.crm_uuid).unwrap_or_default(), body.first_name.clone(), body.last_name.clone(), body.date_of_birth.clone(), body.email.clone(), body.address.clone(), body.zip_code.clone(), body.city.clone(), body.country.clone(), body.company.clone(), body.phone_number.clone(), body.news_letter.clone());
+    match customer.insert(&Uuid::parse_str(&body.crm_uuid).unwrap_or_default(), &data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
-        Ok(_) => HttpResponse::Created().json(Response::<String>::created("Successfully created client"))
+        Ok(_) => HttpResponse::Created().json(Response::<String>::created("Successfully created customer"))
     }
 }
 
@@ -136,8 +136,8 @@ struct UpdateRequest {
 }
 
 #[put("")]
-async fn update_client(data: web::Data<AppState>, body: web::Json<UpdateRequest>, query: web::Query<RequiresUuid>) -> impl Responder {
-    let client: Client = Client {
+async fn update_customer(data: web::Data<AppState>, body: web::Json<UpdateRequest>, query: web::Query<RequiresUuid>) -> impl Responder {
+    let customer: Customer = Customer {
         crm_uuid: Uuid::parse_str(&query.crm_uuid).unwrap_or_default(),
         uuid: Uuid::parse_str(&body.uuid).unwrap_or_default(),
         first_name: body.first_name.clone(),
@@ -151,12 +151,12 @@ async fn update_client(data: web::Data<AppState>, body: web::Json<UpdateRequest>
         company: body.company.clone(),
         phone_number: body.phone_number.clone(),
         news_letter: body.news_letter,
-        ..Client::default()
+        ..Customer::default()
     };
     
-    match client.update(&data).await {
+    match customer.update(&data).await {
             Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
-            Ok(_) => HttpResponse::Ok().json(Response::<String>::ok("Successfully updated client", None))
+            Ok(_) => HttpResponse::Ok().json(Response::<String>::ok("Successfully updated customer", None))
         }
 }
 
@@ -168,16 +168,16 @@ struct UpdateNoteBodyRequest {
 }
 
 #[put("/note")]
-async fn update_client_note(data: web::Data<AppState>, body: web::Json<UpdateNoteBodyRequest>, query: web::Query<RequiresUuid>) -> impl Responder {
-    let client: Client = Client {
+async fn update_customer_note(data: web::Data<AppState>, body: web::Json<UpdateNoteBodyRequest>, query: web::Query<RequiresUuid>) -> impl Responder {
+    let customer: Customer = Customer {
         crm_uuid: Uuid::parse_str(&query.crm_uuid).unwrap_or_default(),
         uuid: Uuid::parse_str(&body.uuid).unwrap_or_default(),
         note: Some(body.note.clone()),
-        ..Client::default()
+        ..Customer::default()
     };
-    match client.update_note(&data).await {
+    match customer.update_note(&data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
-        Ok(_) => HttpResponse::Ok().json(Response::<String>::ok("Successfully updated client note", None))
+        Ok(_) => HttpResponse::Ok().json(Response::<String>::ok("Successfully updated customer note", None))
     }
 }
 
@@ -191,24 +191,24 @@ struct DeleteRequest {
 }
 
 #[delete("")]
-async fn delete_client(data: web::Data<AppState>, query: web::Query<DeleteRequest>) -> impl Responder {
-    match Client::delete_client(&Uuid::parse_str(&query.uuid).unwrap_or_default(), &Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), &data).await {
+async fn delete_customer(data: web::Data<AppState>, query: web::Query<DeleteRequest>) -> impl Responder {
+    match Customer::delete_customer(&Uuid::parse_str(&query.uuid).unwrap_or_default(), &Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), &data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
-        Ok(_) => HttpResponse::Ok().json(Response::<String>::ok("Successfully deleted client", None))
+        Ok(_) => HttpResponse::Ok().json(Response::<String>::ok("Successfully deleted customer", None))
     }
 }
 
 
 #[get("/statistics")]
 async fn get_statistics(data: web::Data<AppState>, query: web::Query<ClientByUuidRequest>) -> impl Responder {
-    let client: Client = Client {crm_uuid: Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), uuid: Uuid::parse_str(&query.client_uuid).unwrap_or_default(), ..Client::default()};
-    match client.get_statistics(&data).await {
+    let customer: Customer = Customer {crm_uuid: Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), uuid: Uuid::parse_str(&query.customer_uuid).unwrap_or_default(), ..Customer::default()};
+    match customer.get_statistics(&data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
         Ok(stats) => {
             if let None = stats {
                 return HttpResponse::Ok().json(Response::<String>::ok("No statistics was found", None));
             } 
-            HttpResponse::Ok().json(Response::ok("Successfully fetched client statistics", stats))
+            HttpResponse::Ok().json(Response::ok("Successfully fetched customer statistics", stats))
         }
     }
 }

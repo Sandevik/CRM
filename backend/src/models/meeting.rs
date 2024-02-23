@@ -12,8 +12,8 @@ pub struct Meeting {
     #[serde(rename(serialize = "crmUuid", deserialize = "crmUuid"))]
     pub crm_uuid: Uuid,
     pub uuid: Uuid,
-    #[serde(rename(serialize = "clientUuid", deserialize = "clientUuid"))]
-    pub client_uuid: Uuid,
+    #[serde(rename(serialize = "customerUuid", deserialize = "customerUuid"))]
+    pub customer_uuid: Uuid,
     #[serde(rename(serialize = "entryId", deserialize = "entryId"))]
     pub entry_id: Option<i32>,
     pub from: DateTime<Utc>,
@@ -27,7 +27,7 @@ impl Model for Meeting {
         Meeting {
             crm_uuid: Uuid::parse_str(row.get("crm_uuid")).unwrap_or_default(),
             uuid: Uuid::parse_str(row.get("uuid")).unwrap_or_default(),
-            client_uuid: Uuid::parse_str(row.get("client_uuid")).unwrap_or_default(),
+            customer_uuid: Uuid::parse_str(row.get("customer_uuid")).unwrap_or_default(),
             from: row.get("from"),
             to: row.get("to"),
             added: row.get("added"),
@@ -38,13 +38,13 @@ impl Model for Meeting {
 }
 
 impl Meeting {
-    pub fn new(from: DateTime<Utc>, to: DateTime<Utc>, client_uuid: &Uuid, crm_uuid: &Uuid) -> Self {
+    pub fn new(from: DateTime<Utc>, to: DateTime<Utc>, customer_uuid: &Uuid, crm_uuid: &Uuid) -> Self {
         Meeting {
             crm_uuid: crm_uuid.clone(),
             uuid: Uuid::new_v4(),
             from,
             to,
-            client_uuid: client_uuid.clone(),
+            customer_uuid: customer_uuid.clone(),
             added: Utc::now(),
             updated: Utc::now(),
             entry_id: None,
@@ -96,11 +96,11 @@ impl Meeting {
     }
 
     pub async fn insert(&self, data: &web::Data<AppState>, crm_uuid: &Uuid) -> Result<(), sqlx::Error> {
-        let query = "INSERT INTO `crm`.`meetings` (`crm_uuid`, `uuid`, `client_uuid`, `from`, `to`, `added`, `updated`, `entry_id`) VALUES (?,?,?,?,?,?,?,?)";
+        let query = "INSERT INTO `crm`.`meetings` (`crm_uuid`, `uuid`, `customer_uuid`, `from`, `to`, `added`, `updated`, `entry_id`) VALUES (?,?,?,?,?,?,?,?)";
         match sqlx::query(&query)
             .bind(crm_uuid.hyphenated().to_string())
             .bind(&self.uuid.hyphenated().to_string())
-            .bind(&self.client_uuid.hyphenated().to_string())
+            .bind(&self.customer_uuid.hyphenated().to_string())
             .bind(&self.from)
             .bind(&self.to)
             .bind(&self.added)
@@ -142,10 +142,10 @@ impl Meeting {
             }
     }
 
-    pub async fn delete_all_by_user_uuid(client_uuid: &Uuid, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
-        let query = "DELETE FROM `crm`.`meetings` WHERE `client_uuid` = ? AND `crm_uuid` = ?";
+    pub async fn delete_all_by_user_uuid(customer_uuid: &Uuid, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+        let query = "DELETE FROM `crm`.`meetings` WHERE `customer_uuid` = ? AND `crm_uuid` = ?";
         match sqlx::query(&query)
-            .bind(client_uuid.hyphenated().to_string())
+            .bind(customer_uuid.hyphenated().to_string())
             .bind(crm_uuid.hyphenated().to_string())
             .execute(&data.pool)
             .await {
@@ -154,8 +154,8 @@ impl Meeting {
             }
     }
 
-    pub async fn get_all_by_client_uuid(client_uuid: &Uuid, crm_uuid: &Uuid, meeting_option: MeetingsOption, limit: Limit, data: &web::Data<AppState>) -> Result<Vec<Self>, sqlx::Error> {
-        let mut query = String::from("SELECT * FROM `crm` . `meetings` WHERE `client_uuid` = ? AND `crm_uuid` = ? ORDER BY `from` DESC");
+    pub async fn get_all_by_customer_uuid(customer_uuid: &Uuid, crm_uuid: &Uuid, meeting_option: MeetingsOption, limit: Limit, data: &web::Data<AppState>) -> Result<Vec<Self>, sqlx::Error> {
+        let mut query = String::from("SELECT * FROM `crm` . `meetings` WHERE `customer_uuid` = ? AND `crm_uuid` = ? ORDER BY `from` DESC");
         match meeting_option {
             MeetingsOption::All => (),
             MeetingsOption::Future => query.push_str("WHERE `from` >= ? ORDER BY `from` ASC"),
@@ -184,7 +184,7 @@ impl Meeting {
             Limit::Some(limit) => query.push_str(format!(" LIMIT {}", limit).as_str()),
         } 
         match sqlx::query(&query)
-            .bind(client_uuid.hyphenated().to_string())
+            .bind(customer_uuid.hyphenated().to_string())
             .bind(crm_uuid.hyphenated().to_string())
             .fetch_all(&data.pool)
             .await {
@@ -194,9 +194,9 @@ impl Meeting {
     }
 
     pub async fn update(&self, data: &web::Data<AppState>, crm_uuid: &Uuid) -> Result<(), sqlx::Error> {
-        let query = "UPDATE `crm`.`meetings` SET `client_uuid` = ?, `from` = ?, `to` = ?, `updated` = ? WHERE `uuid` = ? AND `crm_uuid` = ?";
+        let query = "UPDATE `crm`.`meetings` SET `customer_uuid` = ?, `from` = ?, `to` = ?, `updated` = ? WHERE `uuid` = ? AND `crm_uuid` = ?";
         match sqlx::query(&query)
-        .bind(&self.client_uuid.hyphenated().to_string())
+        .bind(&self.customer_uuid.hyphenated().to_string())
         .bind(&self.from)
         .bind(&self.to)
         .bind(&self.updated)

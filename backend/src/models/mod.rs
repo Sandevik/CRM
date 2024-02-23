@@ -2,7 +2,7 @@ use sqlx::mysql::MySqlRow;
 
 pub mod user;
 pub mod crm;
-pub mod client;
+pub mod customer;
 pub mod entry;
 pub mod employee;
 pub mod deal;

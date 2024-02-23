@@ -21,7 +21,7 @@ async fn main() -> std::io::Result<()> {
     let server_address = env::var("BACKEND_SERVER_ADDRESS").unwrap_or("127.0.0.1".to_string());
     let server_port: u16 = env::var("BACKEND_SERVER_PORT").unwrap_or("8080".to_string()).parse::<u16>().unwrap();
 
-    let db_url: String = format!("mysql://{}:{}@{}:{}/{}", env::var("BACKEND_MYSQL_USERNAME").unwrap(), env::var("BACKEND_MYSQL_PASSWORD").unwrap(), env::var("BACKEND_MYSQL_ADDRESS").unwrap(), env::var("BACKEND_MYSQL_PORT").unwrap(), env::var("BACKEND_MYSQL_PATH").unwrap());
+    let db_url: String = env::var("DATABASE_URL").expect("ERROR: env DATABASE_URL was not set");
     let pool: Pool<MySql> = MySqlPoolOptions::new()
         .max_connections(10)
         .connect(&db_url)

@@ -1,7 +1,7 @@
 mod users;
 mod auth;
 mod crm;
-mod clients;
+mod customers;
 mod meetings;
 mod entries;
 mod tasks;
@@ -18,7 +18,7 @@ use entries::entries;
 use tasks::tasks;
 use test::test;
 
-use self::{clients::clients, crm::{create_crm, all_crms_by_user}};
+use self::{customers::customers, crm::{create_crm, all_crms_by_user}};
 
 
 #[derive(Serialize)]
@@ -103,7 +103,7 @@ pub fn routes(conf: &mut ServiceConfig) {
     conf.service(crm());
     conf.service(create_crm());
     conf.service(all_crms_by_user());
-    conf.service(clients());
+    conf.service(customers());
     conf.service(meetings());
     conf.service(entries());
     conf.service(tasks());

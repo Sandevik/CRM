@@ -14,7 +14,7 @@ pub fn tasks() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Respons
     let scope = web::scope("/tasks")
         .wrap(owns_or_admin_middleware)
         .service(create_task)
-        .service(get_by_client)
+        .service(get_by_customer)
         .service(complete_task)
         .service(get_by_crm);
         
@@ -29,8 +29,8 @@ struct CreateTodoRequest {
     start: Option<i64>,
     recurrence: Option<String>,
     status: Option<String>,
-    #[serde(rename(deserialize = "clientUuid"))]
-    client_uuid: Option<String>,
+    #[serde(rename(deserialize = "customerUuid"))]
+    customer_uuid: Option<String>,
     title: Option<String>,
 }
 
@@ -39,10 +39,10 @@ async fn create_task(data: web::Data<AppState>, body: web::Json<CreateTodoReques
     let custom_start_date: Option<DateTime<Utc>> = match body.start {None => Task::default().start, Some(i) => Some(Utc.from_local_datetime(&NaiveDateTime::from_timestamp_millis(i).expect("Could not convert milliseconds to date")).unwrap())};
     let deadline: Option<DateTime<Utc>> = match body.deadline {None => None, Some(i) => Some(Utc.from_local_datetime(&NaiveDateTime::from_timestamp_millis(i).expect("Could not convert milliseconds to date")).unwrap())};
     let crm_uuid: Uuid = Uuid::parse_str(&body.crm_uuid).unwrap_or_default();
-    let client_uuid: Option<Uuid> = match &body.client_uuid { Some(uuid) => Some(Uuid::parse_str(&uuid).unwrap_or_default()), None => None};
+    let customer_uuid: Option<Uuid> = match &body.customer_uuid { Some(uuid) => Some(Uuid::parse_str(&uuid).unwrap_or_default()), None => None};
     let recurrence: Option<Recurrence> = match &body.recurrence {None => None, Some(str) => Recurrence::from_string(str)};
     let todo: Task = Task {
-        client_uuid, 
+        customer_uuid, 
         crm_uuid, 
         start: custom_start_date,
         deadline, 
@@ -64,13 +64,13 @@ async fn create_task(data: web::Data<AppState>, body: web::Json<CreateTodoReques
 struct ByClientRequestQuery {
     #[serde(rename(serialize = "crmUuid", deserialize = "crmUuid"))]
     crm_uuid: String,
-    #[serde(rename(serialize = "clientUuid", deserialize = "clientUuid"))]
-    client_uuid: String
+    #[serde(rename(serialize = "customerUuid", deserialize = "customerUuid"))]
+    customer_uuid: String
 }
 
-#[get("/by-client")]
-async fn get_by_client(data: web::Data<AppState>, query: web::Query<ByClientRequestQuery>) -> impl Responder {
-    match Task::get_by_client_uuid(&Uuid::parse_str(&query.client_uuid).unwrap_or_default(), &Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), &data).await {
+#[get("/by-customer")]
+async fn get_by_customer(data: web::Data<AppState>, query: web::Query<ByClientRequestQuery>) -> impl Responder {
+    match Task::get_by_customer_uuid(&Uuid::parse_str(&query.customer_uuid).unwrap_or_default(), &Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), &data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
         Ok(tasks) =>  HttpResponse::Ok().json(Response::ok("Successfully fetched tasks", Some(tasks)))
     }

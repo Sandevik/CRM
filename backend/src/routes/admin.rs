@@ -30,7 +30,7 @@ async fn edit_table(data: web::Data<AppState>, query: web::Query<EditTableQuery>
     let table: Table = match query.table.as_str() {
         "entries" => Table::Entries,
         "deals" => Table::Deals,
-        "clients" => Table::Clients,
+        "customers" => Table::Clients,
         "employees" => Table::Employees,
         "meetings" => Table::Meetings, 
         _ => return HttpResponse::BadRequest().json(Response::<String>::bad_request("Table does not exist"))
