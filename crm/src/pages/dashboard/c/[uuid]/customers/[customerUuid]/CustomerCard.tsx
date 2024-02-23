@@ -21,21 +21,35 @@ export default function CustomerCard({customer, edit, setEdit}: {customer: Custo
     }
   
     return (
-    <div className="w-[30em] h-full bg-background-dark p-2 rounded-md flex flex-col justify-between">
+    <div className="lg:w-[30%] xl:w-[30em] h-full bg-background-dark p-2 rounded-md flex flex-col justify-between">
         
-        <div className="flex flex-col h-[20%] mt-10">
-            <FaUser className="text-8xl flex justify-center m-auto bg-background-light rounded-full p-4"/>
-            <span className="m-auto flex justify-center text-2xl font-semibold">{customer?.firstName} {customer?.lastName}</span>
-            <span className="mx-auto flex justify-center ">{customer?.dateOfBirth}</span>
-        </div>
-        
-        <div className="flex flex-col gap-4 h-[30%] justify-center">
-            <span className="mx-auto flex justify-center ">{customer?.address}</span>
-            <span className="mx-auto flex justify-center ">{customer?.zipCode} {customer?.city}</span>
-            <span className="mx-auto flex justify-center ">{customer?.country}</span>
+        <div className="lg:hidden flex gap-8 h-full justify-between m-auto items-center">
+            <div className="flex flex-col lg:h-[20%] my-10 gap-4">
+                <FaUser className="text-7xl flex justify-center m-auto bg-background-light rounded-full p-4"/>
+                <span className="m-auto flex justify-center text-2xl font-semibold">{customer?.firstName} {customer?.lastName}</span>
+                <span className="mx-auto flex justify-center ">{customer?.dateOfBirth}</span>
+            </div>
+
+            <div className="flex flex-col gap-4 justify-center">
+                <span className="mx-auto flex justify-center ">{customer?.address}</span>
+                <span className="mx-auto flex justify-center ">{customer?.zipCode} {customer?.city}</span>
+                <span className="mx-auto flex justify-center ">{customer?.country}</span>
+            </div>
         </div>
 
-        <div className="flex flex-col justify-center  w-full gap-2 h-[20%]">
+            <div className="lg:flex flex-col h-[40%] lg:h-[20%] mt-10 hidden">
+                <FaUser className="text-8xl flex justify-center m-auto bg-background-light rounded-full p-4"/>
+                <span className="m-auto flex justify-center text-2xl font-semibold">{customer?.firstName} {customer?.lastName}</span>
+                <span className="mx-auto flex justify-center ">{customer?.dateOfBirth}</span>
+            </div>
+
+            <div className="lg:flex flex-col gap-4 h-[30%] justify-center hidden">
+                <span className="mx-auto flex justify-center ">{customer?.address}</span>
+                <span className="mx-auto flex justify-center ">{customer?.zipCode} {customer?.city}</span>
+                <span className="mx-auto flex justify-center ">{customer?.country}</span>
+            </div>
+
+        <div className="flex flex-col justify-center w-full gap-2 lg:h-[20%] mb-6 lg:mb-0">
             <div className="flex justify-between w-[70%] m-auto">
                 <span>Email</span>
                 {customer?.email ? <Link className="text-greenish" href={`mailto:${customer.email}`}>{customer?.email}</Link> : <span>-</span>}

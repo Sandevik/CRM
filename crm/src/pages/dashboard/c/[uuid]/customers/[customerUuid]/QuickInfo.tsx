@@ -32,7 +32,7 @@ export default function QuickInfo({customer, statistics, addingTask, setAddTask,
   }
 
   return (
-    <div className='flex gap-4 h-[calc(100dvh-16em)] w-full overflow-y-scroll scrollthumb pr-6'>
+    <div className='flex gap-4 flex-col md:flex-row h-[calc(100dvh-16em)] w-full overflow-y-scroll scrollthumb pr-6'>
       <div className="flex flex-col w-full gap-2 flex-1 ml-2">
         <div className='flex justify-between w-full'>
           <label htmlFor="note" ><Text text={{eng: "About", swe: "Om"}} /></label>
@@ -49,10 +49,12 @@ export default function QuickInfo({customer, statistics, addingTask, setAddTask,
             </div>
             <TaskList showCustomers={false} tasks={tasks} refetchTasks={refetchTasks} focusTask={focusTask}/>
           </div>
+
         </div>
+
       </div>
 
-      <div className="w-[17em] bg-background-light p-2 rounded-md flex justify-between flex-col mt-8">
+      <div className="w-full md:w-[17em] bg-background-light p-2 rounded-md flex justify-between flex-col mt-8">
         <div className="flex flex-col gap-4">
           <h3 className="text-lg font-semibold"><Text text={{eng: "Customer Statistics", swe: "Kundstatistik"}} /></h3>
           <div className="flex justify-between text-lg ">
