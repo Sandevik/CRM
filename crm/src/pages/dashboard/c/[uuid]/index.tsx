@@ -5,6 +5,7 @@ import { useContext, useEffect, useState } from 'react';
 import { CurrentCrmContext } from '@/context/CurrentCrmContext';
 import request from '@/utils/request';
 import Text from '@/components/Text';
+import Button from '@/components/Button';
 
 export default function index() {
   const {crm} = useContext(CurrentCrmContext);
@@ -53,7 +54,7 @@ export default function index() {
           Suggestions:
           <br />
           Title, text, upvotes / likes, visible (if the user wants a suggestion to be visible to other customers), status (if it is being added, is added, not added..), added_date
-          
+          <Button>Ooga</Button>
 
         </div>
 
