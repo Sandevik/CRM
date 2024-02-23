@@ -1,4 +1,4 @@
 interface Language {
     eng: string,
-    swe?: string,
+    swe: string,
 }

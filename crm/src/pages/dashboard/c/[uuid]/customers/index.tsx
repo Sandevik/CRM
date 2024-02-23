@@ -25,7 +25,7 @@ export default function index() {
     }
 
   return (
-    <main className='relative'>
+    <main className='relative px-2'>
         <Navbar />
         <div className='sticky mt-4 flex justify-center top-[110px]'>
         {data.length > 0 ? 
