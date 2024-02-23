@@ -30,7 +30,7 @@ pub async fn validator(req: ServiceRequest, credentials: BearerAuth) -> Result<S
                     match user {
                         None => Err((ErrorUnauthorized(r#"{"code": 401, "message": "Unauthorized"}"#), req)),
                         Some(user) => {
-                            if user.current_jwt == token_string {
+                            if user.current_jwt == Some(token_string) {
                                 if user.admin {
                                     req.extensions_mut().insert(value.claims);
                                     Ok(req)

@@ -57,7 +57,7 @@ pub async fn validator(mut req: ServiceRequest, credentials: BearerAuth) -> Resu
                     match user {
                         None => Err((ErrorUnauthorized(r#"{"code": 401, "message": "Unauthorized"}"#), req)),
                         Some(user) => {
-                            if user.current_jwt == token_string {
+                            if user.current_jwt == Some(token_string) {
                                 if user.admin || CRM::user_owns(&user, &uuid, data).await.unwrap() {
 
                                     let (_, mut payload) = actix_http::h1::Payload::create(true);

@@ -130,7 +130,7 @@ async fn validate_token(data: web::Data<AppState>, secret: web::Data<String>, cr
         Ok(token_claim) => {
             match User::get_by_uuid(&token_claim.claims.user.uuid.hyphenated().to_string(), &data).await {
                 Ok(db_user) => {
-                    if db_user.is_some() && db_user.unwrap().current_jwt == token_string {
+                    if db_user.is_some() && db_user.clone().unwrap().current_jwt.is_some() && db_user.unwrap().current_jwt.unwrap() == token_string {
                         HttpResponse::Ok().json(Response::ok("Authorized", Some(ValidateResponse {user: token_claim.claims.user})))
                     } else {
                         HttpResponse::Unauthorized().json(Response::<String>::unauthorized("Unauthorized, Your token has been updated"))

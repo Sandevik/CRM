@@ -30,7 +30,7 @@ pub struct User {
     #[serde(rename(serialize = "LegacyUser", deserialize = "LegacyUser"))]
     pub legacy_user: bool,
     #[serde(skip_deserializing, skip_serializing)]
-    pub current_jwt: String,
+    pub current_jwt: Option<String>,
 
 }
 
@@ -127,7 +127,7 @@ impl User {
         if res.is_err() {
             return res;
         }
-        let result = sqlx::query("INSERT INTO `crm`. `users` (uuid, email, first_name, last_name, phone_number, p_hash, admin, joined, last_sign_in, crm_count, subscription_ends, legacy_user, current_jwt) VALUES (uuid(),?,?,?,?,?,0,?,?,?,NULL,false, \"\")")
+        let result = sqlx::query("INSERT INTO `crm`. `users` (uuid, email, first_name, last_name, phone_number, p_hash, admin, joined, last_sign_in, crm_count, subscription_ends, legacy_user) VALUES (uuid(),?,?,?,?,?,0,?,?,?,NULL,false)")
             .bind(email)
             .bind(first_name)
             .bind(last_name)
