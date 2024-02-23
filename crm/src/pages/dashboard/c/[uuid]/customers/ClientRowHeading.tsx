@@ -1,6 +1,6 @@
 import React from 'react'
 
-export default function ClientRowHeading() {
+export default function CustomerRowHeading() {
   return (
     <li className="grid grid-cols-2 md:grid-cols-5 bg-background-light text-lg bg-opacity-60">
         <div className="border-l-2 p-2 pl-4 border-background-light truncate">Name</div>

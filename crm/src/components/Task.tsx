@@ -1,6 +1,6 @@
 import Button from '@/components/Button';
 import { CurrentCrmContext } from '@/context/CurrentCrmContext';
-import fetchClientDetails from '@/utils/fetchClientDetails';
+import fetchCustomerDetails from '@/utils/fetchCustomerDetails';
 import request from '@/utils/request';
 import Link from 'next/link';
 import React, { useContext, useEffect, useState } from 'react'
@@ -9,19 +9,19 @@ import { RiRestartLine } from "react-icons/ri";
 import { TiCog } from "react-icons/ti";
 
 
-export default function Task({task, refetchTasks, focusTask, showClient}: {showClient: boolean, task: Task, refetchTasks: () => Promise<void>, focusTask: (task: Task | null) => void}) {
+export default function Task({task, refetchTasks, focusTask, showCustomer}: {showCustomer: boolean, task: Task, refetchTasks: () => Promise<void>, focusTask: (task: Task | null) => void}) {
   const {crm} = useContext(CurrentCrmContext);
   const percentage: number = (task?.percentage || 0) > 100 ? 100 : (task?.percentage || 0) < 0 ? 0 : (task?.percentage || 0);
 
-  const [client, setClient] = useState<Client | null>(null);
+  const [customer, setCustomer] = useState<Customer | null>(null);
 
   useEffect(() => {
     (async () => {
-        if (task.clientUuid && crm?.crmUuid){
-          setClient(await fetchClientDetails(crm.crmUuid, task.clientUuid));
+        if (task.customerUuid && crm?.crmUuid){
+          setCustomer(await fetchCustomerDetails(crm.crmUuid, task.customerUuid));
         }
       })();
-  },[crm, task, showClient])
+  },[crm, task, showCustomer])
 
   const completeTask = async () => {
     if(crm?.crmUuid) {
@@ -51,7 +51,7 @@ export default function Task({task, refetchTasks, focusTask, showClient}: {showC
         
         <div className={`absolute ${task.status === "Completed" || (task.recurrence !== null && Date.now() < new Date(task.start || "").getTime()) ? "bottom-0" : "bottom-9"} flex flex-col h-12 w-[95%] gap-2`}>
           <div className='w-full flex justify-between items-center'>
-            {showClient && <div><Link className="text-greenish" href={`/dashboard/c/${crm?.crmUuid}/clients/${client?.uuid}`}>{client?.firstName} {client?.lastName}</Link></div>}
+            {showCustomer && <div><Link className="text-greenish" href={`/dashboard/c/${crm?.crmUuid}/customers/${customer?.uuid}`}>{customer?.firstName} {customer?.lastName}</Link></div>}
             <TiCog onClick={() => focusTask(task)} className="text-3xl hover:rotate-45 transition-all hover:text-light-blue cursor-pointer"/>
           </div>
           {(!(task.status === "Completed") && !(task.recurrence !== null && Date.now() < new Date(task.start || "").getTime())) && <Button onClick={()=>completeTask()}>Complete</Button>}

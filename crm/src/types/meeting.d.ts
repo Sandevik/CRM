@@ -1,7 +1,7 @@
 interface Meeting {
     crmUuid: string,
     uuid: string,
-    clientUuid: string,
+    customerUuid: string,
     to: string,
     from: string
     entryId: number | null,

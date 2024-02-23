@@ -4,7 +4,7 @@ interface Crm {
     added: string,
     hidden: boolean,
     name: string,
-    clients?: Client[],
+    customers?: Customer[],
     meetings?: Meeting[],
     deals?: Deal[],
     employees?: Employee[],

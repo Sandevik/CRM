@@ -7,7 +7,7 @@ import { FaChevronRight } from "react-icons/fa6";
 import { FaPen, FaTrash } from "react-icons/fa";
 
 
-export default function Entry({entry, client, refetchEntries}: {entry: Entry, client: Client | null, refetchEntries: () => Promise<void>}) {
+export default function Entry({entry, customer, refetchEntries}: {entry: Entry, customer: Customer | null, refetchEntries: () => Promise<void>}) {
     const {crm} = useContext(CurrentCrmContext);
     const [initialEntry, setInitialEntry] = useState<Entry>(entry);
     const [expand, setExpand] = useState<boolean>(false);
@@ -36,8 +36,8 @@ export default function Entry({entry, client, refetchEntries}: {entry: Entry, cl
     }
 
     const uploadChanges = async () => {
-        if (crm?.crmUuid && client?.uuid && entry.id){
-            let res = await request(`/entries?crmUuid=${crm.crmUuid}&clientUuid=${client.uuid}&id=${entry.id}`, {...initialEntry, content: currentContent}, "PUT") 
+        if (crm?.crmUuid && customer?.uuid && entry.id){
+            let res = await request(`/entries?crmUuid=${crm.crmUuid}&customerUuid=${customer.uuid}&id=${entry.id}`, {...initialEntry, content: currentContent}, "PUT") 
             if (res.code === 200) {
                 console.log(res.message);
             }

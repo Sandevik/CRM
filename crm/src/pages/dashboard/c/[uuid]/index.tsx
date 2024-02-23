@@ -33,7 +33,7 @@ export default function index() {
           
           <div className="flex flex-col gap-2 my-2">
             <h3>Tasks</h3>
-            <TaskList showClients={true} tasks={tasks} refetchTasks={fetchTasks} focusTask={setFocusedTask}/>
+            <TaskList showCustomers={true} tasks={tasks} refetchTasks={fetchTasks} focusTask={setFocusedTask}/>
           </div>
 
           <br />
@@ -43,11 +43,11 @@ export default function index() {
           <br />
           num of meetings today
           <br />
-          things todo from different clients
+          things todo from different customers
           <br />
           wishlist for functions that customers want (votable) and status for wishlist votes
           <br />
-          A box to put in suggestions and a view of all suggestions this client has proposed / All suggestions and ability to upvote all suggestions exept for ones own
+          A box to put in suggestions and a view of all suggestions this customer has proposed / All suggestions and ability to upvote all suggestions exept for ones own
           <br />
           Suggestions:
           <br />

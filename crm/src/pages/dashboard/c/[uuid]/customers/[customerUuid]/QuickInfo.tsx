@@ -4,26 +4,26 @@ import React, { useContext, useEffect, useState } from 'react'
 import { FaPen } from 'react-icons/fa';
 import { Statistics } from '.';
 import Button from '@/components/Button';
-import Task from './Task';
+import Task from '../../../../../../components/Task';
 import TaskList from '../../../../../../components/TaskList';
 
 
 
-export default function QuickInfo({client, statistics, addingTask, setAddTask, tasks, refetchTasks, focusTask}: {client: Client | null, statistics: Statistics, addingTask: boolean, setAddTask: React.Dispatch<React.SetStateAction<boolean>>, tasks: Task[], refetchTasks: () => Promise<void>, focusTask: React.Dispatch<React.SetStateAction<Task | null>>}) {
+export default function QuickInfo({customer, statistics, addingTask, setAddTask, tasks, refetchTasks, focusTask}: {customer: Customer | null, statistics: Statistics, addingTask: boolean, setAddTask: React.Dispatch<React.SetStateAction<boolean>>, tasks: Task[], refetchTasks: () => Promise<void>, focusTask: React.Dispatch<React.SetStateAction<Task | null>>}) {
   const {crm} = useContext(CurrentCrmContext);
-  const [currentNote, setCurrentNote] = useState<string>(client?.note || "");
+  const [currentNote, setCurrentNote] = useState<string>(customer?.note || "");
   const [editing, setEditing] = useState<boolean>(false);
 
-  useEffect(()=>{setCurrentNote(client?.note || "")},[client])
+  useEffect(()=>{setCurrentNote(customer?.note || "")},[customer])
 
   const handleSaveNote = async (editing: boolean) => {
     if (!editing) {
       setEditing(true);
       return;
     }
-    if (crm?.crmUuid && client){
+    if (crm?.crmUuid && customer){
       setEditing(false);
-      const res = await request(`/clients/note?crmUuid=${crm.crmUuid}`, {uuid: client.uuid, note: currentNote}, "PUT")
+      const res = await request(`/customers/note?crmUuid=${crm.crmUuid}`, {uuid: customer.uuid, note: currentNote}, "PUT")
       if (res.code !== 200) {
         setEditing(true);
       }
@@ -46,14 +46,14 @@ export default function QuickInfo({client, statistics, addingTask, setAddTask, t
               <span>Tasks</span>
               <Button className='' onClick={()=>setAddTask(true)}>New Task</Button>
             </div>
-            <TaskList showClients={false} tasks={tasks} refetchTasks={refetchTasks} focusTask={focusTask}/>
+            <TaskList showCustomers={false} tasks={tasks} refetchTasks={refetchTasks} focusTask={focusTask}/>
           </div>
         </div>
       </div>
 
       <div className="w-[17em] bg-background-light p-2 rounded-md flex justify-between flex-col mt-8">
         <div className="flex flex-col gap-4">
-          <h3 className="text-lg font-semibold">Client Statistics</h3>
+          <h3 className="text-lg font-semibold">Customer Statistics</h3>
           <div className="flex justify-between text-lg ">
             <div className=''>Meetings</div>
             <div>{statistics.meetings_count}</div>

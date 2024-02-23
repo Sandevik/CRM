@@ -236,7 +236,7 @@ impl Customer {
         }
     }
 
-    pub async fn get_statistics(&self, data: &web::Data<AppState>) -> Result<Option<ClientStatistics>, sqlx::Error> {
+    pub async fn get_statistics(&self, data: &web::Data<AppState>) -> Result<Option<CustomerStatistics>, sqlx::Error> {
         match sqlx::query(r#"SELECT 
         (SELECT COUNT(*) FROM `crm` . `entries` WHERE `crm_uuid` = ? AND `customer_uuid` = ?) AS entries_count, 
         (SELECT COUNT(*) FROM `crm` . `meetings` WHERE `crm_uuid` = ? AND `customer_uuid` = ?) AS meetings_count, 
@@ -263,7 +263,7 @@ impl Customer {
                 let entries_count = unwrapped.get::<i32, &str>("entries_count") as usize;
                 let task_count = unwrapped.get::<i32, &str>("tasks_count") as usize;
                 let tasks_todo_count = unwrapped.get::<i32, &str>("tasks_todo_count") as usize;
-                return Ok(Some(ClientStatistics {
+                return Ok(Some(CustomerStatistics {
                     meetings_count,
                     entries_count,
                     task_count,
@@ -277,7 +277,7 @@ impl Customer {
 
 
 #[derive(Serialize)]
-pub struct ClientStatistics {
+pub struct CustomerStatistics {
     pub meetings_count: usize,
     pub entries_count: usize,
     pub task_count: usize,

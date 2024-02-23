@@ -1,4 +1,4 @@
-interface Client {
+interface Customer {
     crmUuid: string,
     uuid: string,
     firstName: string | null,

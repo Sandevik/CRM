@@ -22,8 +22,8 @@ export const CurrentContextProvider = ({children}: {children: React.ReactNode}) 
             if (currentUuid) {
               const res = await request<Crm>(`/crm?crmUuid=${currentUuid}`, {}, "GET");
               setCrm(res.data || null);
-              if (res.data && res.data.clients) {
-                cache(res.data.clients, CacheType.Client);
+              if (res.data && res.data.customers) {
+                cache(res.data.customers, CacheType.Customer);
               }
             }
           })();

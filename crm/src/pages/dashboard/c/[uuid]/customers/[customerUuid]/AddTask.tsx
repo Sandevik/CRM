@@ -7,13 +7,13 @@ import { IoClose, IoCalendar } from 'react-icons/io5';
 
 interface Props {
     active: boolean, 
-    client: Client | null, 
+    customer: Customer | null, 
     setActive: React.Dispatch<React.SetStateAction<boolean>>, 
     refetchTasks: () => Promise<void>
 }
 
 
-export default function AddTask({active, setActive, client, refetchTasks}: Props) {
+export default function AddTask({active, setActive, customer, refetchTasks}: Props) {
     const {crm} = useContext(CurrentCrmContext);
     const [form, setForm] = useState<Omit<Task, "added" | "updated" | "recurrenceCount" | "uuid" | "employeeUuid">>({
         deadline: null,
@@ -22,12 +22,12 @@ export default function AddTask({active, setActive, client, refetchTasks}: Props
         start: null,
         status: null,
         recurrence: null,
-        clientUuid: client?.uuid || null,
+        customerUuid: customer?.uuid || null,
     })
     const [deadline, setDeadline] = useState<1|0>(0);
     const [customStart, setCustomStart] = useState<1|0>(0);
 
-    useEffect(()=>{setForm({...form, clientUuid: client?.uuid || null})},[client])
+    useEffect(()=>{setForm({...form, customerUuid: customer?.uuid || null})},[customer])
     useEffect(()=>{setForm({...form, crmUuid: crm?.crmUuid || ""})},[crm])
     
 
@@ -40,13 +40,13 @@ export default function AddTask({active, setActive, client, refetchTasks}: Props
             status: null,
             start: null,
             recurrence: null,
-            clientUuid: client?.uuid || null,
+            customerUuid: customer?.uuid || null,
         })
     }
 
     const addTask = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();
-        if (crm?.crmUuid && client) {
+        if (crm?.crmUuid && customer) {
             const res = await request("/tasks/create", {...form, deadline: new Date(form.deadline || "").getTime(), start: new Date(form.start || "").getTime()}, "POST");
             if (res.code == 201) {
                 close();
@@ -59,7 +59,7 @@ export default function AddTask({active, setActive, client, refetchTasks}: Props
     return (
         <div className={`${active ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"} transition-opacity absolute top-0 left-0 h-full w-full bg-background-dark bg-opacity-40 backdrop-blur-md grid place-items-center`}>
         <form className=" w-[40em] bg-background-light p-4 rounded-md relative flex flex-col gap-5">
-            <h3 className="text-2xl font-semibold">Create a new task for {client?.firstName || "unknown client"}</h3>
+            <h3 className="text-2xl font-semibold">Create a new task for {customer?.firstName || "unknown customer"}</h3>
             <IoClose onClick={() => close()} className="absolute top-2 right-2 text-4xl cursor-pointer"/>
             
             <div className="flex flex-col gap-2">

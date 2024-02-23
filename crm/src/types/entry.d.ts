@@ -1,7 +1,7 @@
 interface Entry {
     crmUuid: string,
     id: number,
-    clientUuid: string,
+    customerUuid: string,
     addedAtMeeting: string | null,
     content: string | null,
     added: string | null,

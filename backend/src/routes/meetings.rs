@@ -131,14 +131,14 @@ pub async fn delete_meeting(data: web::Data<AppState>, query: web::Query<Meeting
 }
 
 #[derive(Serialize, Deserialize)]
-struct MeetingsByClientRequest {
+struct MeetingsByCustomerRequest {
     #[serde(rename(deserialize = "crmUuid"))]
     crm_uuid: String, //crm uuid
     #[serde(rename(deserialize = "customerUuid"))]
     customer_uuid: String,
 }
 #[get("/by-customer")]
-pub async fn get_by_customer_uuid(data: web::Data<AppState>, query: web::Query<MeetingsByClientRequest>) -> impl Responder {
+pub async fn get_by_customer_uuid(data: web::Data<AppState>, query: web::Query<MeetingsByCustomerRequest>) -> impl Responder {
     match Meeting::get_all_by_customer_uuid(&Uuid::parse_str(&query.customer_uuid).unwrap_or_default(), &Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), MeetingsOption::All, Limit::Some(20), &data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
         Ok(meetings) => HttpResponse::Ok().json(Response::ok("Successfully fetched meetings", Some(meetings)))

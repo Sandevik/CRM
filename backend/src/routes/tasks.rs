@@ -61,7 +61,7 @@ async fn create_task(data: web::Data<AppState>, body: web::Json<CreateTodoReques
 
 
 #[derive(Serialize, Deserialize)]
-struct ByClientRequestQuery {
+struct ByCustomerRequestQuery {
     #[serde(rename(serialize = "crmUuid", deserialize = "crmUuid"))]
     crm_uuid: String,
     #[serde(rename(serialize = "customerUuid", deserialize = "customerUuid"))]
@@ -69,7 +69,7 @@ struct ByClientRequestQuery {
 }
 
 #[get("/by-customer")]
-async fn get_by_customer(data: web::Data<AppState>, query: web::Query<ByClientRequestQuery>) -> impl Responder {
+async fn get_by_customer(data: web::Data<AppState>, query: web::Query<ByCustomerRequestQuery>) -> impl Responder {
     match Task::get_by_customer_uuid(&Uuid::parse_str(&query.customer_uuid).unwrap_or_default(), &Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), &data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
         Ok(tasks) =>  HttpResponse::Ok().json(Response::ok("Successfully fetched tasks", Some(tasks)))

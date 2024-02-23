@@ -1,33 +1,33 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { MeetingWithDay } from './Calendar';
-import fetchClientDetails from '@/utils/fetchClientDetails';
+import fetchCustomerDetails from '@/utils/fetchCustomerDetails';
 import { CurrentCrmContext } from '@/context/CurrentCrmContext';
-import ClientList from './ClientList';
+import CustomerList from './CustomerList';
 
 export default function CalendarPart({activeDate, meetingWithDay, currentDate}: {activeDate: Date, meetingWithDay: MeetingWithDay, currentDate: Date}) {
     
-    const [clients, setClients] = useState<Client[]>([]);
+    const [customers, setCustomers] = useState<Customer[]>([]);
     const {crm} = useContext(CurrentCrmContext);
 
     useEffect(()=>{
         if(crm?.crmUuid){
-           getClients(crm);
+           getCustomers(crm);
         }
     },[meetingWithDay, crm])
 
-    const getClients = async (crm: Crm) => {
-        let res: Client[] = [];
+    const getCustomers = async (crm: Crm) => {
+        let res: Customer[] = [];
         meetingWithDay.meetings.forEach( async (meeting) => {
-            let c = await fetchClientDetails(crm?.crmUuid, meeting.clientUuid)
+            let c = await fetchCustomerDetails(crm?.crmUuid, meeting.customerUuid)
             if (c) res.push(c)
         });
         console.log(res);
-        setClients(res)
+        setCustomers(res)
     }
 
     /* useEffect(()=>{
-        console.log("clients")
-    },[clients]) */
+        console.log("customers")
+    },[customers]) */
   
     return (
     <li className={`h-32 p-2 hover:bg-light-purple transition-colors ${new Date(activeDate.getFullYear(), activeDate.getMonth(), meetingWithDay.day).toDateString() === currentDate.toDateString() ? "bg-light-purple bg-opacity-60" : new Date(activeDate.getFullYear(), activeDate.getMonth(), meetingWithDay.day).getTime() < currentDate.getTime() ? "bg-background-light bg-opacity-50" : "bg-background-light" }`} key={meetingWithDay.day}>
@@ -35,7 +35,7 @@ export default function CalendarPart({activeDate, meetingWithDay, currentDate}: 
             <span className="text-2xl font-semibold">{meetingWithDay.day}</span>
             <span className="text-md">{matchWeekDay(new Date(activeDate.getFullYear(), activeDate.getMonth() + 1, meetingWithDay.day).getDay())}</span>
         </div>
-        <ClientList clients={clients} />
+        <CustomerList customers={customers} />
     </li>
   )
 }

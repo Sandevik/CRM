@@ -1,34 +1,34 @@
 export enum CacheType {
-    Client,
+    Customer,
     Crm
 } 
 type U = CacheType;
 type T = 
-U extends CacheType.Client ? Client :
+U extends CacheType.Customer ? Customer :
 U extends CacheType.Crm ? Crm : never;
 
 export function cache(item: T | T[], as: U): void {
     switch (as) {
-        case CacheType.Client:
-            var ls = localStorage.getItem("crm-client-cache");
+        case CacheType.Customer:
+            var ls = localStorage.getItem("crm-customer-cache");
             if (!ls) {
                 if (Array.isArray(item)){
-                    localStorage.setItem("crm-client-cache", JSON.stringify(item))
+                    localStorage.setItem("crm-customer-cache", JSON.stringify(item))
                 } else {
-                    localStorage.setItem("crm-client-cache", JSON.stringify([item]));
+                    localStorage.setItem("crm-customer-cache", JSON.stringify([item]));
                 }
             } else {
-                let parsed = JSON.parse(ls) as Client[];
+                let parsed = JSON.parse(ls) as Customer[];
                 if (Array.isArray(item)) {
                     item.forEach(cl => {
-                        parsed = parsed.filter(client => client.uuid !== cl.uuid)
+                        parsed = parsed.filter(customer => customer.uuid !== cl.uuid)
                     })
                     parsed = [...parsed, ...item];
                 } else {
-                    parsed = parsed.filter(client => client.uuid !== item.uuid)
+                    parsed = parsed.filter(customer => customer.uuid !== item.uuid)
                     parsed.push(item);
                 }
-                localStorage.setItem("crm-client-cache", JSON.stringify(parsed));
+                localStorage.setItem("crm-customer-cache", JSON.stringify(parsed));
             }
         break;
 
@@ -48,7 +48,7 @@ export function cache(item: T | T[], as: U): void {
                     })
                     parsed = [...parsed, ...item];
                 } else {
-                    parsed = parsed.filter(client => client.uuid !== item.uuid)
+                    parsed = parsed.filter(customer => customer.uuid !== item.uuid)
                     parsed.push(item);
                 }
                 localStorage.setItem("crm-crm-cache", JSON.stringify(parsed));

@@ -11,7 +11,7 @@ interface BaseProps {
     closePopup: () => void, 
     active: boolean, 
     onSuccessfulSubmit: () => void, 
-    withClientUuid?: string
+    withCustomerUuid?: string
 }
 
 const calcDateWithTimezoneOffset = (date: Date): Date => {
@@ -19,9 +19,9 @@ const calcDateWithTimezoneOffset = (date: Date): Date => {
 }
 
 
-export default function AddMeeting({closePopup, active, onSuccessfulSubmit, withClientUuid}: BaseProps) {
+export default function AddMeeting({closePopup, active, onSuccessfulSubmit, withCustomerUuid}: BaseProps) {
     const {crm} = useContext(CurrentCrmContext);
-    const [meeting, setMeeting] = useState<NewMeeting>({clientUuid: withClientUuid || "", from: "", to: ""})
+    const [meeting, setMeeting] = useState<NewMeeting>({customerUuid: withCustomerUuid || "", from: "", to: ""})
 
 
     const createMeeting = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -30,7 +30,7 @@ export default function AddMeeting({closePopup, active, onSuccessfulSubmit, with
         const to = new Date(meeting.to);
         if (crm?.crmUuid) {
             const res = await request("/meetings/create", {
-                clientUuid: withClientUuid || meeting.clientUuid,
+                customerUuid: withCustomerUuid || meeting.customerUuid,
                 crmUuid: crm?.crmUuid,
                 from: from.getTime(),
                 to: to.getTime(),
@@ -56,9 +56,9 @@ export default function AddMeeting({closePopup, active, onSuccessfulSubmit, with
                 <Input type="datetime-local" name="to" value={meeting.to} onChange={(e) => setMeeting({...meeting, to: e.target.value})}/>
             </div>
 
-            {!withClientUuid && <div className="flex flex-col">
-                <label htmlFor="clientUuid">Client uuid</label>
-                <Input type="text" name="clientUuid" placeholder='dc586882-5a1c-4f35-b4d4-08c695427090' value={meeting.clientUuid} onChange={(e) => setMeeting({...meeting, clientUuid: e.target.value})}/>
+            {!withCustomerUuid && <div className="flex flex-col">
+                <label htmlFor="customerUuid">Customer uuid</label>
+                <Input type="text" name="customerUuid" placeholder='dc586882-5a1c-4f35-b4d4-08c695427090' value={meeting.customerUuid} onChange={(e) => setMeeting({...meeting, customerUuid: e.target.value})}/>
             </div>}
 
             <Button type='submit' className='mt-4' onClick={(e) => createMeeting(e)}>Create</Button>

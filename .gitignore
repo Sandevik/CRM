@@ -43,3 +43,6 @@ yarn-error.log*
 
 # rust
 **/target/
+
+# docker
+**/compose.yml

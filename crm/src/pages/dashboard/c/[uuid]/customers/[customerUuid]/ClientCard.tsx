@@ -7,14 +7,14 @@ import React, { useContext } from 'react'
 import { FaUser } from "react-icons/fa";
 
 
-export default function ClientCard({client, edit, setEdit}: {client: Client | null, edit: boolean, setEdit: React.Dispatch<React.SetStateAction<boolean>>}) {
+export default function CustomerCard({customer, edit, setEdit}: {customer: Customer | null, edit: boolean, setEdit: React.Dispatch<React.SetStateAction<boolean>>}) {
     const {crm} = useContext(CurrentCrmContext);
     const router = useRouter();
-    const deleteClient = async () => {
-        if (crm?.crmUuid && client?.uuid) {
-            const res = await request(`/clients?crmUuid=${crm?.crmUuid}&uuid=${client?.uuid}`, {}, "DELETE");
+    const deleteCustomer = async () => {
+        if (crm?.crmUuid && customer?.uuid) {
+            const res = await request(`/customers?crmUuid=${crm?.crmUuid}&uuid=${customer?.uuid}`, {}, "DELETE");
             if (res.code === 200) {
-                router.push(`/dashboard/c/${crm.crmUuid}/clients`);
+                router.push(`/dashboard/c/${crm.crmUuid}/customers`);
             }
         }
     }
@@ -24,38 +24,38 @@ export default function ClientCard({client, edit, setEdit}: {client: Client | nu
         
         <div className="flex flex-col h-[20%] mt-10">
             <FaUser className="text-8xl flex justify-center m-auto bg-background-light rounded-full p-4"/>
-            <span className="m-auto flex justify-center text-2xl font-semibold">{client?.firstName} {client?.lastName}</span>
-            <span className="mx-auto flex justify-center ">{client?.dateOfBirth}</span>
+            <span className="m-auto flex justify-center text-2xl font-semibold">{customer?.firstName} {customer?.lastName}</span>
+            <span className="mx-auto flex justify-center ">{customer?.dateOfBirth}</span>
         </div>
         
         <div className="flex flex-col gap-4 h-[30%] justify-center">
-            <span className="mx-auto flex justify-center ">{client?.address}</span>
-            <span className="mx-auto flex justify-center ">{client?.zipCode} {client?.city}</span>
-            <span className="mx-auto flex justify-center ">{client?.country}</span>
+            <span className="mx-auto flex justify-center ">{customer?.address}</span>
+            <span className="mx-auto flex justify-center ">{customer?.zipCode} {customer?.city}</span>
+            <span className="mx-auto flex justify-center ">{customer?.country}</span>
         </div>
 
         <div className="flex flex-col justify-center  w-full gap-2 h-[20%]">
             <div className="flex justify-between w-[70%] m-auto">
                 <span>Email</span>
-                {client?.email ? <Link className="text-greenish" href={`mailto:${client.email}`}>{client?.email}</Link> : <span>-</span>}
+                {customer?.email ? <Link className="text-greenish" href={`mailto:${customer.email}`}>{customer?.email}</Link> : <span>-</span>}
             </div>
             <div className="flex justify-between w-[70%] m-auto">
                 <span>Phone</span>
-                {client?.phoneNumber ? <Link className="text-greenish" href={`mailto:${client.phoneNumber}`}>{client?.phoneNumber}</Link> : <span>-</span>}
+                {customer?.phoneNumber ? <Link className="text-greenish" href={`mailto:${customer.phoneNumber}`}>{customer?.phoneNumber}</Link> : <span>-</span>}
             </div>
             <div className="flex justify-between w-[70%] m-auto">
                 <span>Company</span>
-                <span>{client?.company || "-"}</span>
+                <span>{customer?.company || "-"}</span>
             </div>
             <div className="flex justify-between w-[70%] m-auto">
                 <span>Wants news letter</span>
-                <span>{client?.newsLetter ? "Yes" : "No"}</span>
+                <span>{customer?.newsLetter ? "Yes" : "No"}</span>
             </div>
         </div>
 
         <div className="flex-1 justify-center gap-6 flex py-2 items-end">
             <Button onClick={() => setEdit(!edit)}>{edit ? "Close" : "Edit"}</Button>
-            <Button onClick={() => deleteClient()}>Delete</Button>
+            <Button onClick={() => deleteCustomer()}>Delete</Button>
         </div>
 
     </div>

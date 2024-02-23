@@ -6,7 +6,7 @@ interface Task {
     recurrence: TaskReaccurance,
     recurrenceCount: number,
     status: TaskStatus,
-    clientUuid: string | null,
+    customerUuid: string | null,
     employeeUuid: string | null,
     title: string | null,
     added: string,

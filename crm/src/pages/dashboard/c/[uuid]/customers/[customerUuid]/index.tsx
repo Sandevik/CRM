@@ -2,11 +2,9 @@ import { useParams } from 'next/navigation'
 import React, { useContext, useEffect, useState } from 'react'
 import Navbar from '../../Navbar';
 import { CurrentCrmContext } from '@/context/CurrentCrmContext';
-import fetchClientDetails from '@/utils/fetchClientDetails';
-import { FaChevronRight, FaChevronLeft } from "react-icons/fa6";
+import fetchCustomerDetails from '@/utils/fetchCustomerDetails';
+import { FaChevronLeft } from "react-icons/fa6";
 import Link from 'next/link';
-import ClientCard from './ClientCard';
-import EditClient from './EditClient';
 import Entries from './Entries';
 import Button from '@/components/Button';
 import QuickInfo from './QuickInfo';
@@ -17,6 +15,8 @@ import AddMeeting from '@/components/AddMeeting';
 import EditMeeting from './EditMeeting';
 import AddTask from './AddTask';
 import FocusedTask from './FocusedTask';
+import CustomerCard from './ClientCard';
+import EditCustomer from './EditClient';
 
 export interface Statistics {
   meetings_count: number,
@@ -29,7 +29,7 @@ export interface Statistics {
 export default function index() {
   const params = useParams();
   const {crm} = useContext(CurrentCrmContext);
-  const [client, setClient] = useState<Client | null>(null);
+  const [customer, setCustomer] = useState<Customer | null>(null);
   const [edit, setEdit] = useState<boolean>(false);
   const [entries, setEntries] = useState<Entry[]>([]);
   const [meetings, setMeetings] = useState<Meeting[]>([]);
@@ -44,7 +44,7 @@ export default function index() {
 
   useEffect(()=>{
     (async () => {
-      await fetchClient();
+      await fetchCustomer();
     })();
   },[crm, params])
 
@@ -55,27 +55,27 @@ export default function index() {
       await fetchTasks();
       await fetchStatistics();
     })();
-  },[client])
+  },[customer])
 
   const fetchStatistics = async () => {
-    if (crm?.crmUuid && client) {
-      let res = await request<Statistics>(`/clients/statistics?crmUuid=${crm.crmUuid}&clientUuid=${client.uuid}`, {}, "GET");
+    if (crm?.crmUuid && customer) {
+      let res = await request<Statistics>(`/customers/statistics?crmUuid=${crm.crmUuid}&customerUuid=${customer.uuid}`, {}, "GET");
       if (res.code === 200 && res.data) {
         setStatistics(res.data);
       }
     }
   }
 
-  const fetchClient = async () => {
-    if (crm?.crmUuid && params?.clientUuid) {
-      const client = await fetchClientDetails(crm?.crmUuid, params?.clientUuid as string);
-      setClient(client)
+  const fetchCustomer = async () => {
+    if (crm?.crmUuid && params?.customerUuid) {
+      const customer = await fetchCustomerDetails(crm?.crmUuid, params?.customerUuid as string);
+      setCustomer(customer)
     }
   }
 
   const fetchEntries = async () => {
-    if (crm?.crmUuid && client) {
-      let res = await request<Entry[]>(`/entries/all?crmUuid=${crm?.crmUuid}&clientUuid=${client?.uuid}`, {}, "GET");
+    if (crm?.crmUuid && customer) {
+      let res = await request<Entry[]>(`/entries/all?crmUuid=${crm?.crmUuid}&customerUuid=${customer?.uuid}`, {}, "GET");
       if (res.code === 200 && res.data) {
         setEntries(res.data);
         await fetchStatistics();
@@ -83,8 +83,8 @@ export default function index() {
     }
   }
   const fetchMeetings = async () => {
-    if (crm?.crmUuid && client) {
-      let res = await request<Meeting[]>(`/meetings/by-client?crmUuid=${crm?.crmUuid}&clientUuid=${client?.uuid}`, {}, "GET");
+    if (crm?.crmUuid && customer) {
+      let res = await request<Meeting[]>(`/meetings/by-customer?crmUuid=${crm?.crmUuid}&customerUuid=${customer?.uuid}`, {}, "GET");
       if (res.code === 200 && res.data) {
         setMeetings(res.data);
         await fetchStatistics();
@@ -92,8 +92,8 @@ export default function index() {
     }
   }
   const fetchTasks = async () => {
-    if (crm?.crmUuid && client) {
-      let res = await request<Task[]>(`/tasks/by-client?crmUuid=${crm?.crmUuid}&clientUuid=${client?.uuid}`, {}, "GET");
+    if (crm?.crmUuid && customer) {
+      let res = await request<Task[]>(`/tasks/by-customer?crmUuid=${crm?.crmUuid}&customerUuid=${customer?.uuid}`, {}, "GET");
       if (res.code === 200 && res.data) {
         setTasks(res.data);
         await fetchStatistics();
@@ -115,9 +115,9 @@ export default function index() {
   return (
       <div className='relative'>
         <Navbar />
-        <Link href={`/dashboard/c/${crm?.crmUuid}/clients`} className="flex gap-2 items-center text-lg bg-light-blue hover:bg-greenish transition-colors absolute top-[4.2em] px-2 text-black rounded-md"><FaChevronLeft /> <div>Clients</div> </Link>
+        <Link href={`/dashboard/c/${crm?.crmUuid}/customers`} className="flex gap-2 items-center text-lg bg-light-blue hover:bg-greenish transition-colors absolute top-[4.2em] px-2 text-black rounded-md"><FaChevronLeft /> <div>Customers</div> </Link>
         <main className='h-[calc(100dvh-11em)] rounded-md w-full mt-12 p-4 bg-background-light bg-opacity-50 flex gap-4'>
-          <ClientCard client={client} setEdit={setEdit} edit={edit}/>
+          <CustomerCard customer={customer} setEdit={setEdit} edit={edit}/>
           <div className="flex-1 w-full relative">
 
             <nav>
@@ -137,9 +137,9 @@ export default function index() {
 
             <div className="mt-3">
             {currentView === "quick" ?
-              <QuickInfo focusTask={setFocusedTask} client={client} statistics={statistics} addingTask={addTask} setAddTask={setAddTask} tasks={tasks} refetchTasks={fetchTasks}/>
+              <QuickInfo focusTask={setFocusedTask} customer={customer} statistics={statistics} addingTask={addTask} setAddTask={setAddTask} tasks={tasks} refetchTasks={fetchTasks}/>
               : currentView === "entries" ?
-              <Entries refetchEntries={fetchEntries} entries={entries} client={client} />
+              <Entries refetchEntries={fetchEntries} entries={entries} customer={customer} />
               : 
               <Meetings refetchMeetings={fetchMeetings} setEditMeeting={setEditMeeting} meetings={meetings}/>
             }
@@ -148,13 +148,13 @@ export default function index() {
           </div>
         </main>
         <div className='absolute bottom-0 right-[15dvh]'>
-          <AddMeeting closePopup={() => setNewMeetingActive(false)} active={newMeetingActive} onSuccessfulSubmit={fetchMeetings} withClientUuid={client?.uuid} />
+          <AddMeeting closePopup={() => setNewMeetingActive(false)} active={newMeetingActive} onSuccessfulSubmit={fetchMeetings} withCustomerUuid={customer?.uuid} />
           <EditMeeting closePopup={() => setEditMeeting(null)} _meeting={editMeeting} onSuccessfulSubmit={fetchMeetings} />
         </div>
         {/* <FocusedTask setTask={setFocusedTask} task={focusedTask} refetchTasks={fetchTasks} /> */}
-        <AddTask active={addTask} setActive={setAddTask} client={client} refetchTasks={fetchTasks} />
-        <NewEntryForm active={newEntryActive} refetchEntries={fetchEntries} close={() => setNewEntryActive(false)} client={client}/>
-        <EditClient initialClient={client} active={edit} _setClient={setClient} setEdit={setEdit}/>
+        <AddTask active={addTask} setActive={setAddTask} customer={customer} refetchTasks={fetchTasks} />
+        <NewEntryForm active={newEntryActive} refetchEntries={fetchEntries} close={() => setNewEntryActive(false)} customer={customer}/>
+        <EditCustomer initialCustomer={customer} active={edit} _setCustomer={setCustomer} setEdit={setEdit}/>
       </div>
     )
 }

@@ -26,7 +26,7 @@ pub fn customers() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Res
 }
 
 #[derive(Serialize, Deserialize)]
-struct ClientByUuidRequest {
+struct CustomerByUuidRequest {
     #[serde(rename(deserialize = "crmUuid"))]
     crm_uuid: String, //crm uuid
     #[serde(rename(deserialize = "customerUuid"))]
@@ -34,7 +34,7 @@ struct ClientByUuidRequest {
 }
 
 #[get("")]
-async fn by_uuid(query: web::Query<ClientByUuidRequest>, data: web::Data<AppState>) -> impl Responder {
+async fn by_uuid(query: web::Query<CustomerByUuidRequest>, data: web::Data<AppState>) -> impl Responder {
     let customer_uuid = Uuid::parse_str(&query.customer_uuid).unwrap_or_default();
     let crm_uuid = Uuid::parse_str(&query.crm_uuid).unwrap_or_default();
     match Customer::get_by_uuid(&customer_uuid, &crm_uuid, &data).await {
@@ -80,7 +80,7 @@ async fn search(data: web::Data<AppState>, query: web::Query<SearchRequest>) -> 
 
 
 #[derive(Deserialize)]
-struct CreateClientRequest {
+struct CreateCustomerRequest {
     #[serde(rename(serialize = "crmUuid", deserialize = "crmUuid"))]
     crm_uuid: String,
     #[serde(rename(serialize = "firstName", deserialize = "firstName"))]
@@ -104,7 +104,7 @@ struct CreateClientRequest {
 
 
 #[post("/create")]
-async fn create_customer(data: web::Data<AppState>, body: web::Json<CreateClientRequest>) -> impl Responder {
+async fn create_customer(data: web::Data<AppState>, body: web::Json<CreateCustomerRequest>) -> impl Responder {
     let customer: Customer = Customer::new(&Uuid::parse_str(&body.crm_uuid).unwrap_or_default(), body.first_name.clone(), body.last_name.clone(), body.date_of_birth.clone(), body.email.clone(), body.address.clone(), body.zip_code.clone(), body.city.clone(), body.country.clone(), body.company.clone(), body.phone_number.clone(), body.news_letter.clone());
     match customer.insert(&Uuid::parse_str(&body.crm_uuid).unwrap_or_default(), &data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
@@ -200,7 +200,7 @@ async fn delete_customer(data: web::Data<AppState>, query: web::Query<DeleteRequ
 
 
 #[get("/statistics")]
-async fn get_statistics(data: web::Data<AppState>, query: web::Query<ClientByUuidRequest>) -> impl Responder {
+async fn get_statistics(data: web::Data<AppState>, query: web::Query<CustomerByUuidRequest>) -> impl Responder {
     let customer: Customer = Customer {crm_uuid: Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), uuid: Uuid::parse_str(&query.customer_uuid).unwrap_or_default(), ..Customer::default()};
     match customer.get_statistics(&data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),

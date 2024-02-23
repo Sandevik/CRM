@@ -1,5 +1,5 @@
 import { CurrentCrmContext } from '@/context/CurrentCrmContext';
-import fetchClientDetails from '@/utils/fetchClientDetails';
+import fetchCustomerDetails from '@/utils/fetchCustomerDetails';
 import Link from 'next/link';
 import React, { useContext, useEffect, useState } from 'react'
 import { FaUser } from "react-icons/fa";
@@ -13,14 +13,14 @@ export default function MeetingCard({meeting, refetchMeetings}: {meeting: Meetin
     const {crm} = useContext(CurrentCrmContext);
     const fromDate = new Date(meeting.from);
     const toDate = new Date(meeting.to);
-    const [client, setClient] = useState<Client | null>(null);
+    const [customer, setCustomer] = useState<Customer | null>(null);
     const [meetingSettingsOpen, setMeetingSettingsOpen] = useState<boolean>(false);
     
-    // fetch client details from localstorage first then request
+    // fetch customer details from localstorage first then request
     useEffect(()=>{
         (async () => {
             if (crm?.crmUuid) {
-                setClient(await fetchClientDetails(crm?.crmUuid, meeting.clientUuid));
+                setCustomer(await fetchCustomerDetails(crm?.crmUuid, meeting.customerUuid));
             }
         })();
     },[meeting])
@@ -49,14 +49,14 @@ export default function MeetingCard({meeting, refetchMeetings}: {meeting: Meetin
         <div className="flex flex-col gap-12 mt-8">
             <div className='flex flex-col gap-2 items-center justify-center'>
                 <FaUser className="text-[92px] bg-background-dark p-2 rounded-full" />
-                <Link href={`${crm?.crmUuid}/clients/${client?.uuid}`} className='font-semibold text-lg text-light-blue hover:text-greenish transition-colors'>{client ? client.firstName + " " + client.lastName : "Unknown client"}</Link>
+                <Link href={`${crm?.crmUuid}/customers/${customer?.uuid}`} className='font-semibold text-lg text-light-blue hover:text-greenish transition-colors'>{customer ? customer.firstName + " " + customer.lastName : "Unknown customer"}</Link>
             </div>
 
 
             <div className="flex flex-col items-center gap-2">
-                <a className='text-greenish' href={`mailto:${client?.email}`}>{client?.email}</a>
-                <a className='text-greenish' href={`tel:${client?.phoneNumber}`}>{client?.phoneNumber}</a>
-                <span>{client?.company}</span>
+                <a className='text-greenish' href={`mailto:${customer?.email}`}>{customer?.email}</a>
+                <a className='text-greenish' href={`tel:${customer?.phoneNumber}`}>{customer?.phoneNumber}</a>
+                <span>{customer?.company}</span>
             </div>
         </div>
         
