@@ -1,4 +1,5 @@
 import Button from '@/components/Button';
+import Text from '@/components/Text';
 import { CurrentCrmContext } from '@/context/CurrentCrmContext';
 import request from '@/utils/request';
 import Link from 'next/link';
@@ -40,22 +41,22 @@ export default function CustomerCard({customer, edit, setEdit}: {customer: Custo
                 {customer?.email ? <Link className="text-greenish" href={`mailto:${customer.email}`}>{customer?.email}</Link> : <span>-</span>}
             </div>
             <div className="flex justify-between w-[70%] m-auto">
-                <span>Phone</span>
+                <span><Text text={{eng: "Phone", swe: "Telefon"}} /></span>
                 {customer?.phoneNumber ? <Link className="text-greenish" href={`mailto:${customer.phoneNumber}`}>{customer?.phoneNumber}</Link> : <span>-</span>}
             </div>
             <div className="flex justify-between w-[70%] m-auto">
-                <span>Company</span>
+                <span><Text text={{eng: "Company", swe: "Företag"}} /></span>
                 <span>{customer?.company || "-"}</span>
             </div>
             <div className="flex justify-between w-[70%] m-auto">
-                <span>Wants news letter</span>
+                <span><Text text={{eng: "Wants news letter", swe: "Vill ha nyhetsbrev"}} /></span>
                 <span>{customer?.newsLetter ? "Yes" : "No"}</span>
             </div>
         </div>
 
         <div className="flex-1 justify-center gap-6 flex py-2 items-end">
-            <Button onClick={() => setEdit(!edit)}>{edit ? "Close" : "Edit"}</Button>
-            <Button onClick={() => deleteCustomer()}>Delete</Button>
+            <Button onClick={() => setEdit(!edit)}>{edit ? <Text text={{eng: "Close", swe: "Stäng"}} /> : <Text text={{eng: "Edit", swe: "Ändra"}} />}</Button>
+            <Button onClick={() => deleteCustomer()}><Text text={{eng: "Delete", swe: "Ta bort"}} /></Button>
         </div>
 
     </div>

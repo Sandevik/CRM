@@ -1,8 +1,10 @@
 import Button from '@/components/Button';
 import Input from '@/components/Input';
 import Text from '@/components/Text';
+import { AuthContext } from '@/context/AuthContext';
 import { CurrentCrmContext } from '@/context/CurrentCrmContext';
 import request from '@/utils/request';
+import text from '@/utils/text';
 import React, { useContext, useState } from 'react'
 import { IoClose } from "react-icons/io5";
 
@@ -10,6 +12,8 @@ export default function NewEntryForm({active, close, customer, refetchEntries}: 
     const {crm} = useContext(CurrentCrmContext);
     const [form, setForm] = useState<{content: string, addedAtMeeting: string | null}>({content: "", addedAtMeeting: null})
     const [error, setError] = useState<boolean>(false);
+    const {data} = useContext(AuthContext);
+
 
     const submitEntry = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();
@@ -36,7 +40,7 @@ export default function NewEntryForm({active, close, customer, refetchEntries}: 
             
             <div className="flex flex-col h-[70%] gap-2">
                 <label htmlFor="entry note" className="text-lg"><Text text={{eng: "Entry Note", swe: "Anteckning"}} /></label>
-                <textarea name="entry note" value={form.content} onChange={(e) => setForm({...form, content: e.target.value})} className="w-full flex-1 rounded-md overflow-y-scroll scrollthumb resize-none transition-all relative p-2 bg-background-dark text-white" placeholder='Write a note entry about this customer...'></textarea>   
+                <textarea name="entry note" value={form.content} onChange={(e) => setForm({...form, content: e.target.value})} className="w-full flex-1 rounded-md overflow-y-scroll scrollthumb resize-none transition-all relative p-2 bg-background-dark text-white" placeholder={text({eng:'Write a note entry about this customer...', swe: "Skriv en anteckning om denna kund..."}, data)}></textarea>   
             </div>
             
             <div className='flex flex-col gap-2'>

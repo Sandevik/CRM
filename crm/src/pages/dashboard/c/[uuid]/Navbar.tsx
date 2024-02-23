@@ -10,7 +10,7 @@ export default function Navbar() {
   const {crm} = useContext(CurrentCrmContext);
   
   return (
-    <nav className="w-full p-2 text-light-blue border-b-2 border-background-light pr-4 sticky top-12 bg-background-dark">
+    <nav className="w-full p-2 text-light-blue  pr-4 sticky top-12 bg-background-dark">
         {/* <BreadCrumb /> */}
         <ul className='flex justify-between items-center text-xl font-semibold'>
             <li className='text-2xl font-bold capitalize truncate'>
@@ -20,7 +20,7 @@ export default function Navbar() {
                 <Link href={`/dashboard/c/${crm?.crmUuid}`} className={`${pathName?.split("/").length === 4 && "text-black px-2 clippath bg-light-blue"} transition-colors hover:text-greenish`}>Dashboard</Link>
                 <Link href={`/dashboard/c/${crm?.crmUuid}/calendar`} className={`${(/.+\/calendar.*/).test(pathName) && "text-black px-2 clippath bg-light-blue"} transition-colors hover:text-greenish `}><Text text={{swe: "Kalender", eng: "Calendar"}} /></Link>
                 <Link href={`/dashboard/c/${crm?.crmUuid}/customers`} className={`${(/.+\/customers.*/).test(pathName) && "text-black px-2 clippath bg-light-blue"} transition-colors hover:text-greenish `}><Text text={{swe: "Kunder", eng: "Customers"}}/></Link>
-                <Link href={`/dashboard/c/${crm?.crmUuid}`} className={`${(/.+\/employees.*/).test(pathName) && "text-black px-2 clippath bg-light-blue"} transition-colors hover:text-greenish `}><Text text={{swe: "Anställda", eng: "Employees"}} /></Link>
+                <Link href={`/dashboard/c/${crm?.crmUuid}/employees`} className={`${(/.+\/employees.*/).test(pathName) && "text-black px-2 clippath bg-light-blue"} transition-colors hover:text-greenish `}><Text text={{swe: "Anställda", eng: "Employees"}} /></Link>
                 {/* <Link href={`/dashboard/c/${crm?.crmUuid}`} className={`${(/.+\/deals.*).test(pathName) && "text-black px-2 clippath bg-light-blue"} transition-colors hover:text-greenish `}><Text text={{swe: "Affärer", eng: "Deals"}} /></Link> */}
                 <Link href={`/dashboard/c/${crm?.crmUuid}/settings`} className={`${(/.+\/settings.*/).test(pathName) && "text-black px-2 clippath bg-light-blue"} transition-colors hover:text-greenish `}><Text text={{swe: "Inställningar", eng: "Settings"}} /></Link>
             </li>

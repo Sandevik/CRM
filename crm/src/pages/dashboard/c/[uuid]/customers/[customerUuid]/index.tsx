@@ -15,8 +15,8 @@ import AddMeeting from '@/components/AddMeeting';
 import EditMeeting from './EditMeeting';
 import AddTask from './AddTask';
 import FocusedTask from './FocusedTask';
-import CustomerCard from './ClientCard';
-import EditCustomer from './EditClient';
+import CustomerCard from './CustomerCard';
+import EditCustomer from './EditCustomer';
 import Text from '@/components/Text';
 
 export interface Statistics {
