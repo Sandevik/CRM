@@ -102,7 +102,7 @@ impl Model for Task {
             status: match row.get("status") {None => None, Some(status_str) => Some(TaskStatus::from_string(status_str))},
             added: row.get("added"),
             updated: row.get("updated"),
-            percentage: match row.get("percentage") {None => None, Some(p) => Some(p)},
+            percentage: match row.try_get("percentage") {Err(_) => None, Ok(p) => Some(p)},
         }
     }
 }
