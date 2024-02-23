@@ -15,4 +15,4 @@ interface Task {
 }
 
 type TaskRecurrence = "dayly" | "weekly" | "monthly" | "yearly" | "everyOtherWeek" | "everyOtherMonth" | null;
-type TaskStatus = "Ongoing" | "Completed" | null
+type TaskStatus = "Ongoing" | "Completed" | "ongoing" | "completed" | null

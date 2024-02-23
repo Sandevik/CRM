@@ -10,4 +10,5 @@ interface User {
     crmCount: number,
     subscriptionEnds: string,
     legacyUser: boolean,
+    preferredLanguage: string,
 }

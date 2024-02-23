@@ -78,6 +78,11 @@ Gets all task revolving a certain customer
 Completes a task regardless if it is reaccuring or not
 
 
+## /users
+### /users/update-language | POST | JSON: language (string), userUuid: (string),
+updates the preferred language
+
+
 
 ## /test
 ###  /test/generate-hash | GET

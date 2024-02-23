@@ -9,6 +9,7 @@ import Spinner from '@/components/Spinner';
 import NewCustomerForm from './NewClientForm';
 import CustomerRow from './ClientRow';
 import CustomerRowHeading from './ClientRowHeading';
+import Text from '@/components/Text';
 
 export default function index() {
     const [createCustomerActive, setCreateCustomerActive] = useState<boolean>(false);
@@ -32,7 +33,7 @@ export default function index() {
             <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search" className="w-[30em]"/>
           </div> 
           : ""}
-          <Button onClick={() => setCreateCustomerActive(!createCustomerActive)} className="absolute right-4 top-14 md:top-0 z-20">{createCustomerActive ? "Close" : "New customer"}</Button>
+          <Button onClick={() => setCreateCustomerActive(!createCustomerActive)} className="absolute right-4 top-14 md:top-0 z-20">{createCustomerActive ? <Text text={{eng: "Close", swe: "Stäng"}} /> : <Text text={{eng: "New customer", swe: "Ny kund"}} />}</Button>
         </div>
         {loading &&  <Spinner className='text-5xl absolute top-[45%] w-full grid place-items-center' />}
         <NewCustomerForm setCreateCustomerActive={setCreateCustomerActive} onSuccessfulSubmit={onSuccessfullSubmit} active={createCustomerActive}/>
@@ -45,7 +46,7 @@ export default function index() {
         : <div className="flex justify-center items-center text-2xl mt-16 h-[calc(100dvh-15em)] flex-col gap-4">
             {!loading && 
             <>
-              <span>Oops, it seems like you do not yet have any customers. Create one</span>
+              <span><Text text={{eng: "Oops, it seems like you do not yet have any customers. Create one!", swe: "Oj, det ser ut som att du ännu inte har några kunder. Skapa en!"}} /></span>
               <Image className="" priority src={"/astronaut.svg"} alt="astronaut" width={200} height={200}/>
             </>}
           </div>
@@ -53,7 +54,7 @@ export default function index() {
 
           <div className="flex gap-2 justify-center items-center">
             <Button onClick={() => prevResult()}><FaChevronLeft /></Button>
-              <span>Page {currentPage}</span>
+              <span><Text text={{eng: "Page", swe: "Sida"}} /> {currentPage}</span>
             <Button onClick={() => nextResult()}><FaChevronRight/></Button>
           </div>
     </main>

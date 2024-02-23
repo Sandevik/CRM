@@ -4,6 +4,7 @@ import Navbar from './Navbar';
 import { useContext, useEffect, useState } from 'react';
 import { CurrentCrmContext } from '@/context/CurrentCrmContext';
 import request from '@/utils/request';
+import Text from '@/components/Text';
 
 export default function index() {
   const {crm} = useContext(CurrentCrmContext);
@@ -32,7 +33,7 @@ export default function index() {
         <div className="p-2">
           
           <div className="flex flex-col gap-2 my-2">
-            <h3>Tasks</h3>
+            <h3><Text text={{swe: "Uppgifter", eng: "Tasks"}} /></h3>
             <TaskList showCustomers={true} tasks={tasks} refetchTasks={fetchTasks} focusTask={setFocusedTask}/>
           </div>
 

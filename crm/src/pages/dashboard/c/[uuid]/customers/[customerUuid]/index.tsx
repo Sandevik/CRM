@@ -17,6 +17,7 @@ import AddTask from './AddTask';
 import FocusedTask from './FocusedTask';
 import CustomerCard from './ClientCard';
 import EditCustomer from './EditClient';
+import Text from '@/components/Text';
 
 export interface Statistics {
   meetings_count: number,
@@ -35,7 +36,7 @@ export default function index() {
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [newEntryActive, setNewEntryActive] = useState<boolean>(false);
   const [newMeetingActive, setNewMeetingActive] = useState<boolean>(false);
-  const [currentView, setCurrentView] = useState<"quick" | "entries" | "meetings">("quick");
+  const [currentView, setCurrentView] = useState<"info" | "entries" | "meetings">("info");
   const [editMeeting, setEditMeeting] = useState<Meeting | null>(null);
   const [statistics, setStatistics] = useState<Statistics>({meetings_count: 0, entries_count: 0, task_count: 0, tasks_todo_count: 0});
   const [addTask, setAddTask] = useState<boolean>(false);
@@ -115,28 +116,28 @@ export default function index() {
   return (
       <div className='relative'>
         <Navbar />
-        <Link href={`/dashboard/c/${crm?.crmUuid}/customers`} className="flex gap-2 items-center text-lg bg-light-blue hover:bg-greenish transition-colors absolute top-[3.3em] left-1 px-2 text-black rounded-md"><FaChevronLeft /> <div>Customers</div> </Link>
+        <Link href={`/dashboard/c/${crm?.crmUuid}/customers`} className="flex gap-2 items-center text-lg bg-light-blue hover:bg-greenish transition-colors absolute top-[3.3em] left-1 px-2 text-black rounded-md"><FaChevronLeft /> <div><Text text={{eng: "Customers", swe: "Kunder"}} /></div> </Link>
         <main className='h-[calc(100dvh-11em)] rounded-md w-full mt-12 p-4 bg-background-light bg-opacity-50 flex gap-4'>
           <CustomerCard customer={customer} setEdit={setEdit} edit={edit}/>
           <div className="flex-1 w-full relative">
 
             <nav>
               <ul className="flex gap-1">
-                <li onClick={()=>setCurrentView("quick")} className={`${currentView === "quick" ? " bg-light-blue text-background-dark" : "bg-background-dark"} clippath transition-colors font-semibold cursor-pointer px-2 py-1`}>Quick Info</li>
-                <li onClick={()=>setCurrentView("entries")} className={`${currentView === "entries" ? " bg-light-blue text-background-dark" : "bg-background-dark"} clippath transition-colors font-semibold cursor-pointer px-2 py-1`}>Entries</li>
-                <li onClick={()=>setCurrentView("meetings")} className={`${currentView === "meetings" ? " bg-light-blue text-background-dark" : "bg-background-dark"} clippath transition-colors font-semibold cursor-pointer px-2 py-1`}>Meetings</li>
+                <li onClick={()=>setCurrentView("info")} className={`${currentView === "info" ? " bg-light-blue text-background-dark" : "bg-background-dark"} clippath transition-colors font-semibold cursor-pointer px-2 py-1`}>Information</li>
+                <li onClick={()=>setCurrentView("entries")} className={`${currentView === "entries" ? " bg-light-blue text-background-dark" : "bg-background-dark"} clippath transition-colors font-semibold cursor-pointer px-2 py-1`}><Text text={{eng: "Entries", swe: "Anteckningar"}} /></li>
+                <li onClick={()=>setCurrentView("meetings")} className={`${currentView === "meetings" ? " bg-light-blue text-background-dark" : "bg-background-dark"} clippath transition-colors font-semibold cursor-pointer px-2 py-1`}><Text text={{eng: "Meetings", swe: "Möten"}} /></li>
               </ul>
             </nav>
 
             {currentView === "entries" ? 
-              <Button onClick={() => setNewEntryActive(true)} className='absolute top-0 right-0'>New Entry</Button>
+              <Button onClick={() => setNewEntryActive(true)} className='absolute top-0 right-0'><Text text={{eng: "New Entry", swe: "Ny Anteckning"}} /></Button>
               : currentView === "meetings" ?
-              <Button onClick={() => setNewMeetingActive(true)} className='absolute top-0 right-0'>New Meeting</Button>
+              <Button onClick={() => setNewMeetingActive(true)} className='absolute top-0 right-0'><Text text={{eng: "New Meeting", swe: "Nytt Möte"}} /></Button>
               : ""
             }
 
             <div className="mt-3">
-            {currentView === "quick" ?
+            {currentView === "info" ?
               <QuickInfo focusTask={setFocusedTask} customer={customer} statistics={statistics} addingTask={addTask} setAddTask={setAddTask} tasks={tasks} refetchTasks={fetchTasks}/>
               : currentView === "entries" ?
               <Entries refetchEntries={fetchEntries} entries={entries} customer={customer} />

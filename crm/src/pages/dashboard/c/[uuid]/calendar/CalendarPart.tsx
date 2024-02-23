@@ -3,6 +3,8 @@ import { MeetingWithDay } from './Calendar';
 import fetchCustomerDetails from '@/utils/fetchCustomerDetails';
 import { CurrentCrmContext } from '@/context/CurrentCrmContext';
 import CustomerList from './CustomerList';
+import Text from '@/components/Text';
+
 
 export default function CalendarPart({activeDate, meetingWithDay, currentDate}: {activeDate: Date, meetingWithDay: MeetingWithDay, currentDate: Date}) {
     
@@ -40,22 +42,22 @@ export default function CalendarPart({activeDate, meetingWithDay, currentDate}: 
   )
 }
 
-const matchWeekDay = (num: number): string => {
+const matchWeekDay = (num: number): React.JSX.Element | "" => {
     switch (num) {
         case 0:
-            return "Thursday";
+            return <Text text={{eng: "Thursday", swe: "Torsdag"}} />;
         case 1:
-            return "Friday";
+            return <Text text={{eng: "Friday", swe: "Fredag"}} />;
         case 2:
-            return "Saturday";
+            return <Text text={{eng: "Saturday", swe: "Lördag"}} />;
         case 3:
-            return "Sunday";
+            return <Text text={{eng: "Sunday", swe: "Söndag"}} />;
         case 4:
-            return "Monday";
+            return <Text text={{eng: "Monday", swe: "Måndag"}} />;
         case 5:
-            return "Tuesday";
+            return <Text text={{eng: "Tuesday", swe: "Tisdag"}} />;
         case 6: 
-            return "Wednesday";
+            return <Text text={{eng: "Wednesday", swe: "Onsdag"}} />;
         default: 
             return "";
     }

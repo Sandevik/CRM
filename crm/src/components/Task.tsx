@@ -7,6 +7,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import { FaTriangleExclamation, FaCircleCheck } from "react-icons/fa6";
 import { RiRestartLine } from "react-icons/ri";
 import { TiCog } from "react-icons/ti";
+import Text from './Text';
 
 
 export default function Task({task, refetchTasks, focusTask, showCustomer}: {showCustomer: boolean, task: Task, refetchTasks: () => Promise<void>, focusTask: (task: Task | null) => void}) {
@@ -45,16 +46,16 @@ export default function Task({task, refetchTasks, focusTask, showCustomer}: {sho
 
       <div className='flex-col h-full w-full task-content'>
         
-        {!(task.status === "Completed") && (percentage >= 85 && <div className={`${percentage === 100 ? "text-light-red" : "text-yellow-200"}`}>{percentage === 100 ? "This task has exceeded its deadline" : "This task is about to exceed deadline"}</div>)}
-        {task.recurrence !== null && <div className="">This task reccurs <span className="underline">{task.recurrence}</span></div>}
-        <div>{(task.recurrence !== null && Date.now() < new Date(task.start || "").getTime()) && "Task completed this period, reccurs: " + new Date(task.start || "").toLocaleDateString()}</div>
+        {!(task.status === "Completed") && (percentage >= 85 && <div className={`${percentage === 100 ? "text-light-red" : "text-yellow-200"}`}>{percentage === 100 ? <Text text={{eng: "Task has exceeded its deadline", swe: "Uppgiften har överskridit deadline"}} /> : <Text text={{eng: "Task is about to exceed deadline", swe: "Uppgiften är påväg att överskrida deadline"}} />}</div>)}
+        {task.recurrence !== null && <div className=""><Text text={{eng: "This task reccurs", swe: "Uppgift återkommer"}} /> <span className="underline">{task.recurrence}</span></div>}
+        <div>{(task.recurrence !== null && Date.now() < new Date(task.start || "").getTime()) && <Text text={{eng: `Task completed this period, reccurs: ${new Date(task.start || "").toLocaleDateString()}`, swe: `Uppgift avklarad för pågående period, återkommer: ${new Date(task.start || "").toLocaleDateString()}`}} />}</div>
         
         <div className={`absolute ${task.status === "Completed" || (task.recurrence !== null && Date.now() < new Date(task.start || "").getTime()) ? "bottom-0" : "bottom-9"} flex flex-col h-12 w-[95%] gap-2`}>
           <div className='w-full flex justify-between items-center'>
             {showCustomer && <div><Link className="text-greenish" href={`/dashboard/c/${crm?.crmUuid}/customers/${customer?.uuid}`}>{customer?.firstName} {customer?.lastName}</Link></div>}
             <TiCog onClick={() => focusTask(task)} className="text-3xl hover:rotate-45 transition-all hover:text-light-blue cursor-pointer"/>
           </div>
-          {(!(task.status === "Completed") && !(task.recurrence !== null && Date.now() < new Date(task.start || "").getTime())) && <Button onClick={()=>completeTask()}>Complete</Button>}
+          {(!(task.status === "Completed") && !(task.recurrence !== null && Date.now() < new Date(task.start || "").getTime())) && <Button onClick={()=>completeTask()}><Text text={{eng: "Complete", swe: "Avklarad"}}/></Button>}
         </div>
 
 

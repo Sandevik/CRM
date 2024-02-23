@@ -10,7 +10,8 @@ mod test;
 use actix_web::web::ServiceConfig;
 use serde::Serialize;
 
-use users::users;
+use users::users_admin;
+use users::users_user;
 use auth::auth;
 use crm::crm;
 use meetings::meetings;
@@ -99,7 +100,8 @@ pub enum Limit {
 
 pub fn routes(conf: &mut ServiceConfig) {
     conf.service(auth());
-    conf.service(users());
+    conf.service(users_admin());
+    conf.service(users_user());
     conf.service(crm());
     conf.service(create_crm());
     conf.service(all_crms_by_user());

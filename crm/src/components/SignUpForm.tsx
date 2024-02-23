@@ -15,6 +15,7 @@ interface Credentials {
     phoneNumber: string,
     password: string,
     retypedPassword: string,
+    language: string
 }
 interface SignInData {
     code: number,
@@ -27,7 +28,7 @@ export default function SignInForm() {
 
     const router = useRouter();
     const {setData} = useContext(AuthContext);
-    const [credetials, setCredentials] = useState<Credentials>({email: "", firstName: "", lastName: "", phoneNumber: "", password: "", retypedPassword: ""});
+    const [credetials, setCredentials] = useState<Credentials>({email: "", firstName: "", lastName: "", phoneNumber: "", password: "", retypedPassword: "", language: "eng"});
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<number | null>(null);
 
@@ -35,13 +36,7 @@ export default function SignInForm() {
         e.preventDefault();
         setIsLoading(true);
         try {
-            let res = await request<SignInData>("/auth/sign-up", {
-                email: credetials.email,
-                firstName: credetials.firstName,
-                lastName: credetials.lastName,
-                phoneNumber: credetials.phoneNumber,
-                password: credetials.password
-            }, "POST")
+            let res = await request<SignInData>("/auth/sign-up", credetials, "POST")
             if (res.code === 200) {
                 localStorage.setItem("auth_token", res.data?.token || "");
                 const payloadData = decodeJWTPayload(res.data?.token);
@@ -82,6 +77,10 @@ export default function SignInForm() {
         <input type="tel" required value={credetials.phoneNumber} onChange={(e) => setCredentials({...credetials, phoneNumber: e.target.value})} placeholder='Phone number' className={`p-2 text-lg text-gray-700 rounded-md ${error ? "ring-2 ring-light-red": ""}`}/>
         <input type="password" required value={credetials.password} onChange={(e) => setCredentials({...credetials, password: e.target.value})} placeholder='Password'  className={`p-2 text-lg text-gray-700 rounded-md ${(!(credetials.password && credetials.retypedPassword) && error) ? "ring-2 ring-light-red": ""}`}/>
         <input type="password" required value={credetials.retypedPassword} onChange={(e) => setCredentials({...credetials, retypedPassword: e.target.value})} placeholder='Retype password' className={`p-2 text-lg text-gray-700 rounded-md ${credetials.password !== credetials.retypedPassword && credetials.retypedPassword != "" || (!(credetials.password && credetials.retypedPassword) && error) ? "ring-2 ring-light-red": ""}`}/>
+        <select name="language" value={credetials.language as string} onChange={(e) => setCredentials({...credetials, language: e.target.value})} >
+            <option value="eng">English</option>
+            <option value="swe">Svenska</option>
+        </select>
         <Button type='submit' className="p-2 rounded-md h-9 flex items-center justify-center font-semibold mt-7 " onClick={(e) => handleSignUp(e)}>{isLoading ? <Spinner /> : "Sign up"}</Button>
         <div className="flex flex-col items-center justify-center gap-6 w-full">
             <div className="flex w-full justify-between">

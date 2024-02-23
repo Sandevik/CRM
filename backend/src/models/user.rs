@@ -27,10 +27,12 @@ pub struct User {
     pub crm_count: u8,
     #[serde(rename(serialize = "subscriptionEnds", deserialize = "subscriptionEnds"))]
     pub subscription_ends: Option<DateTime<Utc>>,
-    #[serde(rename(serialize = "LegacyUser", deserialize = "LegacyUser"))]
+    #[serde(rename(serialize = "legacyUser", deserialize = "legacyUser"))]
     pub legacy_user: bool,
     #[serde(skip_deserializing, skip_serializing)]
     pub current_jwt: Option<String>,
+    #[serde(rename(serialize = "preferredLanguage", deserialize = "preferredLanguage"))]
+    pub preferred_language: String,
 
 }
 
@@ -50,7 +52,8 @@ impl Model for User {
             legacy_user: row.get("legacy_user"),
             crm_count: row.get("crm_count"),
             subscription_ends: row.get("subscription_ends"),   
-            current_jwt: row.get("current_jwt")
+            current_jwt: row.get("current_jwt"),
+            preferred_language: row.get("preferred_language"),
         }
     }
 }
@@ -122,16 +125,17 @@ impl User {
         }
     } 
 
-    pub async fn insert_user(email: &String, first_name: &String, last_name: & String, phone_number: &String, password: &String, data: &web::Data<AppState>) -> Result<sqlx::mysql::MySqlQueryResult, Error> {
+    pub async fn insert_user(email: &String, first_name: &String, last_name: &String, phone_number: &String, password: &String, language: &String, data: &web::Data<AppState>) -> Result<sqlx::mysql::MySqlQueryResult, Error> {
         let res = Database::setup_users_table(&data.pool).await;
         if res.is_err() {
             return res;
         }
-        let result = sqlx::query("INSERT INTO `crm`. `users` (uuid, email, first_name, last_name, phone_number, p_hash, admin, joined, last_sign_in, crm_count, subscription_ends, legacy_user) VALUES (uuid(),?,?,?,?,?,0,?,?,?,NULL,false)")
+        let result = sqlx::query("INSERT INTO `crm`. `users` (uuid, email, first_name, last_name, phone_number, preferred_language, p_hash, admin, joined, last_sign_in, crm_count, subscription_ends, legacy_user) VALUES (uuid(),?,?,?,?,?,?,0,?,?,?,NULL,false)")
             .bind(email)
             .bind(first_name)
             .bind(last_name)
             .bind(phone_number)
+            .bind(language)
             .bind(Hashing::hash(password))
             .bind(Utc::now())
             .bind(Utc::now())
@@ -139,6 +143,18 @@ impl User {
             .execute(&data.pool)
             .await;
         result
+    }
+
+    pub async fn update_language(user_uuid: &Uuid, language: &String, data: &web::Data<AppState>) -> Result<(), Error> {
+        let result = sqlx::query("UPDATE `crm`.`users` SET `preferred_language` = ? WHERE `uuid` = ?")
+            .bind(language)
+            .bind(user_uuid.hyphenated().to_string())
+            .execute(&data.pool).await;
+        match result {
+            Ok(_) => Ok(()),
+            Err(err) => Err(err)
+        }
+        
     }
 
     pub async fn update_last_sign_in(&self, data: &web::Data<AppState>) -> Result<(), Error> {

@@ -1,14 +1,27 @@
-use actix_web::{web::{self}, get,  Responder, HttpResponse, Scope, dev::{ServiceFactory, ServiceRequest, ServiceResponse}, body::{EitherBody, BoxBody}, Error};
+use actix_web::{body::{BoxBody, EitherBody}, dev::{ServiceFactory, ServiceRequest, ServiceResponse}, get, post, web, Error, HttpResponse, Responder, Scope};
 use actix_web_httpauth::middleware::HttpAuthentication;
+use uuid::Uuid;
 
-use crate::{AppState, models::user::User};
+use crate::{middleware::user_middleware::validator, models::user::User, AppState};
 use serde::{Serialize, Deserialize};
 use super::Response;
-use crate::middleware::admin_middleware::validator;
+use crate::middleware::admin_middleware::validator as admin_validator;
+
+//user
+pub fn users_user() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Response = ServiceResponse<EitherBody<BoxBody>>, Error = Error, InitError = ()>> {
+    let user_middleware = HttpAuthentication::bearer(validator);
+
+    let scope = web::scope("/users")
+        .wrap(user_middleware)
+        .service(update_language);
+
+    scope
+}
 
 
-pub fn users() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Response = ServiceResponse<EitherBody<BoxBody>>, Error = Error, InitError = ()>> {
-    let admin_auth_middleware = HttpAuthentication::bearer(validator);
+// admin
+pub fn users_admin() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Response = ServiceResponse<EitherBody<BoxBody>>, Error = Error, InitError = ()>> {
+    let admin_auth_middleware = HttpAuthentication::bearer(admin_validator);
 
     let scope = web::scope("/users")
         .wrap(admin_auth_middleware)
@@ -79,3 +92,17 @@ async fn user_by_username(path: web::Path<String>, data: web::Data<AppState>) ->
     }
 }
 
+#[derive(Deserialize)]
+struct UpdateLanguageRequest {
+    #[serde(rename(deserialize = "userUuid"))]
+    user_uuid: String,
+    language: String,
+}
+
+#[post("/update-language")]
+async fn update_language(data: web::Data<AppState>, body: web::Json<UpdateLanguageRequest>) -> impl Responder {
+    match User::update_language(&Uuid::parse_str(&body.user_uuid).unwrap_or_default(), &body.language.to_string(), &data).await {
+        Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
+        Ok(_) => HttpResponse::Ok().json(Response::<String>::ok("Language updated", None))
+    }
+}

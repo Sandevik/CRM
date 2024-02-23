@@ -6,6 +6,7 @@ import { Statistics } from '.';
 import Button from '@/components/Button';
 import Task from '../../../../../../components/Task';
 import TaskList from '../../../../../../components/TaskList';
+import Text from '@/components/Text';
 
 
 
@@ -35,7 +36,7 @@ export default function QuickInfo({customer, statistics, addingTask, setAddTask,
       <div className="flex flex-col w-full gap-2 flex-1 ml-2">
         <div className='flex justify-between w-full'>
           <label htmlFor="note" >Note</label>
-          <button onClick={() => handleSaveNote(editing)} className="flex gap-2 items-center hover:text-light-blue" >< FaPen /> {!editing ? "Edit" : "Save"}</button>
+          <button onClick={() => handleSaveNote(editing)} className="flex gap-2 items-center hover:text-light-blue" >< FaPen /> {!editing ? <Text text={{eng: "Edit", swe: "Ändra"}} /> : <Text text={{eng: "Save", swe: "Spara"}} />}</button>
         </div>
         <textarea name="note" disabled={!editing} className={`min-h-52 ${editing ? "ring-light-purple" : "ring-background-dark"} scrollthumb resize-none ring-2 tranition-all rounded-md relative p-2 bg-background-light text-white  w-full `} value={currentNote} onChange={(e) => setCurrentNote(e.target.value)}></textarea>
       
@@ -43,8 +44,8 @@ export default function QuickInfo({customer, statistics, addingTask, setAddTask,
 
           <div className="h-full flex flex-col gap-6">
             <div className="flex justify-between items-end">
-              <span>Tasks</span>
-              <Button className='' onClick={()=>setAddTask(true)}>New Task</Button>
+              <span><Text text={{eng: "Tasks", swe: "Uppgifter"}} /></span>
+              <Button className='' onClick={()=>setAddTask(true)}><Text text={{eng: "New Task", swe: "Ny Uppgift"}} /></Button>
             </div>
             <TaskList showCustomers={false} tasks={tasks} refetchTasks={refetchTasks} focusTask={focusTask}/>
           </div>
@@ -53,21 +54,21 @@ export default function QuickInfo({customer, statistics, addingTask, setAddTask,
 
       <div className="w-[17em] bg-background-light p-2 rounded-md flex justify-between flex-col mt-8">
         <div className="flex flex-col gap-4">
-          <h3 className="text-lg font-semibold">Customer Statistics</h3>
+          <h3 className="text-lg font-semibold"><Text text={{eng: "Customer Statistics", swe: "Kundstatistik"}} /></h3>
           <div className="flex justify-between text-lg ">
-            <div className=''>Meetings</div>
+            <div className=''><Text text={{eng: "Meetings", swe: "Möten"}} /></div>
             <div>{statistics.meetings_count}</div>
           </div>
           <div className="flex justify-between text-lg ">
-            <div>Entries</div>
+            <div><Text text={{eng: "Entries", swe: "Anteckningar"}} /></div>
             <div>{statistics.entries_count}</div>
           </div>
           <div className="flex justify-between text-lg ">
-            <div>Ongoing Tasks</div>
+            <div><Text text={{eng: "Ongoing Tasks", swe: "Pågående Uppgifter"}} /></div>
             <div>{statistics.tasks_todo_count}</div>
           </div>
           <div className="flex justify-between text-lg ">
-            <div>Tasks</div>
+            <div><Text text={{eng: "Tasks", swe: "Uppgifter"}} /></div>
             <div>{statistics.task_count}</div>
           </div>
         </div>

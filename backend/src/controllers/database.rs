@@ -111,6 +111,7 @@ impl Database {
                 `subscription_ends` DATETIME,
                 `legacy_user` BOOLEAN NOT NULL DEFAULT FALSE,
                 `current_jwt` TEXT,
+                `preferred_language` VARCHAR(3) NOT NULL DEFAULT 'eng',
                 PRIMARY KEY (`uuid`(36)),
                 UNIQUE (`email`(50), `phone_number`(15))
               ) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;

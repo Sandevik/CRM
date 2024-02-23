@@ -4,8 +4,9 @@ import request from '@/utils/request';
 import { CurrentCrmContext } from '@/context/CurrentCrmContext';
 import Input from '@/components/Input';
 import Button from '@/components/Button';
+import Text from '@/components/Text';
 
-type NewMeeting = Omit<Meeting, "added" | "updated" | "uuid" | "entryId">;
+type NewMeeting = Omit<Meeting, "added" | "updated" | "uuid" | "entryId" | "crmUuid">;
 
 interface BaseProps {
     closePopup: () => void, 
@@ -68,21 +69,21 @@ export default function EditMeeting({closePopup, _meeting, onSuccessfulSubmit}: 
         <IoClose className="absolute top-2 right-2 text-4xl text-gray-400 cursor-pointer" onClick={() => closePopup()}/>
         <div className="flex flex-col gap-4 mt-6">
             <div className="flex flex-col">
-                <label htmlFor="from">From</label>
+                <label htmlFor="from"><Text text={{eng: "From", swe: "Från"}} /></label>
                 <Input type="datetime-local" name='from' value={meeting?.from || ""} onChange={(e) => setMeeting({...meeting, from: e.target.value})}/>
             </div>
             
             <div className="flex flex-col">
-                <label htmlFor="to">To</label>
+                <label htmlFor="to"><Text text={{eng: "To", swe: "Till"}} /></label>
                 <Input type="datetime-local" name="to" value={meeting?.to || ""} onChange={(e) => setMeeting({...meeting, to: e.target.value})}/>
             </div>
 
             <div className="flex flex-col">
-                <label htmlFor="customerUuid">Customer uuid</label>
+                <label htmlFor="customerUuid"><Text text={{eng: "Customer Uuid", swe: "Kund Uuid"}} /></label>
                 <Input type="text" name="customerUuid" placeholder='dc586882-5a1c-4f35-b4d4-08c695427090' value={meeting.customerUuid} onChange={(e) => setMeeting({...meeting, customerUuid: e.target.value})}/>
             </div>
 
-            <Button type='submit' className='mt-4' onClick={(e) => editMeeting(e)}>Save</Button>
+            <Button type='submit' className='mt-4' onClick={(e) => editMeeting(e)}><Text text={{eng: "Save", swe: "Spara"}} /></Button>
         </div>
     </form>
   )
