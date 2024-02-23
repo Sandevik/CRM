@@ -115,7 +115,7 @@ export default function index() {
   return (
       <div className='relative'>
         <Navbar />
-        <Link href={`/dashboard/c/${crm?.crmUuid}/customers`} className="flex gap-2 items-center text-lg bg-light-blue hover:bg-greenish transition-colors absolute top-[4.2em] px-2 text-black rounded-md"><FaChevronLeft /> <div>Customers</div> </Link>
+        <Link href={`/dashboard/c/${crm?.crmUuid}/customers`} className="flex gap-2 items-center text-lg bg-light-blue hover:bg-greenish transition-colors absolute top-[3.3em] left-1 px-2 text-black rounded-md"><FaChevronLeft /> <div>Customers</div> </Link>
         <main className='h-[calc(100dvh-11em)] rounded-md w-full mt-12 p-4 bg-background-light bg-opacity-50 flex gap-4'>
           <CustomerCard customer={customer} setEdit={setEdit} edit={edit}/>
           <div className="flex-1 w-full relative">
