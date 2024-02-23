@@ -133,31 +133,31 @@ impl Database {
     }
 
     pub async fn setup_customers_table(pool: &Pool<MySql>) -> Result<MySqlQueryResult, sqlx::Error> {
-        let query: String = format!(r#"CREATE TABLE IF NOT EXISTS `customers` ({}) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;"#, Self::default_customers_table());
+        let query: String = format!(r#"CREATE TABLE IF NOT EXISTS `crm`.`customers` ({}) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;"#, Self::default_customers_table());
         sqlx::query(&query).execute(pool).await
     }
     pub async fn setup_entries_table(pool: &Pool<MySql>) -> Result<MySqlQueryResult, sqlx::Error> {
-        let query: String = format!(r#"CREATE TABLE IF NOT EXISTS `entries` ({}) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;"#,
+        let query: String = format!(r#"CREATE TABLE IF NOT EXISTS `crm`.`entries` ({}) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;"#,
         Self::default_entries_table());
         sqlx::query(&query).execute(pool).await
     }  
     pub async fn setup_meetings_table(pool: &Pool<MySql>) -> Result<MySqlQueryResult, sqlx::Error> {
-        let query: String = format!(r#"CREATE TABLE IF NOT EXISTS `meetings` ({}) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;"#, 
+        let query: String = format!(r#"CREATE TABLE IF NOT EXISTS `crm`.`meetings` ({}) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;"#, 
         Self::default_meetings_table());
         sqlx::query(&query).execute(pool).await
     }  
     pub async fn setup_employees_table(pool: &Pool<MySql>) -> Result<MySqlQueryResult, sqlx::Error> {
-        let query: String = format!(r#"CREATE TABLE IF NOT EXISTS `employees` ({}) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;"#, 
+        let query: String = format!(r#"CREATE TABLE IF NOT EXISTS `crm`.`employees` ({}) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;"#, 
         Self::default_employees_table());
         sqlx::query(&query).execute(pool).await
     }
     pub async fn setup_deals_table(pool: &Pool<MySql>) -> Result<MySqlQueryResult, sqlx::Error> {
-        let query: String = format!(r#"CREATE TABLE IF NOT EXISTS `deals` ({}) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;"#,
+        let query: String = format!(r#"CREATE TABLE IF NOT EXISTS `crm`.`deals` ({}) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;"#,
         Self::default_deals_table());
         sqlx::query(&query).execute(pool).await
     }
-    pub async fn setup_todos_table(pool: &Pool<MySql>) -> Result<MySqlQueryResult, sqlx::Error> {
-        let query: String = format!(r#"CREATE TABLE IF NOT EXISTS `tasks` ({}) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;"#,
+    pub async fn setup_tasks_table(pool: &Pool<MySql>) -> Result<MySqlQueryResult, sqlx::Error> {
+        let query: String = format!(r#"CREATE TABLE IF NOT EXISTS `crm`.`tasks` ({}) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;"#,
         Self::default_task_table());
         sqlx::query(&query).execute(pool).await
     }
@@ -184,7 +184,7 @@ impl Database {
         if let Err(err) = Self::setup_deals_table(pool).await {
             return Err(err);
         }
-        if let Err(err) = Self::setup_todos_table(pool).await {
+        if let Err(err) = Self::setup_tasks_table(pool).await {
             return Err(err);
         }
         Ok(())
