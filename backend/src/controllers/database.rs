@@ -50,16 +50,87 @@ impl Database {
         r#"
         `crm_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
         `uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL PRIMARY KEY,
-        `user_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL UNIQUE,
-        `soc_sec` VARCHAR(12),
+        `user_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci UNIQUE,
+        `first_name` TEXT,
+        `last_name` TEXT,
         `date_of_birth` DATETIME,
+        `ssn` VARCHAR(12),
+        `address` TEXT,
+        `zip_code` TEXT,
+        `city` TEXT,
+        `phone_number` TEXT,
+        `role` TEXT,
+        `driving_license_class` TEXT,
+        `period_of_validity` TEXT,
+        `bank_number` TEXT,
+        `clearing_number` TEXT,
+        `bank_name` TEXT,
+        `email` TEXT,
+        `employment_type` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci,
         `access_level` TEXT,
-        `employment_type` TEXT,
-        `salary` DOUBLE,
         `added` DATETIME,
         `updated` DATETIME
         "#.to_string()
     }
+    fn default_company_table() -> String {
+        r#"
+        `crm_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL PRIMARY KEY,
+        `name` TEXT,
+        `organization_number` TEXT,
+        `address` TEXT,
+        `zip_code` TEXT,
+        `city` TEXT,
+        `phone_number` TEXT,
+        `place_of_stationing` TEXT,
+        `added` DATETIME,
+        `updated` DATETIME
+        "#.to_string()
+    }
+    fn default_employment_type_table() -> String {
+        r#"
+        `crm_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
+        `uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL PRIMARY KEY,
+        `employee_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
+        `is_template` BOOL,
+        `employment_date` DATE,
+        `title` TEXT,
+        `new_employment` BOOL,
+        `change` BOOL,
+        `change_from_date` DATE,
+        `probationary_employment` BOOL,
+        `probationary_employment_from` DATE,
+        `probationary_employment_until` DATE,
+        `permanent_emloyment` BOOL,
+        `temp_employment` BOOL,
+        `temp_employment_for_name` TEXT,
+        `temp_employment_reason` TEXT,
+        `temp_employment_from` DATE,
+        `temp_employment_until` DATE,
+        `extra_employment` BOOL,
+        `extra_employment_from` DATE,
+        `extra_employment_until` DATE,
+        `extra_employment_set_days` TEXT,
+        `other_fixed_term_employment` BOOL,
+        `other_fixed_term_employment_standard` BOOL,
+        `other_fixed_term_employment_season_work` BOOL,
+        `other_fixed_term_employment_special` BOOL,
+        `other_fixed_term_employment_from` DATE,
+        `other_fixed_term_employment_until` DATE,
+        `working_hours_full_time` BOOL,
+        `working_hours_part_time` BOOL,
+        `working_hours_part_time_weekly_hours` INT,
+        `salary_group` TEXT,
+        `entry_salary` DECIMAL(13,2),
+        `salary_form` TEXT,
+        `payment_form` TEXT,
+        `vacation` TEXT,
+        `active_collective_agreement` TEXT, 
+        `note` TEXT,
+        `added` DATETIME,
+        `updated` DATETIME
+        "#.to_string()
+    }
+    
     fn default_deals_table() -> String {
         r#"
         `crm_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
@@ -162,7 +233,16 @@ impl Database {
         Self::default_task_table());
         sqlx::query(&query).execute(pool).await
     }
-
+    pub async fn setup_company_table(pool: &Pool<MySql>) -> Result<MySqlQueryResult, sqlx::Error> {
+        let query: String = format!(r#"CREATE TABLE IF NOT EXISTS `crm`.`companies` ({}) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;"#,
+        Self::default_company_table());
+        sqlx::query(&query).execute(pool).await
+    }
+    pub async fn setup_employment_type_table(pool: &Pool<MySql>) -> Result<MySqlQueryResult, sqlx::Error> {
+        let query: String = format!(r#"CREATE TABLE IF NOT EXISTS `crm`.`employment_types` ({}) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;"#,
+        Self::default_employment_type_table());
+        sqlx::query(&query).execute(pool).await
+    }
     pub async fn setup_tables(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
         if let Err(err) = Self::setup_users_table(pool).await {
             return Err(err);
@@ -186,6 +266,12 @@ impl Database {
             return Err(err);
         }
         if let Err(err) = Self::setup_tasks_table(pool).await {
+            return Err(err);
+        }
+        if let Err(err) = Self::setup_company_table(pool).await {
+            return Err(err);
+        }
+        if let Err(err) = Self::setup_employment_type_table(pool).await {
             return Err(err);
         }
         Ok(())
