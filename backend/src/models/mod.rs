@@ -8,6 +8,8 @@ pub mod employee;
 pub mod deal;
 pub mod meeting;
 pub mod task;
+pub mod time_report;
+pub mod _break;
 
 
 trait Model {

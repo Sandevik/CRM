@@ -130,7 +130,48 @@ impl Database {
         `updated` DATETIME
         "#.to_string()
     }
-    
+    fn default_time_reports_table() -> String {
+        r#"
+        `crm_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
+        `uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL PRIMARY KEY,
+        `employee_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
+        `date` DATE NOT NULL,
+        `start_time` TIME,
+        `end_time` TIME,
+        `breaks` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci,
+        `note` TEXT,
+        `work_tasks` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci,
+        `added` DATETIME,
+        `updated` DATETIME
+        "#.to_string()
+    }
+    fn default_time_reports_breaks_table() -> String {
+        r#"
+        `crm_uuid`  VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL PRIMARY KEY,
+        `time_report_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
+        `breaks_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL
+        "#.to_string()
+    }
+    fn default_breaks_table() -> String {
+        r#"
+        `breaks_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL PRIMARY KEY,
+        `start_time` TIME,
+        `end_time` TIME,
+        `added` DATETIME,
+        `updated` DATETIME
+        "#.to_string()
+    }
+    fn default_work_task_table() -> String {
+        r#"
+        `uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL PRIMARY KEY,
+        `start_time` TIME,
+        `end_time` TIME,
+        `activity` TEXT,
+        `vehicle` TEXT,
+        `added` DATETIME,
+        `updated` DATETIME
+        "#.to_string()
+    }
     fn default_deals_table() -> String {
         r#"
         `crm_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
@@ -203,7 +244,6 @@ impl Database {
         "#;
         sqlx::query(create_table_crm_query).execute(pool).await
     }
-
     pub async fn setup_customers_table(pool: &Pool<MySql>) -> Result<MySqlQueryResult, sqlx::Error> {
         let query: String = format!(r#"CREATE TABLE IF NOT EXISTS `crm`.`customers` ({}) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;"#, Self::default_customers_table());
         sqlx::query(&query).execute(pool).await
@@ -243,6 +283,26 @@ impl Database {
         Self::default_employment_type_table());
         sqlx::query(&query).execute(pool).await
     }
+    pub async fn setup_time_reports_table(pool: &Pool<MySql>) -> Result<MySqlQueryResult, sqlx::Error> {
+        let query: String = format!(r#"CREATE TABLE IF NOT EXISTS `crm`.`time_reports` ({}) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;"#,
+        Self::default_time_reports_table());
+        sqlx::query(&query).execute(pool).await
+    }
+    pub async fn setup_time_reports_breaks_table(pool: &Pool<MySql>) -> Result<MySqlQueryResult, sqlx::Error> {
+        let query: String = format!(r#"CREATE TABLE IF NOT EXISTS `crm`.`time_reports_breaks` ({}) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;"#,
+        Self::default_time_reports_breaks_table());
+        sqlx::query(&query).execute(pool).await
+    }
+    pub async fn setup_breaks_table(pool: &Pool<MySql>) -> Result<MySqlQueryResult, sqlx::Error> {
+        let query: String = format!(r#"CREATE TABLE IF NOT EXISTS `crm`.`breaks` ({}) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;"#,
+        Self::default_breaks_table());
+        sqlx::query(&query).execute(pool).await
+    }
+    pub async fn setup_work_tasks_table(pool: &Pool<MySql>) -> Result<MySqlQueryResult, sqlx::Error> {
+        let query: String = format!(r#"CREATE TABLE IF NOT EXISTS `crm`.`work_tasks` ({}) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;"#,
+        Self::default_work_task_table());
+        sqlx::query(&query).execute(pool).await
+    }
     pub async fn setup_tables(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
         if let Err(err) = Self::setup_users_table(pool).await {
             return Err(err);
@@ -272,6 +332,18 @@ impl Database {
             return Err(err);
         }
         if let Err(err) = Self::setup_employment_type_table(pool).await {
+            return Err(err);
+        }
+        if let Err(err) = Self::setup_breaks_table(pool).await {
+            return Err(err);
+        }
+        if let Err(err) = Self::setup_time_reports_breaks_table(pool).await {
+            return Err(err);
+        }
+        if let Err(err) = Self::setup_time_reports_table(pool).await {
+            return Err(err);
+        }
+        if let Err(err) = Self::setup_work_tasks_table(pool).await {
             return Err(err);
         }
         Ok(())
