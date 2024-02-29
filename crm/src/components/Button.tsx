@@ -13,7 +13,8 @@ export default function Button(props: React.ButtonHTMLAttributes<HTMLButtonEleme
       ripple.classList.add("ripple");
       ref.current.appendChild(ripple);
       setTimeout(()=>{
-       ref.current.removeChild(ripple);
+       try{ref.current.removeChild(ripple);}
+       catch {}
       }, 750)
    })
 

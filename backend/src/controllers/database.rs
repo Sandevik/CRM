@@ -58,6 +58,7 @@ impl Database {
         `address` TEXT,
         `zip_code` TEXT,
         `city` TEXT,
+        `country` TEXT,
         `phone_number` TEXT,
         `role` TEXT,
         `driving_license_class` TEXT,

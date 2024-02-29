@@ -7,9 +7,10 @@ import useReq from '@/hooks/useReq';
 import { FaChevronRight, FaChevronLeft } from "react-icons/fa6";
 import Spinner from '@/components/Spinner';
 import NewCustomerForm from './NewClientForm';
-import CustomerRow from './ClientRow';
-import CustomerRowHeading from './ClientRowHeading';
+import CustomerRow from './CustomerRow';
+import CustomerRowHeading from './CustomerRowHeading';
 import Text from '@/components/Text';
+import EmptyList from '@/components/EmptyList';
 
 export default function index() {
     const [createCustomerActive, setCreateCustomerActive] = useState<boolean>(false);
@@ -43,13 +44,7 @@ export default function index() {
             {!searchResult && data.map(customer => (<CustomerRow key={customer.uuid} customer={customer}/>))}
             {searchResult && searchResult.length > 0 && searchResult.map(customer => (<CustomerRow key={customer.uuid} customer={customer} />))}
         </ul>
-        : <div className="flex justify-center items-center text-2xl mt-16 h-[calc(100dvh-15em)] flex-col gap-4">
-            {!loading && 
-            <>
-              <span><Text text={{eng: "Oops, it seems like you do not yet have any customers. Create one!", swe: "Oj, det ser ut som att du ännu inte har några kunder. Skapa en!"}} /></span>
-              <Image className="" priority src={"/astronaut.svg"} alt="astronaut" width={200} height={200}/>
-            </>}
-          </div>
+        : <EmptyList loading={loading} text={{eng: "Oops, it seems like you do not yet have any customers. Create one!", swe: "Oj, det ser ut som att du ännu inte har några kunder. Skaffa en!"}} />
        }
 
           <div className="flex gap-2 justify-center items-center">
