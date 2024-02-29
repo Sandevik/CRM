@@ -39,7 +39,7 @@ export default function NewEmployeeForm({active, setCreateEmployeeActive, onSucc
     const submit = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();
         if (crm?.crmUuid) {
-            const res = await request("/employee/create", {...employee, crmUuid: crm?.crmUuid}, "POST");
+            const res = await request("/employees/create", {...employee, crmUuid: crm?.crmUuid}, "POST");
             if (res.code === 201) {
                 onSuccessfulSubmit();
                 setEmployee({
@@ -120,8 +120,8 @@ export default function NewEmployeeForm({active, setCreateEmployeeActive, onSucc
         <div className='border-b-2'></div>
         
         <div className=" flex flex-col gap-2">
-            <label htmlFor="company"><Text text={{eng: "Company", swe: "Företag"}} /></label>
-            <Input className="bg-light-blue font-semibold" name="company" value={employee.company || ""} onChange={(e) => setEmployee({...employee, company: e.target.value})}/>
+            <label htmlFor="company"><Text text={{eng: "User Uuid", swe: "Användar Uuid"}} /></label>
+            <Input className="bg-light-blue font-semibold" name="company" value={employee.userUuid || ""} onChange={(e) => setEmployee({...employee, userUuid: e.target.value})}/>
         </div>
         
         <div className=" flex flex-col gap-2">
@@ -129,10 +129,7 @@ export default function NewEmployeeForm({active, setCreateEmployeeActive, onSucc
             <Input className="bg-light-blue font-semibold" name="phone number" value={employee.phoneNumber || ""} onChange={(e) => setEmployee({...employee, phoneNumber: e.target.value})}/>
         </div>
         
-        <div className=" flex gap-2 items-center">
-            <label htmlFor="news letter"><Text text={{eng: "News letter", swe: "Nyhetsbrev"}} /></label>
-            <Input name="news letter" type='checkbox' className="h-5 w-5" checked={employee.newsLetter || false} onChange={(e) => setEmployee({...employee, newsLetter: e.target.checked})}/>
-        </div>
+        
         
         <Button type='submit' onClick={(e) => submit(e)}><Text text={{eng: "Create", swe: "Skapa"}} /></Button>
     </form>

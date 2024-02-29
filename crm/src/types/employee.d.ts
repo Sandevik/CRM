@@ -9,6 +9,7 @@ interface Employee {
     address: string | null,
     zipCode: string | null,
     city: string | null,
+    country: string | null,
     phoneNumber: string | null,
     role: string | null,
     drivingLicenseClass: string | null,

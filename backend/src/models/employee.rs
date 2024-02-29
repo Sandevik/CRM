@@ -182,7 +182,7 @@ impl Employee {
     }
 
     pub async fn insert(&self, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
-        let query = "INSERT INTO `crm`.`employees` (crm_uuid, uuid, first_name, last_name, date_of_birth, email, address, zip_code, city, country, ssn, email, access_level, employment_type, phone_number, role, driving_license_class, period_of_validity, bank_number, clearing_number, bank_name, added, updated) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        let query = "INSERT INTO `crm`.`employees` (crm_uuid, uuid, first_name, last_name, date_of_birth, email, address, zip_code, city, country, ssn, access_level, employment_type, phone_number, role, driving_license_class, period_of_validity, bank_number, clearing_number, bank_name, added, updated) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
         match sqlx::query(&query)
             .bind(crm_uuid.hyphenated().to_string())
             .bind(&self.uuid.hyphenated().to_string())
@@ -195,7 +195,6 @@ impl Employee {
             .bind(&self.city)
             .bind(&self.country)
             .bind(&self.ssn)
-            .bind(&self.email)
             .bind(&self.access_level)
             .bind(&self.employment_type)
             .bind(&self.phone_number)

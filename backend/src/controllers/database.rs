@@ -53,7 +53,7 @@ impl Database {
         `user_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci UNIQUE,
         `first_name` TEXT,
         `last_name` TEXT,
-        `date_of_birth` DATETIME,
+        `date_of_birth` DATE,
         `ssn` VARCHAR(12),
         `address` TEXT,
         `zip_code` TEXT,

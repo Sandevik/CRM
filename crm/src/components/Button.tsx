@@ -22,6 +22,6 @@ export default function Button(props: React.ButtonHTMLAttributes<HTMLButtonEleme
   })
 
   return (
-    <button ref={ref} {...props} className={`${/.*(absolute|relative).*/.test(props.className || "") ? props.className : "relative"} ripple-btn bg-light-blue text-black font-semibold flex justify-center items-center rounded-sm h-[33px] min-w-[100px]`}>{props.children}</button>
+    <button ref={ref} {...props} className={`${/.*(absolute|relative).*/.test(props.className || "") ? props.className : "relative"} ripple-btn bg-light-blue text-black font-semibold flex justify-center items-center rounded-sm min-h-[33px] min-w-[100px]`}>{props.children}</button>
   )
 }
