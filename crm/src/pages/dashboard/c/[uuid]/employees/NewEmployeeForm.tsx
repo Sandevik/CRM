@@ -23,11 +23,8 @@ export default function NewEmployeeForm({active, setCreateEmployeeActive, onSucc
         role: null,
         drivingLicenseClass: null,
         periodOfValidity: null,
-        bankNumber: null,
-        clearingNumber: null,
-        bankName: null,
         email: null,
-        employmentType: null,
+        contract_uuid: null,
         accessLevel: null,
     } as Employee);
     const ref = useRef<any>(undefined);
@@ -56,11 +53,8 @@ export default function NewEmployeeForm({active, setCreateEmployeeActive, onSucc
                     role: null,
                     drivingLicenseClass: null,
                     periodOfValidity: null,
-                    bankNumber: null,
-                    clearingNumber: null,
-                    bankName: null,
                     email: null,
-                    employmentType: null,
+                    contract_uuid: null,
                     accessLevel: null,  
                 } as Employee)
             }
@@ -128,9 +122,31 @@ export default function NewEmployeeForm({active, setCreateEmployeeActive, onSucc
             <label htmlFor="phone number"><Text text={{eng: "Phone number", swe: "Telefonnummer"}} /></label>
             <Input className="bg-light-blue font-semibold" name="phone number" value={employee.phoneNumber || ""} onChange={(e) => setEmployee({...employee, phoneNumber: e.target.value})}/>
         </div>
+
+        <div className=" flex flex-col gap-2">
+            <label htmlFor="ssn"><Text text={{eng: "Social Security Number", swe: "Personnummer"}} /></label>
+            <Input className="bg-light-blue font-semibold" name="ssn" value={employee.ssn || ""} onChange={(e) => setEmployee({...employee, userUuid: e.target.value})}/>
+        </div>
+
+        <div className=" flex flex-col gap-2">
+            <label htmlFor="role"><Text text={{eng: "Role", swe: "Roll"}} /></label>
+            <Input className="bg-light-blue font-semibold" name="role" value={employee.role || ""} onChange={(e) => setEmployee({...employee, phoneNumber: e.target.value})}/>
+        </div>
+
+        <div className='border-b-2'></div>
+
+        <div className=" flex flex-col gap-2">
+            <label htmlFor="drivingLicenseClass"><Text text={{eng: "Driving License Class", swe: "Körkortsklass"}} /></label>
+            <Input className="bg-light-blue font-semibold" name="drivingLicenseClass" value={employee.drivingLicenseClass || ""} onChange={(e) => setEmployee({...employee, userUuid: e.target.value})}/>
+        </div>
         
-        
-        
+        <div className=" flex flex-col gap-2">
+            <label htmlFor="periodOfValidity"><Text text={{eng: "Period Of Validity", swe: "Giltighetsperiod"}} /></label>
+            <Input className="bg-light-blue font-semibold" name="periodOfValidity" value={employee.periodOfValidity || ""} onChange={(e) => setEmployee({...employee, phoneNumber: e.target.value})}/>
+        </div>
+
+        <div className='border-b-2'></div>
+    
         <Button type='submit' onClick={(e) => submit(e)}><Text text={{eng: "Create", swe: "Skapa"}} /></Button>
     </form>
   )

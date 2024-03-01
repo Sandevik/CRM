@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import Navbar from '../Navbar'
 import Input from '@/components/Input'
 import useReq from '@/hooks/useReq';
@@ -11,9 +11,11 @@ import NewEmployeeForm from './NewEmployeeForm';
 import EmployeeRowHeading from './EmployeeRowHeading';
 import EmployeeRow from './EmployeeRow';
 import EmptyList from '@/components/EmptyList';
+import text from '@/utils/text';
+import { AuthContext } from '@/context/AuthContext';
 
 export default function index() {
-
+  const {data: userData} = useContext(AuthContext);
   const [createCustomerActive, setCreateEmployeeActive] = useState<boolean>(false);
     
     const {data, refetch, nextResult, prevResult, setSearchQuery, searchQuery, searchResult, currentPage, loading} = useReq<Employee>({
@@ -30,10 +32,11 @@ export default function index() {
   return (
     <main className='relative px-2'>
         <Navbar />
+        <h1 className="text-3xl flex justify-center py-2 font-semibold"><Text text={{eng: "Employees", swe: "Anställda"}}/></h1>
         <div className='sticky mt-4 flex justify-center top-[110px]'>
         {data.length > 0 ? 
           <div className="flex gap-2 bg-background-dark bg-opacity-60">
-            <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search" className="w-[30em]"/>
+            <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder={text({eng: "Search...", swe: "Sök..."}, userData)} className="w-[30em]"/>
           </div> 
           : ""}
           <Button onClick={() => setCreateEmployeeActive(!createCustomerActive)} className="absolute right-4 top-14 md:top-0 z-20">{createCustomerActive ? <Text text={{eng: "Close", swe: "Stäng"}} /> : <Text text={{eng: "New Employee", swe: "Ny Anställd"}} />}</Button>

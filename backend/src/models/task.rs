@@ -162,6 +162,16 @@ impl Task {
                 Ok(rows) =>  Ok(rows.iter().map(|row| Self::from_row(row)).collect())
             }
     }
+    pub async fn get_by_employee_uuid(employee_uuid: &Uuid, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<Vec<Self>, sqlx::Error> {
+        match sqlx::query("SELECT *, (((UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(`start`)) / (UNIX_TIMESTAMP(`deadline`) - UNIX_TIMESTAMP(`start`))) * 100) DIV 1 as percentage FROM `crm` . `tasks` WHERE `crm_uuid` = ? AND `employee_uuid` = ? ORDER BY `status` DESC, ISNULL(`percentage`), `percentage` DESC, `recurrence` DESC, `status` DESC")
+            .bind(crm_uuid.hyphenated().to_string())
+            .bind(employee_uuid.hyphenated().to_string())
+            .fetch_all(&data.pool)
+            .await {
+                Err(err) => Err(err),
+                Ok(rows) =>  Ok(rows.iter().map(|row| Self::from_row(row)).collect())
+            }
+    }
 
     pub async fn get_by_crm_uuid(crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<Vec<Self>, sqlx::Error> {
         match sqlx::query("SELECT *, (((UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(`start`)) / (UNIX_TIMESTAMP(`deadline`) - UNIX_TIMESTAMP(`start`))) * 100) DIV 1 as percentage FROM `crm` . `tasks` WHERE `crm_uuid` = ? AND `status` <> 'completed' ORDER BY `status` DESC, ISNULL(`percentage`), `percentage` DESC, `recurrence` DESC, `status` DESC")

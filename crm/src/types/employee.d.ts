@@ -14,11 +14,8 @@ interface Employee {
     role: string | null,
     drivingLicenseClass: string | null,
     periodOfValidity: string | null,
-    bankNumber: string | null,
-    clearingNumber: string | null,
-    bankName: string | null,
     email: string | null,
-    employmentType: string | null,
+    contract_uuid: string | null,
     accessLevel: string | null,
     added: string,
     updated: string

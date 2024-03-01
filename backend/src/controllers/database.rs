@@ -63,11 +63,8 @@ impl Database {
         `role` TEXT,
         `driving_license_class` TEXT,
         `period_of_validity` TEXT,
-        `bank_number` TEXT,
-        `clearing_number` TEXT,
-        `bank_name` TEXT,
         `email` TEXT,
-        `employment_type` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci,
+        `contract_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci,
         `access_level` TEXT,
         `added` DATETIME,
         `updated` DATETIME
@@ -87,7 +84,7 @@ impl Database {
         `updated` DATETIME
         "#.to_string()
     }
-    fn default_employment_type_table() -> String {
+    fn default_contract_table() -> String {
         r#"
         `crm_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
         `uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL PRIMARY KEY,
@@ -127,6 +124,9 @@ impl Database {
         `vacation` TEXT,
         `active_collective_agreement` TEXT, 
         `note` TEXT,
+        `bank_number` TEXT,
+        `clearing_number` TEXT,
+        `bank_name` TEXT,
         `added` DATETIME,
         `updated` DATETIME
         "#.to_string()
@@ -279,9 +279,9 @@ impl Database {
         Self::default_company_table());
         sqlx::query(&query).execute(pool).await
     }
-    pub async fn setup_employment_type_table(pool: &Pool<MySql>) -> Result<MySqlQueryResult, sqlx::Error> {
-        let query: String = format!(r#"CREATE TABLE IF NOT EXISTS `crm`.`employment_types` ({}) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;"#,
-        Self::default_employment_type_table());
+    pub async fn setup_contract_table(pool: &Pool<MySql>) -> Result<MySqlQueryResult, sqlx::Error> {
+        let query: String = format!(r#"CREATE TABLE IF NOT EXISTS `crm`.`contracts` ({}) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;"#,
+        Self::default_contract_table());
         sqlx::query(&query).execute(pool).await
     }
     pub async fn setup_time_reports_table(pool: &Pool<MySql>) -> Result<MySqlQueryResult, sqlx::Error> {
@@ -332,7 +332,7 @@ impl Database {
         if let Err(err) = Self::setup_company_table(pool).await {
             return Err(err);
         }
-        if let Err(err) = Self::setup_employment_type_table(pool).await {
+        if let Err(err) = Self::setup_contract_table(pool).await {
             return Err(err);
         }
         if let Err(err) = Self::setup_breaks_table(pool).await {

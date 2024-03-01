@@ -10,6 +10,7 @@ pub mod meeting;
 pub mod task;
 pub mod time_report;
 pub mod _break;
+pub mod contract;
 
 
 trait Model {

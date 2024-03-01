@@ -35,15 +35,10 @@ pub struct Employee {
     pub driving_license_class: Option<String>,
     #[serde(rename(serialize = "periodOfValidity", deserialize = "periodOfValidity"))]
     pub period_of_validity: Option<String>,
-    #[serde(rename(serialize = "bankNumber", deserialize = "bankNumber"))]
-    pub bank_number: Option<String>,
-    #[serde(rename(serialize = "clearingNumber", deserialize = "clearingNumber"))]
-    pub clearing_number: Option<String>,
-    #[serde(rename(serialize = "bankName", deserialize = "bankName"))]
-    pub bank_name: Option<String>,
     pub email: Option<String>,
-    #[serde(rename(serialize = "employmentType", deserialize = "employmentType"))]
-    pub employment_type: Option<Uuid>,
+    #[serde(rename(serialize = "contractUuid", deserialize = "contractUuid"))]
+    pub contract_uuid: Option<Uuid>,
+    #[serde(rename(serialize = "accessLevel", deserialize = "accessLevel"))]
     pub access_level: Option<String>,
     pub added: DateTime<Utc>,
     pub updated: DateTime<Utc>
@@ -65,14 +60,11 @@ impl Model for Employee {
             ssn: row.get("ssn"),
             email: row.get("email"),
             access_level: row.get("access_level"),
-            employment_type: row.get("employment_type"),
+            contract_uuid: match row.get("contract_uuid") {None => None, Some(str) => match Uuid::parse_str(str) {Err(_) => None, Ok(u) => Some(u)}},
             phone_number: row.get("phone_number"),
             role: row.get("role"),
             driving_license_class: row.get("driving_license_class"),
             period_of_validity: row.get("period_of_validity"),
-            bank_number: row.get("bank_number"),
-            clearing_number: row.get("clearing_number"),
-            bank_name: row.get("bank_name"),
             added: row.get("added"),
             updated: row.get("updated"),
         }
@@ -96,14 +88,11 @@ impl Employee {
             ssn: None,
             email: None,
             access_level: None,
-            employment_type: None,
+            contract_uuid: None,
             phone_number: None,
             role: None,
             driving_license_class: None,
             period_of_validity: None,
-            bank_number: None,
-            clearing_number: None,
-            bank_name: None,
             added: Utc::now(),
             updated: Utc::now(),
         }
@@ -182,7 +171,7 @@ impl Employee {
     }
 
     pub async fn insert(&self, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
-        let query = "INSERT INTO `crm`.`employees` (crm_uuid, uuid, first_name, last_name, date_of_birth, email, address, zip_code, city, country, ssn, access_level, employment_type, phone_number, role, driving_license_class, period_of_validity, bank_number, clearing_number, bank_name, added, updated) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        let query = "INSERT INTO `crm`.`employees` (crm_uuid, uuid, first_name, last_name, date_of_birth, email, address, zip_code, city, country, ssn, access_level, contract_uuid, phone_number, role, driving_license_class, period_of_validity, added, updated) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
         match sqlx::query(&query)
             .bind(crm_uuid.hyphenated().to_string())
             .bind(&self.uuid.hyphenated().to_string())
@@ -196,14 +185,11 @@ impl Employee {
             .bind(&self.country)
             .bind(&self.ssn)
             .bind(&self.access_level)
-            .bind(&self.employment_type)
+            .bind(match &self.contract_uuid {None => None, Some(uuid) => Some(uuid.hyphenated().to_string())})
             .bind(&self.phone_number)
             .bind(&self.role)
             .bind(&self.driving_license_class)
             .bind(&self.period_of_validity)
-            .bind(&self.bank_number)
-            .bind(&self.clearing_number)
-            .bind(&self.bank_name)
             .bind(&self.added)
             .bind(&self.updated)
             .execute(&data.pool)

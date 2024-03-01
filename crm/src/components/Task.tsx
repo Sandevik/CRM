@@ -46,7 +46,7 @@ export default function Task({task, refetchTasks, focusTask, showCustomer}: {sho
 
       <div className='flex-col h-full w-full task-content'>
         
-        {!(task.status === "Completed") && (percentage >= 85 && <div className={`${percentage === 100 ? "text-light-red" : "text-yellow-200"}`}>{percentage === 100 ? <Text text={{eng: "Task has exceeded its deadline", swe: "Uppgiften har överskridit deadline"}} /> : <Text text={{eng: "Task is about to exceed deadline", swe: "Uppgiften är påväg att överskrida deadline"}} />}</div>)}
+        {!(task.status === "Completed") && (percentage >= 85 && <div className={`${percentage === 100 ? "text-light-red" : "text-yellow-200"}`}>{percentage === 100 ? <Text text={{eng: "Task has exceeded its deadline", swe: "Uppgiften har överskridit deadline"}} /> : <Text text={{eng: "Task is about to exceed deadline", swe: "Påväg att överskrida deadline"}} />}</div>)}
         {task.recurrence !== null && <div className=""><Text text={{eng: "This task reccurs", swe: "Uppgift återkommer"}} /> <span className="underline">{task.recurrence}</span></div>}
         <div>{(task.recurrence !== null && Date.now() < new Date(task.start || "").getTime()) && <Text text={{eng: `Task completed this period, reccurs: ${new Date(task.start || "").toLocaleDateString()}`, swe: `Uppgift avklarad för pågående period, återkommer: ${new Date(task.start || "").toLocaleDateString()}`}} />}</div>
         

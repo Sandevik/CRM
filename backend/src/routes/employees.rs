@@ -16,13 +16,14 @@ pub fn employees() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Res
         .service(by_uuid)
         .service(create_employee)
         .service(get_all)
+        .service(search)
         ;
         
     scope
 }
 
 #[derive(Serialize, Deserialize)]
-struct CustomerByUuidRequest {
+struct EmployeeByUuidRequest {
     #[serde(rename(deserialize = "crmUuid"))]
     crm_uuid: String, //crm uuid
     #[serde(rename(deserialize = "employeeUuid"))]
@@ -30,7 +31,7 @@ struct CustomerByUuidRequest {
 }
 
 #[get("")]
-async fn by_uuid(query: web::Query<CustomerByUuidRequest>, data: web::Data<AppState>) -> impl Responder {
+async fn by_uuid(query: web::Query<EmployeeByUuidRequest>, data: web::Data<AppState>) -> impl Responder {
     let employee_uuid = Uuid::parse_str(&query.employee_uuid).unwrap_or_default();
     let crm_uuid = Uuid::parse_str(&query.crm_uuid).unwrap_or_default();
     match Employee::get_by_uuid(&employee_uuid, &crm_uuid, &data).await {
@@ -100,14 +101,9 @@ struct CreateEmployeeRequest {
     #[serde(rename(serialize = "periodOfValidity", deserialize = "periodOfValidity"))]
     period_of_validity: Option<String>,
     #[serde(rename(serialize = "bankNumber", deserialize = "bankNumber"))]
-    bank_number: Option<String>,
-    #[serde(rename(serialize = "clearingNumber", deserialize = "clearingNumber"))]
-    clearing_number: Option<String>,
-    #[serde(rename(serialize = "bankName", deserialize = "bankName"))]
-    bank_name: Option<String>,
     email: Option<String>,
-    #[serde(rename(serialize = "employmentType", deserialize = "employmentType"))]
-    employment_type: Option<String>,
+    #[serde(rename(serialize = "contract_uuid", deserialize = "contract_uuid"))]
+    contract_uuid: Option<String>,
     access_level: Option<String>,
 }
 
@@ -127,11 +123,8 @@ async fn create_employee(data: web::Data<AppState>, body: web::Json<CreateEmploy
         role: body.role.clone(),
         driving_license_class: body.driving_license_class.clone(),
         period_of_validity: body.period_of_validity.clone(),
-        bank_number: body.bank_number.clone(),
-        clearing_number: body.clearing_number.clone(),
-        bank_name: body.bank_name.clone(),
         email: body.email.clone(),
-        employment_type: match body.employment_type.clone() {None => None, Some(str) => Some(match Uuid::parse_str(&str) {Err(_) => Uuid::new_v4(), Ok(u) => u})},
+        contract_uuid: match body.contract_uuid.clone() {None => None, Some(str) => Some(match Uuid::parse_str(&str) {Err(_) => Uuid::new_v4(), Ok(u) => u})},
         access_level: body.access_level.clone(),
         ..Employee::default()
     };

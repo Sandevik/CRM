@@ -16,7 +16,8 @@ pub fn tasks() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Respons
         .service(create_task)
         .service(get_by_customer)
         .service(complete_task)
-        .service(get_by_crm);
+        .service(get_by_crm)
+        .service(get_by_employee);
         
     scope
 }
@@ -71,6 +72,21 @@ struct ByCustomerRequestQuery {
 #[get("/by-customer")]
 async fn get_by_customer(data: web::Data<AppState>, query: web::Query<ByCustomerRequestQuery>) -> impl Responder {
     match Task::get_by_customer_uuid(&Uuid::parse_str(&query.customer_uuid).unwrap_or_default(), &Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), &data).await {
+        Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
+        Ok(tasks) =>  HttpResponse::Ok().json(Response::ok("Successfully fetched tasks", Some(tasks)))
+    }
+}
+#[derive(Serialize, Deserialize)]
+struct ByEmployeeRequestQuery {
+    #[serde(rename(serialize = "crmUuid", deserialize = "crmUuid"))]
+    crm_uuid: String,
+    #[serde(rename(serialize = "employeeUuid", deserialize = "employeeUuid"))]
+    employee_uuid: String
+}
+
+#[get("/by-employee")]
+async fn get_by_employee(data: web::Data<AppState>, query: web::Query<ByEmployeeRequestQuery>) -> impl Responder {
+    match Task::get_by_customer_uuid(&Uuid::parse_str(&query.employee_uuid).unwrap_or_default(), &Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), &data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
         Ok(tasks) =>  HttpResponse::Ok().json(Response::ok("Successfully fetched tasks", Some(tasks)))
     }
