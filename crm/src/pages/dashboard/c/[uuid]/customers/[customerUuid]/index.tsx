@@ -13,7 +13,7 @@ import NewEntryForm from './NewEntryForm';
 import Meetings from './Meetings';
 import AddMeeting from '@/components/AddMeeting';
 import EditMeeting from './EditMeeting';
-import AddTask from './AddTask';
+import AddTask from '../../../../../../components/AddTask';
 import FocusedTask from './FocusedTask';
 import CustomerCard from './CustomerCard';
 import EditCustomer from './EditCustomer';

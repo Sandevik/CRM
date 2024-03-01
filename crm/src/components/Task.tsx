@@ -45,9 +45,8 @@ export default function Task({task, refetchTasks, focusTask, showCustomer}: {sho
       </div>
 
       <div className='flex-col h-full w-full task-content'>
-        
         {!(task.status === "Completed") && (percentage >= 85 && <div className={`${percentage === 100 ? "text-light-red" : "text-yellow-200"}`}>{percentage === 100 ? <Text text={{eng: "Task has exceeded its deadline", swe: "Uppgiften har överskridit deadline"}} /> : <Text text={{eng: "Task is about to exceed deadline", swe: "Påväg att överskrida deadline"}} />}</div>)}
-        {task.recurrence !== null && <div className=""><Text text={{eng: "This task reccurs", swe: "Uppgift återkommer"}} /> <span className="underline">{task.recurrence}</span></div>}
+        {task.recurrence !== null && <div className=""><Text text={{eng: "This task reccurs", swe: "Uppgiften återkommer"}} /> <span className="underline">{matchReccurance(task.recurrence)}</span></div>}
         <div>{(task.recurrence !== null && Date.now() < new Date(task.start || "").getTime()) && <Text text={{eng: `Task completed this period, reccurs: ${new Date(task.start || "").toLocaleDateString()}`, swe: `Uppgift avklarad för pågående period, återkommer: ${new Date(task.start || "").toLocaleDateString()}`}} />}</div>
         
         <div className={`absolute ${task.status === "Completed" || (task.recurrence !== null && Date.now() < new Date(task.start || "").getTime()) ? "bottom-0" : "bottom-9"} flex flex-col h-12 w-[95%] gap-2`}>
@@ -57,11 +56,7 @@ export default function Task({task, refetchTasks, focusTask, showCustomer}: {sho
           </div>
           {(!(task.status === "Completed") && !(task.recurrence !== null && Date.now() < new Date(task.start || "").getTime())) && <Button onClick={()=>completeTask()}><Text text={{eng: "Complete", swe: "Avklarad"}}/></Button>}
         </div>
-
-
       </div>
-
-
     </div>
     </li>  
   )
@@ -73,4 +68,23 @@ const LoadingBar = ({percentage, completed}: {percentage: number, completed: boo
       <div style={{"--percentage": percentage.toString()+"%"} as any} className={`h-1 w-full ${completed ? "rounded-none bg-green-200 left-0" : percentage === 100 ? "rounded-none bg-light-red left-0" : percentage >= 85 ? "rounded-none bg-yellow-200 left-0 translate-x-[calc(-100%+var(--percentage))]" : "rounded-r-md bg-blue-500 left-0 translate-x-[calc(-100%+var(--percentage))]"} absolute bottom-0 after:content `}></div>
     </div>
   )
+}
+
+const matchReccurance = (recurrance: TaskRecurrence): JSX.Element | null => {
+  switch (recurrance) {
+    case "Dayly":
+      return <Text text={{eng: "dayly", swe: "dagligen"}} />
+    case "Weekly":
+      return <Text text={{eng: "weekly", swe: "veckovis"}} />
+    case "Monthly":
+      return <Text text={{eng: "monthly", swe: "månadsvis"}} />
+    case "Yearly":
+      return <Text text={{eng: "yearly", swe: "årligen"}} />
+    case "EveryOtherMonth":
+      return <Text text={{eng: "every other month", swe: "varannan månad"}} />
+    case "EveryOtherWeek":
+      return <Text text={{eng: "every other week", swe: "varannan vecka"}} />
+      default: 
+      return recurrance;
+  }
 }

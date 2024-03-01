@@ -92,7 +92,7 @@ impl Model for Task {
         Task {
             uuid: Uuid::parse_str(row.get("uuid")).unwrap_or_default(),
             crm_uuid: Uuid::parse_str(row.get("crm_uuid")).unwrap_or_default(),
-            customer_uuid: match Uuid::parse_str(row.get("customer_uuid")) {Err(_) => None, Ok(uuid) => Some(uuid)},
+            customer_uuid: match row.get("customer_uuid") {None => None, Some(str) => match Uuid::parse_str(str) {Err(_) => None, Ok(uuid) => Some(uuid)}},
             employee_uuid: match row.get::<Option<String>, &str>("employee_uuid") {None => None, Some(uuid_str) => match Uuid::parse_str(&uuid_str) {Err(_) => None, Ok(uuid) => Some(uuid)}},
             start: row.get("start"),
             deadline: row.get("deadline"),

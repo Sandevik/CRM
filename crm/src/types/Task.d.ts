@@ -14,5 +14,5 @@ interface Task {
     percentage?: number;
 }
 
-type TaskRecurrence = "dayly" | "weekly" | "monthly" | "yearly" | "everyOtherWeek" | "everyOtherMonth" | null;
+type TaskRecurrence = "Dayly" | "Weekly" | "Monthly" | "Yearly" | "EveryOtherWeek" | "EveryOtherMonth" | null;
 type TaskStatus = "Ongoing" | "Completed" | "ongoing" | "completed" | null

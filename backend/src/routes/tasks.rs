@@ -23,7 +23,7 @@ pub fn tasks() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Respons
 }
 
 #[derive(Deserialize)]
-struct CreateTodoRequest {
+struct CreateTaskRequest {
     #[serde(rename(deserialize = "crmUuid"))]
     crm_uuid: String,
     deadline: Option<i64>,
@@ -32,19 +32,23 @@ struct CreateTodoRequest {
     status: Option<String>,
     #[serde(rename(deserialize = "customerUuid"))]
     customer_uuid: Option<String>,
+    #[serde(rename(deserialize = "employeeUuid"))]
+    employee_uuid: Option<String>,
     title: Option<String>,
 }
 
 #[post("/create")]
-async fn create_task(data: web::Data<AppState>, body: web::Json<CreateTodoRequest>) -> impl Responder {
+async fn create_task(data: web::Data<AppState>, body: web::Json<CreateTaskRequest>) -> impl Responder {
     let custom_start_date: Option<DateTime<Utc>> = match body.start {None => Task::default().start, Some(i) => Some(Utc.from_local_datetime(&NaiveDateTime::from_timestamp_millis(i).expect("Could not convert milliseconds to date")).unwrap())};
     let deadline: Option<DateTime<Utc>> = match body.deadline {None => None, Some(i) => Some(Utc.from_local_datetime(&NaiveDateTime::from_timestamp_millis(i).expect("Could not convert milliseconds to date")).unwrap())};
     let crm_uuid: Uuid = Uuid::parse_str(&body.crm_uuid).unwrap_or_default();
     let customer_uuid: Option<Uuid> = match &body.customer_uuid { Some(uuid) => Some(Uuid::parse_str(&uuid).unwrap_or_default()), None => None};
+    let employee_uuid: Option<Uuid> = match &body.employee_uuid { Some(uuid) => Some(Uuid::parse_str(&uuid).unwrap_or_default()), None => None};
     let recurrence: Option<Recurrence> = match &body.recurrence {None => None, Some(str) => Recurrence::from_string(str)};
     let todo: Task = Task {
         customer_uuid, 
         crm_uuid, 
+        employee_uuid,
         start: custom_start_date,
         deadline, 
         recurrence_count: match &recurrence {None => None, Some(_) => Some(1)},
@@ -56,7 +60,7 @@ async fn create_task(data: web::Data<AppState>, body: web::Json<CreateTodoReques
 
     match todo.insert(&data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
-        Ok(_) => HttpResponse::Created().json(Response::<String>::created("Successfully created todo"))
+        Ok(_) => HttpResponse::Created().json(Response::<String>::created("Successfully created task"))
     }
 }
 

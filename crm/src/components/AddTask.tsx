@@ -8,15 +8,16 @@ import { IoClose, IoCalendar } from 'react-icons/io5';
 
 interface Props {
     active: boolean, 
-    customer: Customer | null, 
+    customer?: Customer | null, 
+    employee?: Employee | null,
     setActive: React.Dispatch<React.SetStateAction<boolean>>, 
     refetchTasks: () => Promise<void>
 }
 
 
-export default function AddTask({active, setActive, customer, refetchTasks}: Props) {
+export default function AddTask({active, setActive, customer, employee, refetchTasks}: Props) {
     const {crm} = useContext(CurrentCrmContext);
-    const [form, setForm] = useState<Omit<Task, "added" | "updated" | "recurrenceCount" | "uuid" | "employeeUuid">>({
+    const [form, setForm] = useState<Omit<Task, "added" | "updated" | "recurrenceCount" | "uuid">>({
         deadline: null,
         crmUuid: crm?.crmUuid || "" ,
         title: null,
@@ -24,11 +25,13 @@ export default function AddTask({active, setActive, customer, refetchTasks}: Pro
         status: "ongoing",
         recurrence: null,
         customerUuid: customer?.uuid || null,
+        employeeUuid: employee?.uuid || null,
     })
     const [deadline, setDeadline] = useState<1|0>(0);
     const [customStart, setCustomStart] = useState<1|0>(0);
 
     useEffect(()=>{setForm({...form, customerUuid: customer?.uuid || null})},[customer])
+    useEffect(()=>{setForm({...form, employeeUuid: employee?.uuid || null})},[employee])
     useEffect(()=>{setForm({...form, crmUuid: crm?.crmUuid || ""})},[crm])
     
 
@@ -42,12 +45,13 @@ export default function AddTask({active, setActive, customer, refetchTasks}: Pro
             start: null,
             recurrence: null,
             customerUuid: customer?.uuid || null,
+            employeeUuid: employee?.uuid || null,
         })
     }
 
     const addTask = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();
-        if (crm?.crmUuid && customer) {
+        if (crm?.crmUuid && (customer || employee)) {
             const res = await request("/tasks/create", {...form, deadline: new Date(form.deadline || "").getTime(), start: new Date(form.start || "").getTime()}, "POST");
             if (res.code == 201) {
                 close();
@@ -60,7 +64,7 @@ export default function AddTask({active, setActive, customer, refetchTasks}: Pro
     return (
         <div className={`${active ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"} transition-opacity absolute top-0 left-0 h-full w-full bg-background-dark bg-opacity-40 backdrop-blur-md grid place-items-center`}>
         <form className=" w-[40em] bg-background-light p-4 rounded-md relative flex flex-col gap-5">
-            <h3 className="text-2xl font-semibold"><Text text={{eng: "Create a new task with", swe: "Skapa en ny uppgift för"}} /> {customer?.firstName || <Text text={{eng: "unknown customer", swe: "okänd kund"}} />}</h3>
+            <h3 className="text-2xl font-semibold"><Text text={{eng: "Create a new task with", swe: "Skapa en ny uppgift för"}} /> {customer?.firstName || <Text text={{eng: "unknown", swe: "okänd"}} />}</h3>
             <IoClose onClick={() => close()} className="absolute top-2 right-2 text-4xl cursor-pointer"/>
             
             <div className="flex flex-col gap-2">
