@@ -36,7 +36,7 @@ async fn by_uuid(query: web::Query<EmployeeByUuidRequest>, data: web::Data<AppSt
     let crm_uuid = Uuid::parse_str(&query.crm_uuid).unwrap_or_default();
     match Employee::get_by_uuid(&employee_uuid, &crm_uuid, &data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
-        Ok(customer) => HttpResponse::Ok().json(Response::ok("Successfully fetched employee", customer))
+        Ok(employee) => HttpResponse::Ok().json(Response::ok("Successfully fetched employee", employee))
     }
 }
 
@@ -55,7 +55,7 @@ struct AllRequest {
 async fn get_all(data: web::Data<AppState>, query: web::Query<AllRequest>) -> impl Responder {
     match Employee::get_all(&Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), match &query.limit {None => Limit::None, Some(u) => Limit::Some(*u)}, query.offset, &data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
-        Ok(customer) => HttpResponse::Ok().json(Response::ok("Successfully fetched employee", Some(customer)))
+        Ok(employee) => HttpResponse::Ok().json(Response::ok("Successfully fetched employee", Some(employee)))
     }
 }
 
@@ -71,7 +71,7 @@ struct SearchRequest {
 async fn search(data: web::Data<AppState>, query: web::Query<SearchRequest>) -> impl Responder {
     match Employee::search(&Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), &query.q, Limit::Some(20), &data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
-        Ok(customer) => HttpResponse::Ok().json(Response::ok("Successfully searched employees", Some(customer)))
+        Ok(employee) => HttpResponse::Ok().json(Response::ok("Successfully searched employees", Some(employee)))
     }
 }
 
@@ -110,7 +110,7 @@ struct CreateEmployeeRequest {
 
 #[post("/create")]
 async fn create_employee(data: web::Data<AppState>, body: web::Json<CreateEmployeeRequest>) -> impl Responder {
-    let customer: Employee = Employee {
+    let employee: Employee = Employee {
         user_uuid: match body.user_uuid.clone() {None => None, Some(str) => Some(match Uuid::parse_str(&str) {Err(_) => Uuid::new_v4(), Ok(u) => u})} ,
         first_name: body.first_name.clone(),
         last_name: body.last_name.clone(),
@@ -128,7 +128,7 @@ async fn create_employee(data: web::Data<AppState>, body: web::Json<CreateEmploy
         access_level: body.access_level.clone(),
         ..Employee::default()
     };
-    match customer.insert(&Uuid::parse_str(&body.crm_uuid).unwrap_or_default(), &data).await {
+    match employee.insert(&Uuid::parse_str(&body.crm_uuid).unwrap_or_default(), &data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
         Ok(_) => HttpResponse::Created().json(Response::<String>::created("Successfully created employee"))
     }

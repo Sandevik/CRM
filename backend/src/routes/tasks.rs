@@ -86,7 +86,7 @@ struct ByEmployeeRequestQuery {
 
 #[get("/by-employee")]
 async fn get_by_employee(data: web::Data<AppState>, query: web::Query<ByEmployeeRequestQuery>) -> impl Responder {
-    match Task::get_by_customer_uuid(&Uuid::parse_str(&query.employee_uuid).unwrap_or_default(), &Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), &data).await {
+    match Task::get_by_employee_uuid(&Uuid::parse_str(&query.employee_uuid).unwrap_or_default(), &Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), &data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
         Ok(tasks) =>  HttpResponse::Ok().json(Response::ok("Successfully fetched tasks", Some(tasks)))
     }
