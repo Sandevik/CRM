@@ -4,13 +4,12 @@ import React, { useContext, useEffect, useState } from 'react'
 import { FaPen } from 'react-icons/fa';
 import { Statistics } from '.';
 import Button from '@/components/Button';
-import Task from '../../../../../../components/Task';
 import TaskList from '../../../../../../components/TaskList';
 import Text from '@/components/Text';
 
 
 
-export default function QuickInfo({customer, statistics, addingTask, setAddTask, tasks, refetchTasks, focusTask}: {customer: Customer | null, statistics: Statistics, addingTask: boolean, setAddTask: React.Dispatch<React.SetStateAction<boolean>>, tasks: Task[], refetchTasks: () => Promise<void>, focusTask: React.Dispatch<React.SetStateAction<Task | null>>}) {
+export default function QuickInfo({loading, customer, statistics, addingTask, setAddTask, tasks, refetchTasks, focusTask}: {loading: boolean, customer: Customer | null, statistics: Statistics, addingTask: boolean, setAddTask: React.Dispatch<React.SetStateAction<boolean>>, tasks: Task[], refetchTasks: () => Promise<void>, focusTask: React.Dispatch<React.SetStateAction<Task | null>>}) {
   const {crm} = useContext(CurrentCrmContext);
   const [currentNote, setCurrentNote] = useState<string>(customer?.note || "");
   const [editing, setEditing] = useState<boolean>(false);
@@ -47,7 +46,7 @@ export default function QuickInfo({customer, statistics, addingTask, setAddTask,
               <span><Text text={{eng: "Tasks", swe: "Uppgifter"}} /></span>
               <Button className='' onClick={()=>setAddTask(true)}><Text text={{eng: "New Task", swe: "Ny Uppgift"}} /></Button>
             </div>
-            <TaskList showCustomers={false} tasks={tasks} refetchTasks={refetchTasks} focusTask={focusTask}/>
+            <TaskList loading={loading} showCustomers={false} tasks={tasks} refetchTasks={refetchTasks} focusTask={focusTask}/>
           </div>
 
         </div>

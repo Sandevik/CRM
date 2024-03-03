@@ -29,7 +29,7 @@ export default function index() {
     }
 
   return (
-    <main className='relative px-2'>
+    <main className='relative px-2 max-w-[1800px] m-auto'>
         <Navbar />
         <h1 className="text-3xl flex justify-center py-2 font-semibold"><Text text={{eng: "Customers", swe: "Kunder"}}/></h1>
         <div className='sticky mt-4 flex justify-center top-[110px]'>

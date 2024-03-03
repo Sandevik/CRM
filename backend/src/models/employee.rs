@@ -6,9 +6,9 @@ use uuid::Uuid;
 
 use crate::{routes::Limit, AppState};
 
-use super::Model;
+use super::{user::User, Model};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 
 pub struct Employee {
     #[serde(rename(serialize = "crmUuid", deserialize = "crmUuid"))]
@@ -199,6 +199,48 @@ impl Employee {
             }
     }
 
+    /* async fn create_user_account(employee_uuid: &Uuid, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+        // get employee
+        let emp_res = Employee::get_by_uuid(employee_uuid, crm_uuid, data).await;
+        match emp_res {
+            Err(err) => Err(err),
+            Ok(emp_opt) => {
+                match emp_opt {
+                    None => Err(sqlx::Error::RowNotFound),
+                    Some(employee) => {
+                        if employee.email.is_some() || employee.phone_number.is_some() {
+                            
+                            match User::get_by_email_or_phone_number_sep(employee.email, employee.phone_number, data).await {
+                                Err(_) => {todo!()},
+                                Ok(user_opt) => {
+                                    match user_opt {
+                                        None => {todo!()}
+                                        Some(user) => {
 
+                                        }
+                                    }
+                                }
+                            }
+
+
+                        }
+                        return Err(sqlx::Error::ColumnNotFound("Neither email or phone_number was found on employee".to_string()));
+                    }
+                }
+            }
+        }
+        // get user account if exists else create a user struct 
+        
+
+
+        // if !user account, generate a random password that can be viewed until the password is changed
+
+        //add user_uuid and crm_uuid to crm . user_employee_crm so that a user can be an employee of multiple companies
+
+        // create a new user account if it did not exist
+
+
+        Ok(())
+    } */
 
 }

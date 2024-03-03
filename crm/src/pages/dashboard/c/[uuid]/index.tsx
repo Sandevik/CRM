@@ -11,10 +11,12 @@ export default function index() {
   const {crm} = useContext(CurrentCrmContext);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [focusedTask, setFocusedTask] = useState<Task | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
   
   useEffect(()=>{
     (async () => {
       await fetchTasks();
+      setLoading(false);
     })();
   },[crm])
 
@@ -28,16 +30,15 @@ export default function index() {
   }
 
   return (
-    <div className='flex h-[calc(100dvh-3em)]'>
-      <main className="flex-grow p-2">
+    <div className='flex h-[calc(100dvh-3em)] max-w-[1800px] m-auto'>
+      <main className="flex-grow">
         <Navbar />
         <div className="p-2">
-          
+        
           <div className="flex flex-col gap-2 my-2">
             <h3><Text text={{swe: "Uppgifter", eng: "Tasks"}} /></h3>
-            <TaskList showCustomers={true} tasks={tasks} refetchTasks={fetchTasks} focusTask={setFocusedTask}/>
+            <TaskList loading={loading} showCustomers={true} tasks={tasks} refetchTasks={fetchTasks} focusTask={setFocusedTask}/>
           </div>
-
           <br />
           Some statistics?
           <br />
@@ -55,11 +56,8 @@ export default function index() {
           <br />
           Title, text, upvotes / likes, visible (if the user wants a suggestion to be visible to other customers), status (if it is being added, is added, not added..), added_date
           <Button>Ooga</Button>
-
-        </div>
-
+      </div>
       </main>
-      <Meetings />
     </div>
   )
 }

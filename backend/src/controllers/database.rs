@@ -203,6 +203,16 @@ impl Database {
         `updated` DATETIME
         "#.to_string()
     }
+    fn default_employee_crm_table() -> String {
+        r#"
+        CREATE TABLE IF NOT EXISTS `crm`.`user_employee_crm` (
+            `uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL UNIQUE PRIMARY KEY,
+            `user_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
+            `crm_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
+          ) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;
+        "#.to_string()
+    }
+
     // Sets up the inital users table for people who sign up
     pub async fn setup_users_table(pool: &Pool<MySql>) -> Result<MySqlQueryResult, sqlx::Error> {
         let create_table_users_query: &str = r#"
@@ -215,7 +225,7 @@ impl Database {
                 `zip_code` TEXT,
                 `city` TEXT,
                 `country` TEXT,
-                `p_hash` TEXT CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
+                `password_hash` TEXT CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
                 `phone_number` VARCHAR(15) NOT NULL,
                 `admin` BOOLEAN NOT NULL DEFAULT FALSE,
                 `joined` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -225,6 +235,8 @@ impl Database {
                 `legacy_user` BOOLEAN NOT NULL DEFAULT FALSE,
                 `current_jwt` TEXT,
                 `preferred_language` VARCHAR(3) NOT NULL DEFAULT 'eng',
+                `employee_of_uuid` VARCHAR(36) UNIQUE,
+                `employee_changed_pass` BOOL DEFAULT FALSE,
                 PRIMARY KEY (`uuid`(36)),
                 UNIQUE (`email`(50), `phone_number`(15))
               ) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;

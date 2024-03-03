@@ -45,7 +45,7 @@ async fn create_task(data: web::Data<AppState>, body: web::Json<CreateTaskReques
     let customer_uuid: Option<Uuid> = match &body.customer_uuid { Some(uuid) => Some(Uuid::parse_str(&uuid).unwrap_or_default()), None => None};
     let employee_uuid: Option<Uuid> = match &body.employee_uuid { Some(uuid) => Some(Uuid::parse_str(&uuid).unwrap_or_default()), None => None};
     let recurrence: Option<Recurrence> = match &body.recurrence {None => None, Some(str) => Recurrence::from_string(str)};
-    let todo: Task = Task {
+    let task: Task = Task {
         customer_uuid, 
         crm_uuid, 
         employee_uuid,
@@ -58,7 +58,7 @@ async fn create_task(data: web::Data<AppState>, body: web::Json<CreateTaskReques
         ..Task::default()
     }; 
 
-    match todo.insert(&data).await {
+    match task.insert(&data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
         Ok(_) => HttpResponse::Created().json(Response::<String>::created("Successfully created task"))
     }

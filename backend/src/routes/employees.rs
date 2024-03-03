@@ -133,3 +133,17 @@ async fn create_employee(data: web::Data<AppState>, body: web::Json<CreateEmploy
         Ok(_) => HttpResponse::Created().json(Response::<String>::created("Successfully created employee"))
     }
 }
+
+/* #[derive(Serialize, Deserialize)]
+struct CreateEmployeeUserAccount {
+    crm_uuid: String,
+    employee_uuid: String,
+}
+
+#[post("/create-user-account")]
+async fn create_employee_account(data: web::Data<AppState>, body: web::Json<CreateEmployeeUserAccount>) -> impl Responder {
+    match Employee::create_user_account(&Uuid::parse_str(&body.crm_uuid).unwrap_or_default(), &data).await {
+        Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
+        Ok(a) => HttpResponse::Created().json(Response::<String>::created("Successfully created employee user account"))
+    }
+} */

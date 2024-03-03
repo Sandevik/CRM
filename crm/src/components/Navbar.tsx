@@ -12,7 +12,8 @@ export default function Navbar() {
     const {data} = useContext(AuthContext);
 
   return (
-    <nav className="h-[3em] bg-background-light z-10 text-light-blue flex justify-between items-center px-4 sticky top-0">
+    <div className="h-[3em] bg-background-light">
+    <nav className="h-full max-w-[1800px] m-auto z-10 text-light-blue flex justify-between items-center px-4 sticky top-0">
         <span className="font-bold text-2xl">Coneqt</span>
         <ul className='flex gap-8 items-center '>
             <li><Link href={"/dashboard"} className='flex items-center gap-1 text-light-blue hover:text-light-red transition-colors'> <MdDashboard /> <Text text={{eng: "All Crms", swe: "Alla Crm"}} /> </Link></li>
@@ -26,5 +27,6 @@ export default function Navbar() {
             <li className='flex items-center gap-1 text-light-blue hover:text-light-red transition-colors'> <IoMdHelp /> <Text text={{eng: "Help", swe: "Hjälp"}} /> </li>
         </ul>
     </nav>
+    </div>
   )
 }

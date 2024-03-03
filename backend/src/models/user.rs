@@ -16,7 +16,7 @@ pub struct User {
     #[serde(rename(serialize = "lastName", deserialize = "lastName"))]
     pub last_name: String,
     #[serde(skip_serializing, skip_deserializing)]
-    pub p_hash: String,
+    pub password_hash: String,
     #[serde(rename(serialize = "phoneNumber", deserialize = "phoneNumber"))]
     pub phone_number: Option<String>,
     pub admin: bool,
@@ -33,7 +33,10 @@ pub struct User {
     pub current_jwt: Option<String>,
     #[serde(rename(serialize = "preferredLanguage", deserialize = "preferredLanguage"))]
     pub preferred_language: String,
-
+    #[serde(rename(serialize = "employeeOfUuid", deserialize = "employeeOfUuid"))]
+    pub employee_of_uuid: Option<Uuid>,
+    #[serde(rename(serialize = "employeeChangedPass", deserialize = "employeeChangedPass"))]
+    pub employee_changed_pass: bool,
 }
 
 impl Model for User {
@@ -43,7 +46,7 @@ impl Model for User {
             uuid: Uuid::parse_str(row.get("uuid")).expect("ERROR: Could not parse uuid for this user."),
             email: row.get("email"),
             phone_number: row.get("phone_number"),
-            p_hash: row.get("p_hash"),
+            password_hash: row.get("password_hash"),
             admin: row.get("admin"),
             joined: row.get("joined"),
             last_sign_in: row.get("last_sign_in"),
@@ -54,6 +57,8 @@ impl Model for User {
             subscription_ends: row.get("subscription_ends"),   
             current_jwt: row.get("current_jwt"),
             preferred_language: row.get("preferred_language"),
+            employee_of_uuid: match row.get("employee_of_uuid") {None => None, Some(str) => match Uuid::parse_str(str) {Err(_) => None, Ok(u) => Some(u)}},
+            employee_changed_pass: row.get("employee_changed_pass"),
         }
     }
 }
@@ -99,8 +104,33 @@ impl User {
         }
     }
 
+    pub async fn get_by_phone_number(phone_number: &String, data: &web::Data<AppState>) -> Result<Option<User>, Error> {
+        let res = sqlx::query("SELECT * FROM `crm`.`users` WHERE phone_number = ?").bind(phone_number).fetch_optional(&data.pool).await;
+        match res {
+            Err(err) => return Err(err),
+            Ok(row) => {
+                match row {
+                    Some(msql_row) => return Ok(Some(Self::from_row(&msql_row))),
+                    None => return Ok(None),
+                }
+            }
+        }
+    }
+
     pub async fn get_by_email_or_phone_number(email_or_phone_number: &str, data: &web::Data<AppState>) -> Result<Option<User>, Error> {
         let res = sqlx::query("SELECT * FROM `crm`.`users` WHERE email = ? OR phone_number = ?").bind(email_or_phone_number).bind(email_or_phone_number).fetch_optional(&data.pool).await;
+        match res {
+            Err(err) => return Err(err),
+            Ok(row) => {
+                match row {
+                    Some(msql_row) => return Ok(Some(Self::from_row(&msql_row))),
+                    None => return Ok(None),
+                }
+            }
+        }
+    }
+    pub async fn get_by_email_or_phone_number_sep(email: &str, phone_number: &String, data: &web::Data<AppState>) -> Result<Option<User>, Error> {
+        let res = sqlx::query("SELECT * FROM `crm`.`users` WHERE email = ? OR phone_number = ?").bind(email).bind(phone_number).fetch_optional(&data.pool).await;
         match res {
             Err(err) => return Err(err),
             Ok(row) => {
@@ -178,5 +208,7 @@ impl User {
             Err(err) => Err(err)
         }
     }
+
+    
 
 }

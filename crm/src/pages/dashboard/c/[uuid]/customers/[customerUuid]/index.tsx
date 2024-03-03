@@ -42,10 +42,12 @@ export default function index() {
   const [addTask, setAddTask] = useState<boolean>(false);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [focusedTask, setFocusedTask] = useState<Task | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(()=>{
     (async () => {
       await fetchCustomer();
+      setLoading(false);
     })();
   },[crm, params])
 
@@ -114,7 +116,7 @@ export default function index() {
   },[currentView])
 
   return (
-      <div className='relative w-full pl-3 pr-2 '>
+      <div className='relative w-full pl-3 pr-2 max-w-[1800px] m-auto'>
         <Navbar />
         <Link href={`/dashboard/c/${crm?.crmUuid}/customers`} className="flex gap-2 items-center text-lg bg-light-blue hover:bg-greenish transition-colors absolute top-[2.7em] left-3 px-2 text-black rounded-md"><FaChevronLeft /> <div><Text text={{eng: "Customers", swe: "Kunder"}} /></div> </Link>
         <main className='h-[calc(100dvh-9.1em)] rounded-md w-full mt-10 p-4 bg-background-light bg-opacity-50 flex flex-col lg:flex-row gap-4 overflow-y-scroll scrollthumb'>
@@ -138,7 +140,7 @@ export default function index() {
 
             <div className="mt-3">
             {currentView === "info" ?
-              <QuickInfo focusTask={setFocusedTask} customer={customer} statistics={statistics} addingTask={addTask} setAddTask={setAddTask} tasks={tasks} refetchTasks={fetchTasks}/>
+              <QuickInfo loading={loading} focusTask={setFocusedTask} customer={customer} statistics={statistics} addingTask={addTask} setAddTask={setAddTask} tasks={tasks} refetchTasks={fetchTasks}/>
               : currentView === "entries" ?
               <Entries refetchEntries={fetchEntries} entries={entries} customer={customer} />
               : 

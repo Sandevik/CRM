@@ -47,7 +47,7 @@ async fn sign_in(body: web::Json<DecodeSignIn>, secret: web::Data<String>, data:
             match user {
                 None => HttpResponse::BadRequest().json(Response::<String>::bad_request("Email or password is incorrect")),
                 Some(user) => {
-                        match Hashing::verify(body.password.to_string(), &user.p_hash) {
+                        match Hashing::verify(body.password.to_string(), &user.password_hash) {
                         Err(_) => HttpResponse::BadRequest().json(Response::<String>::bad_request("Email or password is incorrect")),
                         Ok(_) => {
                             let jwt = JWT::create_jwt(&user, &secret);
