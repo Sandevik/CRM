@@ -7,7 +7,7 @@ import request from '@/utils/request';
 import Text from '@/components/Text';
 import Button from '@/components/Button';
 
-export default function index() {
+export default function Index() {
   const {crm} = useContext(CurrentCrmContext);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [focusedTask, setFocusedTask] = useState<Task | null>(null);
