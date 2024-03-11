@@ -33,7 +33,7 @@ export default function Calendar() {
                 const skipable: number[] = []
                 for(let i = 0; i < res.data.length; i++){
                     if (!skipable?.includes(res.data[i].day)) skipable.push(res.data[i].day);
-                    const day = finalArr.find(d => d.day === res?.data[i].day);
+                    const day = finalArr.find(d => d.day === (res?.data && res?.data[i].day));
                     if (day){
                         day.meetings.push(res.data[i].meeting);
                     }else{
