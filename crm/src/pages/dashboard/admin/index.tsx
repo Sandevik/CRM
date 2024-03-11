@@ -13,7 +13,7 @@ interface FetchOptions {
 
 
 
-export default function index() {
+export default function Index() {
     const [fetchOptions, setFetchOptions] = useState<FetchOptions>({offset: 0, amount: 10})
     const [usersCount, setUsersCount] = useState<number>(0);
     const [currentPage, setCurrentPage] = useState<number>(1);
