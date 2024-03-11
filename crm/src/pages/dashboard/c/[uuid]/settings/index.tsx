@@ -5,7 +5,7 @@ import { CurrentCrmContext } from '@/context/CurrentCrmContext';
 import request from '@/utils/request';
 import { useRouter } from 'next/router';
 
-export default function index() {
+export default function Index() {
     const router = useRouter();
     const {crm} = useContext(CurrentCrmContext);
     const removeCrm = async () => {
