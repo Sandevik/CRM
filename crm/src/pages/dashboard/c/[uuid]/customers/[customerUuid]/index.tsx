@@ -5,18 +5,18 @@ import { CurrentCrmContext } from '@/context/CurrentCrmContext';
 import fetchCustomerDetails from '@/utils/fetchCustomerDetails';
 import { FaChevronLeft } from "react-icons/fa6";
 import Link from 'next/link';
-import Entries from './Entries';
+import Entries from '../../../../../../components/Entries';
 import Button from '@/components/Button';
-import QuickInfo from './QuickInfo';
+import QuickInfo from '../../../../../../components/QuickInfo';
 import request from '@/utils/request';
-import NewEntryForm from './NewEntryForm';
-import Meetings from './Meetings';
+import NewEntryForm from '../../../../../../components/NewEntryForm';
+import Meetings from '../../../../../../components/MeetingsList';
 import AddMeeting from '@/components/AddMeeting';
-import EditMeeting from './EditMeeting';
+import EditMeeting from '../../../../../../components/EditMeeting';
 import AddTask from '../../../../../../components/AddTask';
-import FocusedTask from './FocusedTask';
-import CustomerCard from './CustomerCard';
-import EditCustomer from './EditCustomer';
+import FocusedTask from '../../../../../../components/FocusedTask';
+import CustomerCard from '../../../../../../components/CustomerCard';
+import EditCustomer from '../../../../../../components/EditCustomer';
 import Text from '@/components/Text';
 
 export interface Statistics {

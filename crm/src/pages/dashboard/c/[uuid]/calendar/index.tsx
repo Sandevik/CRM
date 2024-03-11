@@ -1,6 +1,6 @@
 import React from 'react'
 import Navbar from '../Navbar'
-import Calendar from './Calendar'
+import Calendar from '../../../../../components/Calendar'
 
 export default function Index() {
   return (

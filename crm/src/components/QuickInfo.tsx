@@ -3,9 +3,9 @@ import request from '@/utils/request';
 import React, { useContext, useEffect, useState } from 'react'
 import { FaPen } from 'react-icons/fa';
 import Button from '@/components/Button';
-import TaskList from '../../../../../../components/TaskList';
+import TaskList from './TaskList';
 import Text from '@/components/Text';
-import { Statistics } from '.';
+import { Statistics } from '../pages/dashboard/c/[uuid]/customers/[customerUuid]';
 
 
 

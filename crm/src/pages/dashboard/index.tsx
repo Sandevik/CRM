@@ -1,7 +1,7 @@
 import request from '@/utils/request';
 import React, { useContext, useEffect, useState } from 'react'
-import CrmCard from './CrmCard';
-import CreateCrmPopup from './CreateCrmPopup';
+import CrmCard from '../../components/CrmCard';
+import CreateCrmPopup from '../../components/CreateCrmPopup';
 import Text from '@/components/Text';
 
 interface FetchResult {

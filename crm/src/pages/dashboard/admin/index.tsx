@@ -1,8 +1,8 @@
 import { AuthContext } from '@/context/AuthContext';
 import useRequest from '@/hooks/useRequest';
 import React, { useContext, useEffect, useState } from 'react'
-import UserRow from './UserRow';
-import UserRowHeading from './UserRowHeading';
+import UserRow from '../../../components/UserRow';
+import UserRowHeading from '../../../components/UserRowHeading';
 import { GrNext, GrPrevious  } from "react-icons/gr";
 import request from '@/utils/request';
 
