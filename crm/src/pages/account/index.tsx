@@ -4,7 +4,7 @@ import { AuthContext } from '@/context/AuthContext';
 import request from '@/utils/request';
 import React, { useContext, useEffect, useState } from 'react'
 
-export default function Index() {
+export default function index() {
   const {data} = useContext(AuthContext);
   const [language, setLanguage] = useState<string>("eng");
 
