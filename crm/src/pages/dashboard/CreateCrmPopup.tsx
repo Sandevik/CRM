@@ -24,7 +24,7 @@ export default function CreateCrmPopup({closePopup, active, createCrm}: {closePo
                 <span className='font-semibold text-xl mt-4'>Create a new CRM system</span>
                 <p className="my-4">Please enter the name of the new crm system you wish to create.</p>
                 <div className="flex flex-col w-[70%] m-auto gap-4">
-                    {error && <span className="flex justify-center text-light-red font-bold">CRM name "{name}" already in use!</span>}
+                    {error && <span className="flex justify-center text-light-red font-bold">CRM name &quot;{name}&quot; already in use!</span>}
                     <Input value={name} onChange={(e) => setName(e.target.value)} placeholder='Enter name' className={`text-xl bg-light-blue placeholder:text-background-dark placeholder:text-opacity-70 ${error ? "ring-2 ring-light-pink" : "ring-2 ring-transparent"}`} />
                     <Button type="submit" onClick={(e) => handleCreateClick(e)}>Create</Button>
                 </div>
