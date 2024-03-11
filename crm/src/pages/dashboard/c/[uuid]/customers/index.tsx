@@ -14,7 +14,7 @@ import EmptyList from '@/components/EmptyList';
 import { AuthContext } from '@/context/AuthContext';
 import text from '@/utils/text';
 
-export default function index() {
+export default function Index() {
     const {data: userData} = useContext(AuthContext);
     const [createCustomerActive, setCreateCustomerActive] = useState<boolean>(false);
     
