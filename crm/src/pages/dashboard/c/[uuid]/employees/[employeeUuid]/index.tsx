@@ -18,7 +18,7 @@ import Input from '@/components/Input';
 import text from '@/utils/text';
 
 
-export default function index() {
+export default function Index() {
   const {crm} = useContext(CurrentCrmContext);
   const [employee, setEmployee] = useState<Employee>({} as Employee);
   const [tasks, setTasks] = useState<Task[]>([]);
