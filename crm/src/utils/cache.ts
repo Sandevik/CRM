@@ -48,7 +48,7 @@ export function cache(item: T | T[], as: U): void {
                     })
                     parsed = [...parsed, ...item];
                 } else {
-                    parsed = parsed.filter(customer => customer.uuid !== item.uuid)
+                    parsed = parsed.filter(crm => crm.crmUuid !== item.uuid)
                     parsed.push(item);
                 }
                 localStorage.setItem("crm-crm-cache", JSON.stringify(parsed));
