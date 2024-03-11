@@ -8,7 +8,7 @@ use crate::AppState;
 
 use super::Model;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum TaskStatus {
     Completed, 
     Ongoing,
@@ -32,7 +32,7 @@ impl TaskStatus {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 pub enum Recurrence {
     Dayly,
     Weekly,
@@ -66,7 +66,7 @@ impl Recurrence {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Task {
     pub uuid: Uuid,
     #[serde(rename(deserialize = "crmUuid", serialize = "crmUuid"))]
@@ -219,6 +219,7 @@ impl Task {
                             query.push_str("`status` = 'ongoing', `start` = ?, `deadline` = ?, `recurrence_count` = ? WHERE `uuid` = ? AND `crm_uuid` = ?");
                             match rec {
                                 Recurrence::Dayly => {
+                                    
                                     return match sqlx::query(&query)
                                         .bind(&task.start.unwrap().checked_add_days(Days::new(1)).unwrap())
                                         .bind(&task.deadline.unwrap().checked_add_days(Days::new(1)).unwrap())
@@ -232,6 +233,7 @@ impl Task {
                                         };
                                 },
                                 Recurrence::Weekly => {
+                                   
                                     return match sqlx::query(&query)
                                         .bind(&task.start.unwrap().checked_add_days(Days::new(7)).unwrap())
                                         .bind(&task.deadline.unwrap().checked_add_days(Days::new(7)).unwrap())
@@ -245,6 +247,7 @@ impl Task {
                                         };
                                 },
                                 Recurrence::Monthly => {
+                                    
                                     return match sqlx::query(&query)
                                         .bind(&task.start.unwrap().checked_add_months(Months::new(1)).unwrap())
                                         .bind(&task.deadline.unwrap().checked_add_months(Months::new(1)).unwrap())
@@ -258,6 +261,7 @@ impl Task {
                                         };
                                 },
                                 Recurrence::Yearly => {
+                                    
                                     return match sqlx::query(&query)
                                     .bind(&task.start.unwrap().checked_add_months(Months::new(12)).unwrap())
                                     .bind(&task.deadline.unwrap().checked_add_months(Months::new(12)).unwrap())
@@ -271,6 +275,7 @@ impl Task {
                                     };
                                 },
                                 Recurrence::EveryOtherWeek => {
+                                   
                                     return match sqlx::query(&query)
                                     .bind(&task.start.unwrap().checked_add_days(Days::new(14)).unwrap())
                                     .bind(&task.deadline.unwrap().checked_add_days(Days::new(14)).unwrap())
@@ -284,6 +289,7 @@ impl Task {
                                     };
                                 },
                                 Recurrence::EveryOtherMonth => {
+                                    
                                     return match sqlx::query(&query)
                                     .bind(&task.start.unwrap().checked_add_months(Months::new(2)).unwrap())
                                     .bind(&task.deadline.unwrap().checked_add_months(Months::new(2)).unwrap())

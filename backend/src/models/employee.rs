@@ -8,8 +8,7 @@ use crate::{routes::Limit, AppState};
 
 use super::{user::User, Model};
 
-#[derive(Serialize, Deserialize, Clone)]
-
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Employee {
     #[serde(rename(serialize = "crmUuid", deserialize = "crmUuid"))]
     pub crm_uuid: Uuid,
@@ -198,9 +197,42 @@ impl Employee {
                 Ok(_) => Ok(())
             }
     }
+    pub async fn update(&self, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+        let query = "UPDATE `crm`.`employees` SET first_name = ?, last_name = ?, date_of_birth = ?, email = ?, address = ?, zip_code = ?, city = ?, country = ?, ssn = ?, access_level = ?, contract_uuid = ?, phone_number = ?, role = ?, driving_license_class = ?, period_of_validity = ?, updated = ? WHERE uuid = ? AND crm_uuid = ?";
+        match sqlx::query(&query)
+            .bind(&self.first_name)
+            .bind(&self.last_name)
+            .bind(&self.date_of_birth)
+            .bind(&self.email)
+            .bind(&self.address)
+            .bind(&self.zip_code)
+            .bind(&self.city)
+            .bind(&self.country)
+            .bind(&self.ssn)
+            .bind(&self.access_level)
+            .bind(match &self.contract_uuid {None => None, Some(uuid) => Some(uuid.hyphenated().to_string())})
+            .bind(&self.phone_number)
+            .bind(&self.role)
+            .bind(&self.driving_license_class)
+            .bind(&self.period_of_validity)
+            .bind(Utc::now())
+            .bind(&self.uuid.hyphenated().to_string())
+            .bind(crm_uuid.hyphenated().to_string())
+            .execute(&data.pool)
+            .await {
+                Err(err) => Err(err),
+                Ok(_) => Ok(())
+            }
+    }
 
     /* async fn create_user_account(employee_uuid: &Uuid, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
         // get employee
+
+        // skapa konto om det behövs innan man lägger in i crm . employee
+        // lägg in i crm . user_employee
+        // lägg in i crm . employee WHERE uuid = ? ("user_uuid")
+
+
         let emp_res = Employee::get_by_uuid(employee_uuid, crm_uuid, data).await;
         match emp_res {
             Err(err) => Err(err),

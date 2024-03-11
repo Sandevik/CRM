@@ -35,3 +35,25 @@ impl Model for TimeReport {
         }
     }
 }
+
+impl TimeReport {
+
+    pub fn default(crm_uuid: Uuid, employee_uuid: Uuid) -> Self {
+        TimeReport { 
+            crm_uuid, 
+            uuid: Uuid::new_v4(), 
+            employee_uuid, 
+            date: None, 
+            start_time: None, 
+            end_time: None, 
+            breaks: None, 
+            note: None, 
+            work_tasks: None, 
+            added: Utc::now(), 
+            updated: Utc::now() 
+        }
+    }
+
+
+
+}

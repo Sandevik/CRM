@@ -40,7 +40,7 @@ export default function Task({task, refetchTasks, focusTask, showCustomer}: {sho
     <div className={`min-w-40 sm:w-full max-w-72 rounded-sm bg-background-light p-2 relative overflow-hidden h-11 task ${task.recurrence === null && !task.percentage ? "hover:h-32" :task.status === "Completed" ? "hover:h-24" : "hover:h-44"} transition-all flex flex-col items-center hover:items-start gap-2 `}>
       {task.deadline !== null && <LoadingBar completed={task.status === "Completed" || (task.recurrence !== null && Date.now() < new Date(task.start || "").getTime())} percentage={percentage} />}
       <div className='flex justify-between w-full items-center gap-6 capitalize'>
-        <div className="truncate font-semibold flex gap-2 items-center">{task.recurrence !== null && <RiRestartLine className="text-gray-400" />} <span>{task.title}</span></div>
+        <div className="truncate font-semibold flex gap-2 items-center">{task.recurrence !== null && <RiRestartLine className="text-gray-400 task-icon" />} <span>{task.title}</span></div>
         {task.status === "Completed" || (task.recurrence !== null && Date.now() < new Date(task.start || "").getTime()) ? <FaCircleCheck className="text-green-200"/> : task.deadline !== null && percentage !== 0 && (percentage >= 85 && <FaTriangleExclamation className={`${percentage === 100 ? "text-light-red" : "text-yellow-200"}`} />)}
       </div>
 

@@ -14,18 +14,20 @@ import Link from 'next/link';
 import { MdEmail, MdLocalPhone  } from "react-icons/md";
 import { FaPen } from 'react-icons/fa';
 import { BsChevronRight } from 'react-icons/bs';
+import Input from '@/components/Input';
+import text from '@/utils/text';
 
 
 export default function index() {
   const {crm} = useContext(CurrentCrmContext);
-  const [employee, setEmployee] = useState<Employee | null>(null);
+  const [employee, setEmployee] = useState<Employee>({} as Employee);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [focusTask, setFocusTask] = useState<Task | null>(null);
   const [addTask, setAddTask] = useState<boolean>(false);
   const params = useParams();
   const [edit, setEdit] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
-  const [viewMore, setViewMore] = useState<boolean>(true);
+  const [expand, setExpand] = useState<boolean>(false);
 
   useEffect(()=>{
     fetchEmployee();
@@ -43,13 +45,13 @@ export default function index() {
     if (crm?.crmUuid && params?.employeeUuid) {
       const res = await request<Employee>(`/employees?crmUuid=${crm.crmUuid}&employeeUuid=${params.employeeUuid}`, {}, "GET");
       if (res.code === 200) {
-        setEmployee(res.data || null)
+        setEmployee(res.data || {} as Employee)
       }
     }
   }
 
   const fetchTasks = async () => {
-    if (crm?.crmUuid && employee) {
+    if (crm?.crmUuid && employee && !edit) {
       let res = await request<Task[]>(`/tasks/by-employee?crmUuid=${crm?.crmUuid}&employeeUuid=${employee?.uuid}`, {}, "GET");
       if (res.code === 200 && res.data) {
         setTasks(res.data);
@@ -62,11 +64,18 @@ export default function index() {
     alert("todo")
   }
 
-  const handleEdit = () => {
+  const handleEdit = async () => {
     if (edit) {
-      //save changes
+      if (crm?.crmUuid) {
+        let res = await request("/employees/update", {...employee, crmUuid: crm?.crmUuid}, "POST"); 
+        if (res.code == 200) {
+          setEdit(!edit);
+        } else {
+          alert(res.message);
+        }
+      }
     } else {
-      setViewMore(true);
+      setExpand(true);
     }
     setEdit(!edit);
   }
@@ -86,8 +95,8 @@ export default function index() {
         </div>
         <div className=" p-2 px-6 min-h-20 flex justify-between items-center gap-2 border-r-2 pr-4 border-l-2 pl-4">
           <div className='flex flex-col gap-2 '>
-            {employee?.email ? <Link href={`mailto:${employee.email}`} className={`text-md truncate text-light-blue flex gap-2 items-center`}><MdEmail className="translate-y-[2px]"/>{employee.email}</Link> : <span className="truncate italic"><Text text={{eng:"No email was found", swe: "Ingen e-postadress hittades"}} /></span>}
-            {employee?.phoneNumber ? <Link href={`tel:${employee.phoneNumber}`} className={`text-md truncate text-light-blue flex gap-2 items-center`}><MdLocalPhone className="translate-y-[2px]" />{employee.phoneNumber}</Link> : <span className="truncate italic"><Text text={{eng:"No phone number was found", swe: "Inget telefonnummer hittades"}} /></span>}
+            {edit ? <Input className='bg-background-light w-full' placeholder={"john.doe@email.com"} value={employee?.email || ""} onChange={(e) => setEmployee({...employee, email: e.target.value})}/> : employee?.email ? <Link href={`mailto:${employee.email}`} className={`text-md truncate text-light-blue flex gap-2 items-center`}><MdEmail className="translate-y-[2px]"/>{employee.email}</Link> : <span className="truncate italic"><Text text={{eng:"No email was found", swe: "Ingen e-postadress hittades"}} /></span>}
+            {edit ? <Input className='bg-background-light w-full' value={employee?.phoneNumber || ""} onChange={(e) => setEmployee({...employee, phoneNumber: e.target.value})}/> : employee?.phoneNumber ? <Link href={`tel:${employee.phoneNumber}`} className={`text-md truncate text-light-blue flex gap-2 items-center`}><MdLocalPhone className="translate-y-[2px]" />{employee.phoneNumber}</Link> : <span className="truncate italic"><Text text={{eng:"No phone number was found", swe: "Inget telefonnummer hittades"}} /></span>}
           </div>
           <div className="flex flex-col gap-2  ">
             <span className='text-md text-right'><Text text={{eng: "User Account", swe: "Användarkonto"}} /></span>
@@ -100,15 +109,15 @@ export default function index() {
             <span className='flex gap-2 items-center'> {employee?.contract_uuid ? <Link href={`/dashboard/c/${crm?.crmUuid}/employees/${employee?.uuid}/contract`} className='flex gap-2 items-center text-lg'><span className="underline text-light-blue"><Text text={{eng: "Active", swe: "Aktivt"}} /></span> </Link> : <Button onClick={()=>alert("todo")}><Text text={{eng: "Write", swe: "Skriv"}} /></Button>} <ImProfile className={`text-2xl translate-y-[1px] ${employee?.contract_uuid ? "text-green-300" : "text-light-red"}`} /></span>
           </div>
           <div className='flex flex-col gap-2'>
-            <button onClick={() => handleEdit()} className="flex gap-2 items-center hover:text-light-blue transition-colors"><FaPen /><Text text={{eng:"Edit", swe:"Ändra"}} /></button>
+            <button onClick={() => handleEdit()} className="flex gap-2 items-center hover:text-light-blue transition-colors"><FaPen /><Text text={edit ? {eng: "Save", swe: "Spara"} : {eng:"Edit", swe:"Ändra"}} /></button>
           </div>
         </div>
         
       </div>
 
       <div>
-        <button onClick={() => setViewMore(!viewMore)} className="flex gap-2 items-center text-light-blue"><BsChevronRight className={viewMore ? "rotate-90" : "rotate-0" + " transition-transform"}/><Text text={viewMore ? {eng: "View Less", swe: "Visa Mindre"}:{eng: "View More", swe: "Visa Mer"}}/></button>
-        <div className={`${viewMore ? "h-20 pointer-events-auto opacity-100": "h-0 pointer-events-none opacity-0"} transition-all p-4 grid grid-cols-3`}>
+        <button onClick={() => setExpand(!expand)} className="flex gap-2 items-center text-light-blue"><BsChevronRight className={expand ? "rotate-90" : "rotate-0" + " transition-transform"}/><Text text={expand ? {eng: "View Less", swe: "Visa Mindre"}:{eng: "View More", swe: "Visa Mer"}}/></button>
+        <div className={`${expand ? "h-20 pointer-events-auto opacity-100": "h-0 pointer-events-none opacity-0"} transition-all p-4 grid grid-cols-3`}>
           
           <div>
             <div className="grid grid-cols-2">
@@ -146,8 +155,7 @@ export default function index() {
         </div>
       </div>
 
-      <div className="my-2">
-      </div>
+      
       <div className={`my-4 p-2 rounded-md`}>
         <div className="flex justify-between items-center w-full mb-1">
           <span className='font-semibold'>{tasks.length > 0 &&<Text text={{eng: "Tasks", swe: "Uppgifter"}} />}</span>

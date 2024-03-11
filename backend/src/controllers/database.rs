@@ -134,7 +134,7 @@ impl Database {
     fn default_time_reports_table() -> String {
         r#"
         `crm_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
-        `uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL PRIMARY KEY,
+        `uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL PRIMARY KEY UNIQUE,
         `employee_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
         `date` DATE NOT NULL,
         `start_time` TIME,
@@ -205,7 +205,7 @@ impl Database {
     }
     fn default_employee_crm_table() -> String {
         r#"
-        CREATE TABLE IF NOT EXISTS `crm`.`user_employee_crm` (
+        CREATE TABLE IF NOT EXISTS `crm`.`user_employee` (
             `uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL UNIQUE PRIMARY KEY,
             `user_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
             `crm_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,

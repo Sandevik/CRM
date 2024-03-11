@@ -81,6 +81,16 @@ html::-webkit-scrollbar-thumb {
   opacity: 0;
 }
 
+.task-icon {
+  transform: rotate(0deg);
+  color: rgb(156 163 175 / var(--tw-text-opacity));
+  transition: transform .5s ease-in-out;
+}
+
+.task:hover .task-icon {
+  transform: rotate(360deg);
+}
+
 .task:hover .task-content {
   transition: opacity .15s .05s ease-in-out;
   pointer-events: all;
