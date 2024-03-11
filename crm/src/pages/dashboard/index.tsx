@@ -8,7 +8,7 @@ interface FetchResult {
   crms: Crm[]
 }
 
-export default function index() {
+export default function Index() {
   const [data, setData] = useState<ResultData<FetchResult>>();
   const [popupActive, setPopupActive] = useState<boolean>(false);
 
