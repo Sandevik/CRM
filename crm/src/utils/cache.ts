@@ -5,7 +5,7 @@ export enum CacheType {
 type U = CacheType;
 type T = 
 U extends CacheType.Customer ? Customer :
-U extends CacheType.Crm ? Crm : never;
+U extends CacheType.Crm ? Crm : any;
 
 export function cache(item: T | T[], as: U): void {
     switch (as) {
