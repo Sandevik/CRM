@@ -2,7 +2,7 @@ import { CurrentCrmContext } from '@/context/CurrentCrmContext';
 import request from '@/utils/request';
 import React, { useContext, useEffect, useState } from 'react'
 import { FaPen } from 'react-icons/fa';
-import { Statistics } from '.';
+import { Statistics } from './Index';
 import Button from '@/components/Button';
 import TaskList from '../../../../../../components/TaskList';
 import Text from '@/components/Text';

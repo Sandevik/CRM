@@ -22,7 +22,7 @@ export default function index() {
     useEffect(()=>{
         (async function () {
             const response = await request<{count: number}>("/users/count", {}, "GET");
-            setUsersCount(response.count);
+            setUsersCount(response.data?.count || 0);
         })();
     },[])
 
@@ -48,7 +48,7 @@ export default function index() {
 
         <ul>
             <UserRowHeading />
-            {data?.map((user: User) => (<UserRow key={user.uuid} user={user}/>))}
+            {data?.data?.map((user: User) => (<UserRow key={user.uuid} user={user}/>))}
         </ul>
         
         
