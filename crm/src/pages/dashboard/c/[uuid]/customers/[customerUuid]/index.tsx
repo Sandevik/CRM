@@ -27,7 +27,7 @@ export interface Statistics {
 }
 
 
-export default function index() {
+export default function Index() {
   const params = useParams();
   const {crm} = useContext(CurrentCrmContext);
   const [customer, setCustomer] = useState<Customer | null>(null);
