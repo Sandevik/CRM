@@ -1,6 +1,5 @@
 import React from 'react'
 import Meeting from './Meeting'
-import Text from '@/components/Text'
 import EmptyPage from '@/components/EmptyPage'
 
 export default function Meetings({meetings, setEditMeeting, refetchMeetings}: {meetings: Meeting[], refetchMeetings: () => Promise<void>, setEditMeeting: React.Dispatch<React.SetStateAction<Meeting | null>>}) {
