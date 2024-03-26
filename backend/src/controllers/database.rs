@@ -5,7 +5,7 @@ impl Database {
 
     fn create_table_if_not_exists() -> String {
         r#"
-        CREATE SCHEMA `crm` IF NOT EXISTS COLLATE utf8_general_mysql500_ci
+        CREATE SCHEMA IF NOT EXISTS `crm` COLLATE utf8_general_mysql500_ci
         "#.to_string()
     }
 
