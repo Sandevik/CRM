@@ -3,6 +3,12 @@ pub struct Database ();
 
 impl Database {
 
+    fn create_table_if_not_exists() -> String {
+        r#"
+        CREATE SCHEMA `crm` IF NOT EXISTS COLLATE utf8_general_mysql500_ci
+        "#.to_string()
+    }
+
     fn default_customers_table() -> String {
         r#"
         `crm_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
@@ -317,6 +323,9 @@ impl Database {
         sqlx::query(&query).execute(pool).await
     }
     pub async fn setup_tables(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
+        if let Err(err) = sqlx::query(&Self::create_table_if_not_exists()).execute(pool).await {
+            return Err(err);
+        }
         if let Err(err) = Self::setup_users_table(pool).await {
             return Err(err);
         }
