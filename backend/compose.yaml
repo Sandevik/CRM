@@ -9,10 +9,11 @@ services:
     environment:
      # - DATABASE_URL=mysql://avnadmin:AVNS_QkPkFbpLkTB8cco87t7@crm-mysql-crm-9786.a.aivencloud.com:27107/defaultdb?ssl-mode=REQUIRED # Aiven db
       - DATABASE_URL=mysql://root:AVNS_QkPkFbpLkTB8cco87t7@db:3306 # Docker mysql db
-      - BACKEND_SERVER_ADDRESS=127.0.0.1
+      - BACKEND_SERVER_ADDRESS=0.0.0.0
       - BACKEND_SERVER_PORT=8081
       - BACKEND_JWT_SECRET=090b64b0153738a2f6baf742b1b7a16f
       - BACKEND_HASH_SECRET=5693afd53dcbb16709c3c76d193061e3
+      
     restart: always
     depends_on:
       db:
