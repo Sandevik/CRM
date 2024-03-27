@@ -42,8 +42,10 @@ services:
     ports: 
       - 80:80
       - 443:443
-    #depends_on:
-    #  - server
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - server
     #volumes:
     #  - ./nginx/conf/:/etc/nginx/conf.d/:ro
     #  - ./certbot/www/:/var/www/certbot/:ro
