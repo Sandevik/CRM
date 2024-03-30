@@ -61,4 +61,6 @@ services:
       - "/tmp/acme-challenge:/tmp/acme-challenge"
     environment:
       - TERM=xterm
+    depends_on:
+      - nginx
 
