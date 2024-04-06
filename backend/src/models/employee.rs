@@ -232,7 +232,6 @@ impl Employee {
 
         // Returns the password to a newly created account if it did not exist before, else, returns None
         pub async fn associate_account(employee_uuid: &Uuid, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<Option<String>,sqlx::Error> {
-
             match Employee::get_by_uuid(employee_uuid, crm_uuid, data).await {
                 Err(err) => Err(err),
                 Ok(emp_opt) => {
@@ -256,6 +255,10 @@ impl Employee {
                                                     if let Err(err) = res {
                                                         return Err(err);
                                                     } else {
+                                                        let _ = sqlx::query("UPDATE `crm`.`employees` SET `has_user_account` = TRUE WHERE `uuid` = ?")
+                                                        .bind(&employee.uuid.hyphenated().to_string())
+                                                        .execute(&data.pool)
+                                                        .await;
                                                         return Ok(Some(create_res.unwrap().0));
                                                     }
                                                 }
@@ -265,6 +268,10 @@ impl Employee {
                                                 if let Err(err) = res {
                                                     return Err(err);
                                                 } else {
+                                                    let _ = sqlx::query("UPDATE `crm`.`employees` SET `has_user_account` = TRUE WHERE `uuid` = ?")
+                                                    .bind(&employee.uuid.hyphenated().to_string())
+                                                    .execute(&data.pool)
+                                                    .await;
                                                     return Ok(None);
                                                 }
                                             }

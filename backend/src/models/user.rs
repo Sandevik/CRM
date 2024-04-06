@@ -220,7 +220,9 @@ impl User {
                 .execute(&data.pool)
                 .await {
                     Err(err) => Err(err),
-                    Ok(_) => Ok(())
+                    Ok(_) => {
+                        Ok(())
+                    }
                 }
 
             } else {
