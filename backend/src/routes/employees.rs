@@ -18,6 +18,7 @@ pub fn employees() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Res
         .service(get_all)
         .service(search)
         .service(update_employee)
+        .service(create_employee_account)
         ;
         
     scope
@@ -95,13 +96,13 @@ struct CreateEmployeeRequest {
     zip_code: Option<String>,
     city: Option<String>,
     #[serde(rename(serialize = "phoneNumber", deserialize = "phoneNumber"))]
-    phone_number: Option<String>,
+    phone_number: String,
     role: Option<String>,
     #[serde(rename(serialize = "drivingLicenseClass", deserialize = "drivingLicenseClass"))]
     driving_license_class: Option<String>,
     #[serde(rename(serialize = "periodOfValidity", deserialize = "periodOfValidity"))]
     period_of_validity: Option<String>,
-    email: Option<String>,
+    email: String,
     #[serde(rename(serialize = "contract_uuid", deserialize = "contract_uuid"))]
     contract_uuid: Option<String>,
     access_level: Option<String>,
@@ -153,13 +154,13 @@ struct UpdateEmployeeRequest {
     zip_code: Option<String>,
     city: Option<String>,
     #[serde(rename(serialize = "phoneNumber", deserialize = "phoneNumber"))]
-    phone_number: Option<String>,
+    phone_number: String,
     role: Option<String>,
     #[serde(rename(serialize = "drivingLicenseClass", deserialize = "drivingLicenseClass"))]
     driving_license_class: Option<String>,
     #[serde(rename(serialize = "periodOfValidity", deserialize = "periodOfValidity"))]
     period_of_validity: Option<String>,
-    email: Option<String>,
+    email: String,
     #[serde(rename(serialize = "contract_uuid", deserialize = "contract_uuid"))]
     contract_uuid: Option<String>,
     access_level: Option<String>,
@@ -192,16 +193,19 @@ async fn update_employee(data: web::Data<AppState>, body: web::Json<UpdateEmploy
     }
 }
 
-/* #[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize)]
 struct CreateEmployeeUserAccount {
+    #[serde(rename(deserialize = "crmUuid"))]
     crm_uuid: String,
+    #[serde(rename(deserialize = "employeeUuid"))]
     employee_uuid: String,
 }
 
+
 #[post("/create-user-account")]
 async fn create_employee_account(data: web::Data<AppState>, body: web::Json<CreateEmployeeUserAccount>) -> impl Responder {
-    match Employee::create_user_account(&Uuid::parse_str(&body.crm_uuid).unwrap_or_default(), &data).await {
+    match Employee::associate_account(&Uuid::parse_str(&body.employee_uuid).unwrap(), &Uuid::parse_str(&body.crm_uuid).unwrap(), &data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
-        Ok(a) => HttpResponse::Created().json(Response::<String>::created("Successfully created employee user account"))
+        Ok(new_pass_opt) => HttpResponse::Created().json(Response::<String>::ok(&format!("Successfully created employee user account"), new_pass_opt))
     }
-} */
+}

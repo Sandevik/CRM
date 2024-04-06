@@ -322,6 +322,7 @@ dependencies = [
  "futures-util",
  "jsonwebtoken",
  "pbkdf2",
+ "rand",
  "rand_core",
  "serde",
  "sha2",

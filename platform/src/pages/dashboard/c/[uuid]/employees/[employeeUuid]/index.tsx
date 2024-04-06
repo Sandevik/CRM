@@ -13,13 +13,15 @@ import { ImProfile } from "react-icons/im";
 import Link from 'next/link';
 import { MdEmail, MdLocalPhone  } from "react-icons/md";
 import { FaPen } from 'react-icons/fa';
-import { BsChevronRight } from 'react-icons/bs';
+import { BsChevronRight, BsQuestionCircle } from 'react-icons/bs';
 import Input from '@/components/Input';
 import text from '@/utils/text';
+import { AuthContext } from '@/context/AuthContext';
 
 
 export default function Index() {
   const {crm} = useContext(CurrentCrmContext);
+  const {data} = useContext(AuthContext);
   const [employee, setEmployee] = useState<Employee>({} as Employee);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [focusTask, setFocusTask] = useState<Task | null>(null);
@@ -41,6 +43,18 @@ export default function Index() {
 
   useEffect(()=>{fetchEmployee()},[])
 
+
+  const createEmployeeUser = async () => {
+    if (crm?.crmUuid && params?.employeeUuid) {
+      const res = await request<string>(`/employees/create-user-account`, {crmUuid: crm.crmUuid, employeeUuid: params?.employeeUuid}, "POST");
+      console.log(res);
+      if (res.code === 200) {
+        fetchEmployee();
+        alert(res.data != null ? text({swe: "Nytt konto skapades, kom ihåg följande lösenord - det kommer inte visas igen: ", eng: "A new account was created, remember the following password - it will not be shown again: "}, data) + res.data : text({swe: "Existerande konto länkades", eng: "Existing account successfully linked"}, data));
+      }
+    }
+  }
+
   const fetchEmployee = async () => {
     if (crm?.crmUuid && params?.employeeUuid) {
       const res = await request<Employee>(`/employees?crmUuid=${crm.crmUuid}&employeeUuid=${params.employeeUuid}`, {}, "GET");
@@ -60,9 +74,7 @@ export default function Index() {
     }
   }
 
-  const connectEmployeeToAccount = () => {
-    alert("todo")
-  }
+  
 
   const handleEdit = async () => {
     if (edit) {
@@ -90,7 +102,7 @@ export default function Index() {
           <FaUser className="w-[30%] text-6xl"/>
           <div className="flex flex-col flex-1">
             <span className="text-xl font-semibold truncate">{employee?.firstName} {employee?.lastName}</span>
-            <span className={`text-lg ${!employee?.role && "italic"} truncate`}>{employee?.role || <Text text={{eng:"No role was found", swe: "Ingen roll hittades"}} />}</span>
+            <span className={`text-lg ${!employee?.role && "ital text-mdic"} truncate`}>{employee?.role || <Text text={{eng:"No role was found", swe: "Ingen roll hittades"}} />}</span>
           </div>
         </div>
         <div className=" p-2 px-6 min-h-20 flex justify-between items-center gap-2 border-r-2 pr-4 border-l-2 pl-4">
@@ -99,8 +111,8 @@ export default function Index() {
             {edit ? <Input className='bg-background-light w-full' value={employee?.phoneNumber || ""} onChange={(e) => setEmployee({...employee, phoneNumber: e.target.value})}/> : employee?.phoneNumber ? <Link href={`tel:${employee.phoneNumber}`} className={`text-md truncate text-light-blue flex gap-2 items-center`}><MdLocalPhone className="translate-y-[2px]" />{employee.phoneNumber}</Link> : <span className="truncate italic"><Text text={{eng:"No phone number was found", swe: "Inget telefonnummer hittades"}} /></span>}
           </div>
           <div className="flex flex-col gap-2  ">
-            <span className='text-md text-right'><Text text={{eng: "User Account", swe: "Användarkonto"}} /></span>
-            <span className={`text-lg ${!employee?.userUuid && "italic"} w-full flex justify-between gap-2 items-center`}>{!employee?.userUuid ? <PiPlugsFill className="text-light-red text-2xl" /> : <PiPlugsConnectedFill className="text-green-300 text-2xl" />}{!employee?.userUuid ? <Button onClick={() => connectEmployeeToAccount()}><Text text={{eng: "Connect", swe: "Anslut"}} /></Button> : <Text text={{eng: "Connected", swe: "Ansluten"}} />}</span>
+            <span className='text-md text-right'><Text text={{eng: "User Account", swe: "Användarkonto"}} /> </span>
+            <span className={`text-lg ${!employee?.userUuid && "ital text-mdic"} w-full flex justify-between gap-2 items-center relative`}>{!employee?.hasUserAccount ? <PiPlugsFill className="text-light-red text-2xl" /> : <PiPlugsConnectedFill className="text-green-300 text-2xl" />}{!employee?.hasUserAccount ? <Button disabled={!employee.email || !employee.phoneNumber} disabledReason={text({swe: "Användaren måste ha ett telefonnummer samt en emailadress", eng: "The user needs a phone number as well as an emailaddress"}, data)} onClick={() => createEmployeeUser()}><Text text={{eng: "Connect", swe: "Anslut"}} /></Button> : <Text text={{eng: "Connected", swe: "Ansluten"}} />}</span>
           </div>
         </div>
         <div className=" p-2 min-h-20 flex justify-between items-center gap-2">
@@ -121,34 +133,66 @@ export default function Index() {
           
           <div>
             <div className="grid grid-cols-2">
-              <span className={`${!employee?.address && "italic"}`}>{employee?.address || <Text text={{eng:"No address was found", swe: "Ingen address hittades"}} />}</span>
-              <span className={`${!employee?.zipCode && "italic"}`}>{employee?.zipCode || <Text text={{eng:"No zip code was found", swe: "Ingen postkod hittades"}} />}</span>
+              <div className="flex flex-col">
+                <div className="text-sm"><Text text={{eng: "Address", swe: "Adress"}} /></div>
+                <span className={`${!employee?.address && "italic"} text-md`}>{employee?.address || <Text text={{eng:"No address was found", swe: "Ingen address hittades"}} />}</span>
+              </div>
+              <div className="flex flex-col mt-2">
+                <div className="text-sm"><Text text={{eng: "Zip Code", swe: "Postkod"}} /></div>
+                <span className={`${!employee?.zipCode && "italic"} text-md`}>{employee?.zipCode || <Text text={{eng:"No zip code was found", swe: "Ingen postkod hittades"}} />}</span>
+              </div>
             </div>
             <div className="grid grid-cols-2">
-              <span className={`${!employee?.country && "italic"}`}>{employee?.country || <Text text={{eng:"No country was found", swe: "Inget land hittades"}} />}</span>
-              <span className={`${!employee?.city && "italic"}`}>{employee?.city || <Text text={{eng:"No city was found", swe: "Ingen stad hittades"}} />}</span>
+              <div className="flex flex-col">
+                <div className="text-sm"><Text text={{eng: "Country", swe: "Land"}} /></div>
+                <span className={`${!employee?.country && "italic"} text-md`}>{employee?.country || <Text text={{eng:"No country was found", swe: "Inget land hittades"}} />}</span>
+              </div>
+              <div className="flex flex-col mt-2">
+                <div className="text-sm"><Text text={{eng: "City", swe: "Stad"}} /></div>
+                <span className={`${!employee?.city && "italic"} text-md`}>{employee?.city || <Text text={{eng:"No city was found", swe: "Ingen stad hittades"}} />}</span>
+              </div>
             </div>
           </div>
           
           <div className="grid grid-cols-2">
             <div className="flex flex-col ">
-              <span className={`${!employee?.ssn && "italic"}`}>{employee?.ssn || <Text text={{eng:"No social security number was found", swe: "Inget personnummer hittades"}} />}</span>
-              <span className={`${!employee?.dateOfBirth && "italic"}`}>{employee?.dateOfBirth || <Text text={{eng:"No date of birth was found", swe: "Inget födelsedagsdatum hittades"}} />}</span>
+              <div className="flex flex-col">
+                <div className="text-sm"><Text text={{eng: "Social Security Number", swe: "Personnummer"}} /></div>
+                <span className={`${!employee?.ssn && "italic"} text-md`}>{employee?.ssn || <Text text={{eng:"No social security number was found", swe: "Inget personnummer hittades"}} />}</span>
+              </div>
+              <div className="flex flex-col mt-2">
+                <div className="text-sm"><Text text={{eng: "Date Of Birth", swe: "Födelsedatum"}} /></div>
+                <span className={`${!employee?.dateOfBirth && "italic"} text-md`}>{employee?.dateOfBirth || <Text text={{eng:"No date of birth was found", swe: "Inget födelsedagsdatum hittades"}} />}</span>
+              </div>
             </div>
-            <span className={`${!employee?.accessLevel && "italic"}`}>{employee?.accessLevel || <Text text={{eng:"No access level was found", swe: "Ingen access nivå hittades"}} />}</span>
-
+            <div className="flex flex-col">
+              <div className="text-sm"><Text text={{eng: "Access Level", swe: "Behörighetsnivå"}} /></div>
+              <span className={`${!employee?.accessLevel && "italic"} text-md`}>{employee?.accessLevel || <Text text={{eng:"No access level was found", swe: "Ingen behörighetsnivå hittades"}} />}</span>
+            </div>
           </div>
           
           <div>
             <div className="grid grid-cols-2">
               <div className="flex flex-col">
-                <span className={`${!employee?.drivingLicenseClass && "italic"}`}>{employee?.drivingLicenseClass || <Text text={{eng:"No driving license class was found", swe: "Ingen körkortsklass hittades"}} />}</span>
-                <span className={`${!employee?.periodOfValidity && "italic"}`}>{employee?.periodOfValidity || <Text text={{eng:"No period of validity was found", swe: "Ingen valitetsperiod hittades"}} />}</span>
+                <div className="flex flex-col">
+                <div className="text-sm"><Text text={{eng: "Driving License Class", swe: "Körkortsklass"}} /></div>
+                  <span className={`${!employee?.drivingLicenseClass && "italic"} text-md`}>{employee?.drivingLicenseClass || <Text text={{eng:"No driving license class was found", swe: "Ingen körkortsklass hittades"}} />}</span>
+                </div>
+                <div className="flex flex-col mt-2">
+                  <div className="text-sm"><Text text={{eng: "Period Of Validity", swe: "Validitetsperiod"}} /></div>
+                  <span className={`${!employee?.periodOfValidity && "italic"} text-md`}>{employee?.periodOfValidity || <Text text={{eng:"No period of validity was found", swe: "Ingen valitetsperiod hittades"}} />}</span>
+                </div>
               </div>
             
               <div className="flex flex-col ">
-                <span>added {new Date(employee?.added || "").toLocaleDateString() + " " + new Date(employee?.added || "").toLocaleTimeString() || ""}</span>
-                <span>updated {new Date(employee?.updated || "").toLocaleDateString() + " " + new Date(employee?.updated || "").toLocaleTimeString() || ""}</span>
+              <div className="flex flex-col">
+                <div className="text-sm"><Text text={{eng: "Added", swe: "Tillagd"}} /></div>
+                <span>{new Date(employee?.added || "").toLocaleDateString() + " " + new Date(employee?.added || "").toLocaleTimeString() || ""}</span>
+              </div>
+              <div className="flex flex-col mt-2">
+                <div className="text-sm"><Text text={{eng: "Updated", swe: "Uppdaterad"}} /></div> 
+                <span>{new Date(employee?.updated || "").toLocaleDateString() + " " + new Date(employee?.updated || "").toLocaleTimeString() || ""}</span>
+              </div>
               </div>
             </div>
           </div>

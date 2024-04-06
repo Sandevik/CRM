@@ -51,16 +51,16 @@ services:
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - /tmp/acme-challenge:/tmp/acme-challenge
 
-  letsencrypt:
-    container_name: "certbot"
-    image: certbot/certbot
-    command: sh -c "certbot certonly --webroot -w /tmp/acme-challenge/ -d api.coneqt.xyz --text --agree-tos --email simon.sandevik@outlook.com --rsa-key-size 4096 --verbose --keep-until-expiring --preferred-challenges=http"
-    entrypoint: ""
-    volumes:
-      - "/etc/letsencrypt:/etc/letsencrypt"
-      - "/tmp/acme-challenge:/tmp/acme-challenge"
-    environment:
-      - TERM=xterm
-    depends_on:
-      - nginx
+  #letsencrypt:
+  #  container_name: "certbot"
+  #  image: certbot/certbot
+  #  command: sh -c "certbot certonly --webroot -w /tmp/acme-challenge/ -d api.coneqt.xyz --text --agree-tos --email simon.sandevik@outlook.com --rsa-key-size 4096 --verbose --keep-until-expiring --preferred-challenges=http"
+  #  entrypoint: ""
+  #  volumes:
+  #    - "/etc/letsencrypt:/etc/letsencrypt"
+  #    - "/tmp/acme-challenge:/tmp/acme-challenge"
+  #  environment:
+  #    - TERM=xterm
+  #  depends_on:
+  #    - nginx
 

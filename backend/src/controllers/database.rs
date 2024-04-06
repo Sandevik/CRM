@@ -3,7 +3,7 @@ pub struct Database ();
 
 impl Database {
 
-    fn create_table_if_not_exists() -> String {
+    fn create_schema_if_not_exists() -> String {
         r#"
         CREATE SCHEMA IF NOT EXISTS `crm` COLLATE utf8_general_mysql500_ci
         "#.to_string()
@@ -65,13 +65,14 @@ impl Database {
         `zip_code` TEXT,
         `city` TEXT,
         `country` TEXT,
-        `phone_number` TEXT,
+        `phone_number` VARCHAR(14) NOT NULL UNIQUE,
         `role` TEXT,
         `driving_license_class` TEXT,
         `period_of_validity` TEXT,
-        `email` TEXT,
+        `email` VARCHAR(40) NOT NULL UNIQUE,
         `contract_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci,
         `access_level` TEXT,
+        `has_user_account` BOOLEAN NOT NULL DEFAULT FALSE,
         `added` DATETIME,
         `updated` DATETIME
         "#.to_string()
@@ -209,12 +210,12 @@ impl Database {
         `updated` DATETIME
         "#.to_string()
     }
-    fn default_employee_crm_table() -> String {
+    fn default_employee_user_table() -> String {
         r#"
         CREATE TABLE IF NOT EXISTS `crm`.`user_employee` (
             `uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL UNIQUE PRIMARY KEY,
             `user_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
-            `crm_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
+            `crm_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL
           ) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;
         "#.to_string()
     }
@@ -236,13 +237,10 @@ impl Database {
                 `admin` BOOLEAN NOT NULL DEFAULT FALSE,
                 `joined` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 `last_sign_in` DATETIME DEFAULT CURRENT_TIMESTAMP,
-                `crm_count` TINYINT UNSIGNED NOT NULL,
                 `subscription_ends` DATETIME,
                 `legacy_user` BOOLEAN NOT NULL DEFAULT FALSE,
                 `current_jwt` TEXT,
                 `preferred_language` VARCHAR(3) NOT NULL DEFAULT 'eng',
-                `employee_of_uuid` VARCHAR(36) UNIQUE,
-                `employee_changed_pass` BOOL DEFAULT FALSE,
                 PRIMARY KEY (`uuid`(36)),
                 UNIQUE (`email`(50), `phone_number`(15))
               ) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;
@@ -322,8 +320,12 @@ impl Database {
         Self::default_work_task_table());
         sqlx::query(&query).execute(pool).await
     }
+    pub async fn setup_employee_user_table(pool: &Pool<MySql>) -> Result<MySqlQueryResult, sqlx::Error> {
+        sqlx::query(&Self::default_employee_user_table()).execute(pool).await
+    }
+
     pub async fn setup_tables(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
-        if let Err(err) = sqlx::query(&Self::create_table_if_not_exists()).execute(pool).await {
+        if let Err(err) = sqlx::query(&Self::create_schema_if_not_exists()).execute(pool).await {
             return Err(err);
         }
         if let Err(err) = Self::setup_users_table(pool).await {
@@ -368,9 +370,16 @@ impl Database {
         if let Err(err) = Self::setup_work_tasks_table(pool).await {
             return Err(err);
         }
+        if let Err(err) = Self::setup_employee_user_table(pool).await {
+            return Err(err);
+        }
         Ok(())
     }
 
+
+    pub async fn alter_all_tables_at_start(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
+        todo!();
+    }
    
 
 }

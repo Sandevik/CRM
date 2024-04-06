@@ -104,6 +104,14 @@ html::-webkit-scrollbar-thumb {
   border:none;
 }
 
+.ripple-btn + .ripple-btn-reason {
+  display: none;
+}
+
+.ripple-btn:hover + .ripple-btn-reason {
+  display: block;
+}
+
 .ripple{
   display: block;
   position: absolute;

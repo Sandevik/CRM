@@ -17,6 +17,7 @@ interface Employee {
     email: string | null,
     contract_uuid: string | null,
     accessLevel: string | null,
+    hasUserAccount: boolean,
     added: string,
     updated: string
 }

@@ -1,7 +1,8 @@
 
 export default async function <T extends Object, U extends Object = Object>(apiEndpoint: string, data: InputData<U>, method: HTTPMETHOD = "GET"): Promise<ResultData<T>> {
     try {
-        const result = await fetch("https://"+ process.env.NEXT_PUBLIC_BACKEND_SERVER_ADDRESS + apiEndpoint, {
+        let link = (process.env.NEXT_PUBLIC_DEV === "1" ? "http://localhost" : "https://"+ process.env.NEXT_PUBLIC_BACKEND_SERVER_ADDRESS || "localhost") + apiEndpoint
+        const result = await fetch(link, {
             method,
             body: method === "GET" || method === "DELETE" ? undefined : JSON.stringify(data),
             credentials: "include",

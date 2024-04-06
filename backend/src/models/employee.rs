@@ -1,10 +1,11 @@
-use actix_web::web;
+use actix_web::{error::ErrorBadRequest, web};
 use chrono::{DateTime, NaiveDate, Utc};
+use rand::Rng;
 use serde::{Serialize, Deserialize};
 use sqlx::{mysql::MySqlRow, Row};
 use uuid::Uuid;
 
-use crate::{routes::Limit, AppState};
+use crate::{controllers::hashing::Hashing, routes::Limit, AppState};
 
 use super::{user::User, Model};
 
@@ -28,17 +29,19 @@ pub struct Employee {
     pub city: Option<String>,
     pub country: Option<String>,
     #[serde(rename(serialize = "phoneNumber", deserialize = "phoneNumber"))]
-    pub phone_number: Option<String>,
+    pub phone_number: String,
     pub role: Option<String>,
     #[serde(rename(serialize = "drivingLicenseClass", deserialize = "drivingLicenseClass"))]
     pub driving_license_class: Option<String>,
     #[serde(rename(serialize = "periodOfValidity", deserialize = "periodOfValidity"))]
     pub period_of_validity: Option<String>,
-    pub email: Option<String>,
+    pub email: String,
     #[serde(rename(serialize = "contractUuid", deserialize = "contractUuid"))]
     pub contract_uuid: Option<Uuid>,
     #[serde(rename(serialize = "accessLevel", deserialize = "accessLevel"))]
     pub access_level: Option<String>,
+    #[serde(rename(serialize = "hasUserAccount", deserialize = "hasUserAccount"))]
+    pub has_user_account: bool,
     pub added: DateTime<Utc>,
     pub updated: DateTime<Utc>
 }
@@ -66,6 +69,7 @@ impl Model for Employee {
             period_of_validity: row.get("period_of_validity"),
             added: row.get("added"),
             updated: row.get("updated"),
+            has_user_account: row.get("has_user_account"),
         }
     }
 }
@@ -85,15 +89,16 @@ impl Employee {
             city: None,
             country: None,
             ssn: None,
-            email: None,
+            email: "".to_string(),
             access_level: None,
             contract_uuid: None,
-            phone_number: None,
+            phone_number: "".to_string(),
             role: None,
             driving_license_class: None,
             period_of_validity: None,
             added: Utc::now(),
             updated: Utc::now(),
+            has_user_account: false,
         }
     
     }
@@ -225,54 +230,80 @@ impl Employee {
             }
     }
 
-    /* async fn create_user_account(employee_uuid: &Uuid, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
-        // get employee
+        // Returns the password to a newly created account if it did not exist before, else, returns None
+        pub async fn associate_account(employee_uuid: &Uuid, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<Option<String>,sqlx::Error> {
 
-        // skapa konto om det behövs innan man lägger in i crm . employee
-        // lägg in i crm . user_employee
-        // lägg in i crm . employee WHERE uuid = ? ("user_uuid")
-
-
-        let emp_res = Employee::get_by_uuid(employee_uuid, crm_uuid, data).await;
-        match emp_res {
-            Err(err) => Err(err),
-            Ok(emp_opt) => {
-                match emp_opt {
-                    None => Err(sqlx::Error::RowNotFound),
-                    Some(employee) => {
-                        if employee.email.is_some() || employee.phone_number.is_some() {
-                            
-                            match User::get_by_email_or_phone_number_sep(employee.email, employee.phone_number, data).await {
-                                Err(_) => {todo!()},
-                                Ok(user_opt) => {
-                                    match user_opt {
-                                        None => {todo!()}
-                                        Some(user) => {
-
+            match Employee::get_by_uuid(employee_uuid, crm_uuid, data).await {
+                Err(err) => Err(err),
+                Ok(emp_opt) => {
+                    match emp_opt {
+                        None => Err(sqlx::Error::ColumnNotFound("Employee could not be found".to_string())),
+                        Some(employee) => {
+                            if (employee.email == "".to_string()) || (employee.phone_number == "".to_string()) {
+                                return Err(sqlx::Error::ColumnNotFound("You need to have an email AND a phone number to create a user account".to_string()));
+                            } else {
+                                match User::get_by_email_or_phone_number_sep(&employee.email.clone(), &employee.phone_number.clone(), data).await {
+                                    Err(err) => Err(err),
+                                    Ok(user_opt) => {
+                                        match user_opt {
+                                            None => {
+                                                if employee.email == "".to_string() || employee.phone_number == "".to_string() {return Err(sqlx::Error::ColumnNotFound("Could not find email or phone number".to_string()))};
+                                                let create_res = Self::create_user_account(&employee, data).await;
+                                                if let Err(err) = create_res {
+                                                    return Err(err);
+                                                } else {
+                                                    let res = create_res.as_ref().unwrap().1.add_employee_user(crm_uuid, data).await;
+                                                    if let Err(err) = res {
+                                                        return Err(err);
+                                                    } else {
+                                                        return Ok(Some(create_res.unwrap().0));
+                                                    }
+                                                }
+                                            },
+                                            Some(user) => { 
+                                                let res = user.add_employee_user(crm_uuid, data).await;
+                                                if let Err(err) = res {
+                                                    return Err(err);
+                                                } else {
+                                                    return Ok(None);
+                                                }
+                                            }
                                         }
                                     }
                                 }
                             }
-
-
                         }
-                        return Err(sqlx::Error::ColumnNotFound("Neither email or phone_number was found on employee".to_string()));
                     }
                 }
             }
         }
-        // get user account if exists else create a user struct 
-        
 
 
-        // if !user account, generate a random password that can be viewed until the password is changed
+        // Returns the password for the new user
+        async fn create_user_account(&self, data: &web::Data<AppState>) -> Result<(String, User), sqlx::Error> {
+            let mut pass = String::new();
+            let chars = vec!["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z","!",".","(",")","&","$","*"];
+            let mut rng = rand::thread_rng();
+            for _ in 1 ..= 20 {
+                let n: u8 = rng.gen_range(0..=58);
+                pass.push_str(chars[n as usize]);
+            }
+            let res = User::insert_user(&self.email.clone(), &self.first_name.clone().unwrap(), &self.last_name.clone().unwrap(), &self.phone_number.clone(), &pass, &"eng".to_string(), data).await;
+            if let Err(err) = res {
+                return Err(err);
+            } else {
+                let temp_user = User { email: self.email.clone(), phone_number: Some(self.phone_number.clone()), ..User::default()};
+                let _ = sqlx::query("UPDATE `crm`.`employees` SET `has_user_account` = TRUE WHERE `uuid` = ?")
+                .bind(&self.uuid.hyphenated().to_string())
+                .execute(&data.pool)
+                .await;
+                return Ok((pass, temp_user));
+            }
+        }
 
-        //add user_uuid and crm_uuid to crm . user_employee_crm so that a user can be an employee of multiple companies
+        async fn disassociate_account(&self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+            todo!();
+        }
 
-        // create a new user account if it did not exist
-
-
-        Ok(())
-    } */
-
+ 
 }

@@ -1,6 +1,10 @@
 import React, { useEffect, useRef } from 'react'
 
-export default function Button(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
+interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  disabledReason?: string,
+}
+
+export default function Button(props: Props) {
   const ref = useRef<any>();
 
   useEffect(()=>{
@@ -22,6 +26,9 @@ export default function Button(props: React.ButtonHTMLAttributes<HTMLButtonEleme
   })
 
   return (
-    <button ref={ref} {...props} className={`${/.*(absolute|relative).*/.test(props.className || "") ? props.className : "relative"} ripple-btn bg-light-blue text-black font-semibold flex justify-center items-center rounded-sm min-h-[33px] min-w-[100px] hover:bg-gray-100  transition-all`}>{props.children}</button>
+    <>
+      {props.disabled && props.disabledReason !== "" && <span className={"absolute top-8 left-[23%] text-sm ripple-btn-reason"}>{props.disabledReason}</span>}
+      <button ref={ref} {...props} className={`${/.*(absolute|relative).*/.test(props.className || "") ? props.className : "relative"} ripple-btn text-black font-semibold flex justify-center items-center rounded-sm min-h-[33px] min-w-[100px] ${!props.disabled ? "hover:bg-gray-100 bg-light-blue" : "bg-gray-400 cursor-not-allowed"} transition-all $`}>{props.children}</button>
+    </>
   )
 }
