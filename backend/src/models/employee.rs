@@ -39,7 +39,7 @@ pub struct Employee {
     #[serde(rename(serialize = "contractUuid", deserialize = "contractUuid"))]
     pub contract_uuid: Option<Uuid>,
     #[serde(rename(serialize = "accessLevel", deserialize = "accessLevel"))]
-    pub access_level: Option<String>,
+    pub access_level: Option<i32>,
     #[serde(rename(serialize = "hasUserAccount", deserialize = "hasUserAccount"))]
     pub has_user_account: bool,
     pub added: DateTime<Utc>,
@@ -61,7 +61,6 @@ impl Model for Employee {
             country: row.get("country"),
             ssn: row.get("ssn"),
             email: row.get("email"),
-            access_level: row.get("access_level"),
             contract_uuid: match row.get("contract_uuid") {None => None, Some(str) => match Uuid::parse_str(str) {Err(_) => None, Ok(u) => Some(u)}},
             phone_number: row.get("phone_number"),
             role: row.get("role"),
@@ -70,6 +69,7 @@ impl Model for Employee {
             added: row.get("added"),
             updated: row.get("updated"),
             has_user_account: row.get("has_user_account"),
+            access_level: None,
         }
     }
 }
@@ -115,7 +115,11 @@ impl Employee {
                 Ok(maybe_row) => {
                 match maybe_row {
                     None => Ok(None),
-                    Some(row) => Ok(Some(Self::from_row(&row)))
+                    Some(row) => {
+                        let mut emp = Self::from_row(&row);
+                        let _ = emp.get_access_level(data).await;
+                        Ok(Some(emp))
+                    }
                 }
             }
         }
@@ -312,5 +316,37 @@ impl Employee {
             todo!();
         }
 
+        async fn get_access_level(&mut self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+            match User::get_by_email_or_phone_number_sep(&self.email.clone(), &self.phone_number.clone(), data).await {
+                Err(err) => Err(err),
+                Ok(user_opt) => {
+                    match user_opt {
+                        None => {
+                            self.access_level = None;
+                            Ok(())
+                        },
+                        Some(u) => {
+                            match sqlx::query("SELECT access_level FROM `crm` . `user_employee` WHERE `crm_uuid` = ? AND `user_uuid` = ?")
+                            .bind(&self.crm_uuid.hyphenated().to_string())
+                            .bind(u.uuid.hyphenated().to_string())
+                            .fetch_optional(&data.pool)
+                            .await {
+                                Err(err) => Err(err),
+                                Ok(row_opt) => {
+                                    if let None = row_opt {
+                                        self.access_level = None;
+                                    }else{
+                                        self.access_level = Some(row_opt.unwrap().get("access_level"));
+                                    }
+                                    Ok(())
+                                } 
+                            }
+                        }
+                    }
+                }
+            }
+        } 
+
+       
  
 }

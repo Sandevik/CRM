@@ -71,7 +71,6 @@ impl Database {
         `period_of_validity` TEXT,
         `email` VARCHAR(40) NOT NULL UNIQUE,
         `contract_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci,
-        `access_level` TEXT,
         `has_user_account` BOOLEAN NOT NULL DEFAULT FALSE,
         `added` DATETIME,
         `updated` DATETIME
@@ -215,7 +214,8 @@ impl Database {
         CREATE TABLE IF NOT EXISTS `crm`.`user_employee` (
             `uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL UNIQUE PRIMARY KEY,
             `user_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
-            `crm_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL
+            `crm_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
+            `access_level` INT NOT NULL DEFAULT 0
           ) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;
         "#.to_string()
     }

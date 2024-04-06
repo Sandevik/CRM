@@ -105,7 +105,7 @@ struct CreateEmployeeRequest {
     email: String,
     #[serde(rename(serialize = "contract_uuid", deserialize = "contract_uuid"))]
     contract_uuid: Option<String>,
-    access_level: Option<String>,
+    access_level: Option<i32>,
 }
 
 
@@ -126,7 +126,7 @@ async fn create_employee(data: web::Data<AppState>, body: web::Json<CreateEmploy
         period_of_validity: body.period_of_validity.clone(),
         email: body.email.clone(),
         contract_uuid: match body.contract_uuid.clone() {None => None, Some(str) => Some(match Uuid::parse_str(&str) {Err(_) => Uuid::new_v4(), Ok(u) => u})},
-        access_level: body.access_level.clone(),
+        access_level: body.access_level,
         ..Employee::default()
     };
     match employee.insert(&Uuid::parse_str(&body.crm_uuid).unwrap_or_default(), &data).await {
@@ -163,7 +163,7 @@ struct UpdateEmployeeRequest {
     email: String,
     #[serde(rename(serialize = "contract_uuid", deserialize = "contract_uuid"))]
     contract_uuid: Option<String>,
-    access_level: Option<String>,
+    access_level: Option<i32>,
 }
 
 #[post("/update")]
@@ -184,7 +184,7 @@ async fn update_employee(data: web::Data<AppState>, body: web::Json<UpdateEmploy
         period_of_validity: body.period_of_validity.clone(),
         email: body.email.clone(),
         contract_uuid: match body.contract_uuid.clone() {None => None, Some(str) => Some(match Uuid::parse_str(&str) {Err(_) => Uuid::new_v4(), Ok(u) => u})},
-        access_level: body.access_level.clone(),
+        access_level: body.access_level,
         ..Employee::default()
     };
     match employee.update(&Uuid::parse_str(&body.crm_uuid).unwrap_or_default(), &data).await {

@@ -16,7 +16,7 @@ interface Employee {
     periodOfValidity: string | null,
     email: string | null,
     contract_uuid: string | null,
-    accessLevel: string | null,
+    accessLevel: number | null,
     hasUserAccount: boolean,
     added: string,
     updated: string
