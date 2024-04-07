@@ -84,6 +84,7 @@ impl Database {
         `address` TEXT,
         `zip_code` TEXT,
         `city` TEXT,
+        `company` TEXT,
         `phone_number` TEXT,
         `place_of_stationing` TEXT,
         `added` DATETIME,

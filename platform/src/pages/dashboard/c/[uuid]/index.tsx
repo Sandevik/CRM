@@ -6,16 +6,20 @@ import { CurrentCrmContext } from '@/context/CurrentCrmContext';
 import request from '@/utils/request';
 import Text from '@/components/Text';
 import Button from '@/components/Button';
+import { AuthContext } from '@/context/AuthContext';
 
 export default function Index() {
   const {crm} = useContext(CurrentCrmContext);
+  const {data} = useContext(AuthContext);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [focusedTask, setFocusedTask] = useState<Task | null>(null);
+  const [companyDetails, setCompanyDetails] = useState<Company | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   
   useEffect(()=>{
     (async () => {
       await fetchTasks();
+      await fetchCompanyDetails();
       setLoading(false);
     })();
   },[crm])
@@ -29,11 +33,31 @@ export default function Index() {
     }
   }
 
+  const fetchCompanyDetails = async () => {
+    if (crm?.crmUuid) {
+      let res = await request<Company>(`/companies?crmUuid=${crm?.crmUuid}`, {}, "GET");
+      if (res.code === 200 && res.data) {
+        setCompanyDetails(res.data);
+      }
+    }
+  }
+
   return (
     <div className='flex h-[calc(100dvh-3em)] max-w-[1800px] m-auto'>
       <main className="flex-grow">
         <Navbar />
         <div className="p-2">
+
+          <div>
+            Hej {data?.user?.firstName}!
+          </div>
+
+          <div>
+            {!companyDetails 
+            ? "Du verkar inte ha några företagsdetaljer än"
+            : "Du har företagsdetaljer"
+              }
+          </div>
         
           <div className="flex flex-col gap-2 my-2">
             <h3><Text text={{swe: "Uppgifter", eng: "Tasks"}} /></h3>

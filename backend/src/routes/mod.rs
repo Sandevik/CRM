@@ -113,6 +113,7 @@ pub fn routes(conf: &mut ServiceConfig) {
     conf.service(entries());
     conf.service(tasks());
     conf.service(employees());
+    conf.service(companies());
     conf.service(test());
 }
 

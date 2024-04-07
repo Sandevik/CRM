@@ -1,3 +1,5 @@
+use std::default;
+
 use actix_web::web;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -12,21 +14,21 @@ use super::Model;
 #[derive(Serialize, Deserialize)]
 pub struct Company {
     #[serde(rename(serialize = "crmUuid", deserialize = "crmUuid"))]
-    crm_uuid: Uuid,
-    name: Option<String>,
+    pub crm_uuid: Uuid,
+    pub name: Option<String>,
     #[serde(rename(serialize = "organizationNumber", deserialize = "organizationNumber"))]
-    organization_number: Option<String>,
-    address: Option<String>,
+    pub organization_number: Option<String>,
+    pub address: Option<String>,
     #[serde(rename(serialize = "zipCode", deserialize = "zipCode"))]
-    zip_code: Option<String>,
-    city: Option<String>,
-    country: Option<String>,
+    pub zip_code: Option<String>,
+    pub city: Option<String>,
+    pub country: Option<String>,
     #[serde(rename(serialize = "phoneNumber", deserialize = "phoneNumber"))]
-    phone_number: Option<String>,
+    pub phone_number: Option<String>,
     #[serde(rename(serialize = "placeOfStationing", deserialize = "placeOfStationing"))]
-    place_of_stationing: Option<String>,
-    added: Option<DateTime<Utc>>,
-    updated: Option<DateTime<Utc>>
+    pub place_of_stationing: Option<String>,
+    pub added: Option<DateTime<Utc>>,
+    pub updated: Option<DateTime<Utc>>
 }
 
 impl Model for Company {
@@ -83,10 +85,28 @@ impl Model for Company {
             Ok(_) => Ok(())
         }
     }
+
+
 }
 
 
 impl Company {
+
+    pub fn default() -> Self {
+        Self {
+            crm_uuid: Uuid::new_v4(),
+            name: None,
+            organization_number: None,
+            address: None,
+            zip_code: None,
+            city: None,
+            country: None,
+            phone_number: None,
+            place_of_stationing: None,
+            added: Some(Utc::now()),
+            updated: Some(Utc::now()),
+        }
+    }
 
     pub async fn get_by_crm_uuid(crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<Option<Self>, sqlx::Error> {
         match sqlx::query("SELECT * FROM `crm` . `companies` WHERE `crm_uuid` = ?")
@@ -108,7 +128,16 @@ impl Company {
 
     pub async fn delete(self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
         match sqlx::query("DELETE FROM `crm` . `companies` WHERE crm_uuid = ?")
-        .bind(self.crm_uuid)
+        .bind(self.crm_uuid.hyphenated().to_string())
+        .execute(&data.pool)
+        .await {
+            Err(err) => Err(err),
+            Ok(_) => Ok(())
+        }
+    }
+    pub async fn delete_by_crm_uuid(crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+        match sqlx::query("DELETE FROM `crm` . `companies` WHERE crm_uuid = ?")
+        .bind(crm_uuid.hyphenated().to_string())
         .execute(&data.pool)
         .await {
             Err(err) => Err(err),
