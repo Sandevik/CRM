@@ -41,6 +41,16 @@ impl Model for CRM {
             meetings: None,
         }
     }
+
+    async fn insert(&self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+        todo!();
+    }
+
+    async fn update(&self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+        todo!();
+    }
+
+
 }
 
 

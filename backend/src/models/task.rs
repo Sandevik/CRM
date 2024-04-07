@@ -105,6 +105,31 @@ impl Model for Task {
             percentage: match row.try_get("percentage") {Err(_) => None, Ok(p) => Some(p)},
         }
     }
+
+    async fn insert(&self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+        match sqlx::query("INSERT INTO `crm` . `tasks` (`uuid`, `crm_uuid`, `customer_uuid`, `employee_uuid`, `start`, `deadline`, `recurrence`, `recurrence_count`, `status`, `title`, `added`, `updated`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)")
+            .bind(&self.uuid.hyphenated().to_string())
+            .bind(&self.crm_uuid.hyphenated().to_string())
+            .bind(match &self.customer_uuid { None => None, Some(uuid) => Some(uuid.hyphenated().to_string())})
+            .bind(match &self.employee_uuid { None => None, Some(uuid) => Some(uuid.hyphenated().to_string())})
+            .bind(&self.start)
+            .bind(&self.deadline)
+            .bind(match &self.recurrence {None => None, Some(rec) => Some(rec.stringify())})
+            .bind(0)
+            .bind(match &self.status {None => None, Some(status) => Some(status.stringify())})
+            .bind(&self.title)
+            .bind(&self.added)
+            .bind(&self.updated)
+            .execute(&data.pool)
+            .await {
+                Err(err) => Err(err),
+                Ok(_) => Ok(())
+            }
+    }
+
+    async fn update(&self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+        todo!()
+    }
 }
 
 impl Task {
@@ -128,28 +153,6 @@ impl Task {
             updated: Utc::now(),
             percentage: None
         }
-    }
-
-
-    pub async fn insert(&self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
-        match sqlx::query("INSERT INTO `crm` . `tasks` (`uuid`, `crm_uuid`, `customer_uuid`, `employee_uuid`, `start`, `deadline`, `recurrence`, `recurrence_count`, `status`, `title`, `added`, `updated`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)")
-            .bind(&self.uuid.hyphenated().to_string())
-            .bind(&self.crm_uuid.hyphenated().to_string())
-            .bind(match &self.customer_uuid { None => None, Some(uuid) => Some(uuid.hyphenated().to_string())})
-            .bind(match &self.employee_uuid { None => None, Some(uuid) => Some(uuid.hyphenated().to_string())})
-            .bind(&self.start)
-            .bind(&self.deadline)
-            .bind(match &self.recurrence {None => None, Some(rec) => Some(rec.stringify())})
-            .bind(0)
-            .bind(match &self.status {None => None, Some(status) => Some(status.stringify())})
-            .bind(&self.title)
-            .bind(&self.added)
-            .bind(&self.updated)
-            .execute(&data.pool)
-            .await {
-                Err(err) => Err(err),
-                Ok(_) => Ok(())
-            }
     }
 
     pub async fn get_by_customer_uuid(customer_uuid: &Uuid, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<Vec<Self>, sqlx::Error> {

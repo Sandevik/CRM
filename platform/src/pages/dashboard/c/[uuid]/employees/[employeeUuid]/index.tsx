@@ -99,25 +99,25 @@ export default function Index() {
     <main className="px-2  max-w-[1800px] m-auto">
       <Navbar />
 
-      <div className="grid grid-cols-3 bg-background-dark my-2 gap-2">
-        <div className=" p-2 min-h-20 flex items-center">
+      <div className="flex flex-col items-center lg:grid lg:grid-cols-3 bg-background-dark my-2 gap-2">
+        <div className=" p-2 min-h-20 flex items-center min-w-[90vw] lg:min-w-full">
           <FaUser className="w-[30%] text-6xl"/>
           <div className="flex flex-col flex-1">
             <span className="text-xl font-semibold truncate">{employee?.firstName} {employee?.lastName}</span>
             <span className={`text-lg ${!employee?.role && "ital text-mdic"} truncate`}>{employee?.role || <Text text={{eng:"No role was found", swe: "Ingen roll hittades"}} />}</span>
           </div>
         </div>
-        <div className=" p-2 px-6 min-h-20 flex justify-between items-center gap-2 border-r-2 pr-4 border-l-2 pl-4">
-          <div className='flex flex-col gap-2 '>
+        <div className=" p-2 px-6 min-h-20 flex justify-between items-center gap-2 border-r-2 pr-4 border-l-2 pl-4 min-w-[90vw] lg:min-w-full">
+          <div className='flex flex-col gap-2'>
             {edit ? <Input className='bg-background-light w-full' placeholder={"john.doe@email.com"} value={employee?.email || ""} onChange={(e) => setEmployee({...employee, email: e.target.value})}/> : employee?.email ? <Link href={`mailto:${employee.email}`} className={`text-md truncate text-light-blue flex gap-2 items-center`}><MdEmail className="translate-y-[2px]"/>{employee.email}</Link> : <span className="truncate italic"><Text text={{eng:"No email was found", swe: "Ingen e-postadress hittades"}} /></span>}
             {edit ? <Input className='bg-background-light w-full' value={employee?.phoneNumber || ""} onChange={(e) => setEmployee({...employee, phoneNumber: e.target.value})}/> : employee?.phoneNumber ? <Link href={`tel:${employee.phoneNumber}`} className={`text-md truncate text-light-blue flex gap-2 items-center`}><MdLocalPhone className="translate-y-[2px]" />{employee.phoneNumber}</Link> : <span className="truncate italic"><Text text={{eng:"No phone number was found", swe: "Inget telefonnummer hittades"}} /></span>}
           </div>
           <div className="flex flex-col gap-2  ">
             <span className='text-md text-right'><Text text={{eng: "User Account", swe: "Användarkonto"}} /> </span>
-            <span className={`text-lg ${!employee?.userUuid && "ital text-mdic"} w-full flex justify-between gap-2 items-center relative`}>{!employee?.hasUserAccount ? <PiPlugsFill className="text-light-red text-2xl" /> : <PiPlugsConnectedFill className="text-green-300 text-2xl" />}{!employee?.hasUserAccount ? <Button disabled={!employee.email || !employee.phoneNumber} disabledReason={text({swe: "Användaren måste ha ett telefonnummer samt en emailadress", eng: "The user needs a phone number as well as an emailaddress"}, data)} onClick={() => createEmployeeUser()}><Text text={{eng: "Connect", swe: "Anslut"}} /></Button> : <Text text={{eng: "Connected", swe: "Ansluten"}} />}</span>
+            <span className={`text-lg ${!employee?.userUuid && "ital text-mdic"} w-full flex justify-between gap-2 items-center relative`}>{!employee?.hasUserAccount ? <PiPlugsFill className="text-light-red text-2xl" /> : <PiPlugsConnectedFill className="text-green-300 text-2xl" />}{!employee?.hasUserAccount ? <Button disabled={!employee.email || !employee.phoneNumber} disabledReason={text({swe: "Användaren måste ha ett telefonnummer samt en emailadress", eng: "The user needs a phone number as well as an emailaddress"}, data)} onClick={() => createEmployeeUser()}><Text text={{eng: "Connect", swe: "Anslut"}} /></Button> : <Text text={{eng: "Connected", swe: "Anslutet"}} />}</span>
           </div>
         </div>
-        <div className=" p-2 min-h-20 flex justify-between items-center gap-2">
+        <div className=" p-2 min-h-20 flex justify-between items-center gap-2 min-w-[90vw] lg:min-w-full">
           <div className="flex flex-col gap-2">
             <span><Text text={{eng: "Contract", swe: "Kontrakt"}} /></span>
             <span className='flex gap-2 items-center'> {employee?.contract_uuid ? <Link href={`/dashboard/c/${crm?.crmUuid}/employees/${employee?.uuid}/contract`} className='flex gap-2 items-center text-lg'><span className="underline text-light-blue"><Text text={{eng: "Active", swe: "Aktivt"}} /></span> </Link> : <Button onClick={()=>alert("todo")}><Text text={{eng: "Write", swe: "Skriv"}} /></Button>} <ImProfile className={`text-2xl translate-y-[1px] ${employee?.contract_uuid ? "text-green-300" : "text-light-red"}`} /></span>
@@ -169,7 +169,7 @@ export default function Index() {
             </div>
             <div className="flex flex-col">
               <div className="text-sm"><Text text={{eng: "Access Level", swe: "Behörighetsnivå"}} /></div>
-              <span className={`${!employee?.accessLevel && "italic"} text-md`}>{employee?.accessLevel || <Text text={{eng:"No access level was found", swe: "Ingen behörighetsnivå hittades"}} />}</span>
+              <span className={`${employee?.accessLevel == null && "italic"} text-md`}>{employee?.accessLevel !== null ? employee.accessLevel : <Text text={{eng:"No access level was found", swe: "Ingen behörighetsnivå hittades"}} />}</span>
             </div>
           </div>
           

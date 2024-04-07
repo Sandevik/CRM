@@ -9,6 +9,7 @@ import { FaCircleChevronDown } from "react-icons/fa6";
 
 export default function NewEmployeeForm({active, setCreateEmployeeActive, onSuccessfulSubmit}: {active: boolean, onSuccessfulSubmit: () => void, setCreateEmployeeActive: React.Dispatch<React.SetStateAction<boolean>>}) {
     const {crm} = useContext(CurrentCrmContext);
+    const [error, setError] = useState<string | null>(null);
     const [employee, setEmployee] = useState<Omit<Employee, "added" | "updated" | "uuid">>({
         crmUuid: crm?.crmUuid || "",
         userUuid: null,
@@ -35,10 +36,15 @@ export default function NewEmployeeForm({active, setCreateEmployeeActive, onSucc
 
     const submit = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();
+        if (employee.email === null || employee.email === "" || employee.phoneNumber === null || employee.phoneNumber === "") {
+            setError("Email or phone number not found")
+            return;
+        }
         if (crm?.crmUuid) {
             const res = await request("/employees/create", {...employee, crmUuid: crm?.crmUuid}, "POST");
             if (res.code === 201) {
                 onSuccessfulSubmit();
+                setError(null);
                 setEmployee({
                     crmUuid: crm.crmUuid,
                     userUuid: null,
@@ -83,9 +89,28 @@ export default function NewEmployeeForm({active, setCreateEmployeeActive, onSucc
         </div>
         
         <div className=" flex flex-col gap-2">
-            <label htmlFor="email">Email</label>
-            <Input className="bg-light-blue font-semibold" name="email" value={employee.email || ""} onChange={(e) => setEmployee({...employee, email: e.target.value})}/>
+            <label htmlFor="ssn"><Text text={{eng: "Social Security Number", swe: "Personnummer"}} /></label>
+            <Input className="bg-light-blue font-semibold" name="ssn" value={employee.ssn || ""} onChange={(e) => setEmployee({...employee, ssn: e.target.value})}/>
         </div>
+    
+        <div className='border-b-2'></div>
+
+        <div className=" flex flex-col gap-2">
+            <div className={`flex justify-between ${error && (employee.email === "" || employee.email === null) ? "text-red-400" : ""}`}>
+                <label htmlFor="email">Email *</label>
+                {error && (employee.email === "" || employee.email === null) && <Text text={{swe: "Detta fält är nödvändigt!", eng: "This field is required!"}} />}
+            </div>
+            <Input type='email' className={`bg-light-blue font-semibold ${ error && (employee.email === "" || employee.email === null) ? "ring-2 ring-red-400" : ""}`} name="email" value={employee.email || ""} onChange={(e) => setEmployee({...employee, email: e.target.value})}/>
+        </div>
+        
+        <div className=" flex flex-col gap-2">
+            <div className={`flex justify-between ${error && (employee.phoneNumber === "" || employee.phoneNumber === null) ? "text-red-400" : ""}`}>
+                <label htmlFor="phone number"><Text text={{eng: "Phone number *", swe: "Telefonnummer *"}} /></label>
+                {error && (employee.phoneNumber === "" || employee.phoneNumber === null) && <Text text={{swe: "Detta fält är nödvändigt!", eng: "This field is required!"}} />}
+            </div>
+            <Input required type='tel' className={`bg-light-blue font-semibold ${ error && (employee.phoneNumber === "" || employee.phoneNumber === null) ? "ring-2 ring-red-400" : ""}`} name="phone number" value={employee.phoneNumber || ""} onChange={(e) => setEmployee({...employee, phoneNumber: e.target.value})}/>
+        </div>
+
 
         <div className='border-b-2'></div>
 
@@ -113,21 +138,6 @@ export default function NewEmployeeForm({active, setCreateEmployeeActive, onSucc
 
         <div className='border-b-2'></div>
         
-        <div className=" flex flex-col gap-2">
-            <label htmlFor="company"><Text text={{eng: "User Uuid", swe: "Användar Uuid"}} /></label>
-            <Input className="bg-light-blue font-semibold" name="company" value={employee.userUuid || ""} onChange={(e) => setEmployee({...employee, userUuid: e.target.value})}/>
-        </div>
-        
-        <div className=" flex flex-col gap-2">
-            <label htmlFor="phone number"><Text text={{eng: "Phone number", swe: "Telefonnummer"}} /></label>
-            <Input className="bg-light-blue font-semibold" name="phone number" value={employee.phoneNumber || ""} onChange={(e) => setEmployee({...employee, phoneNumber: e.target.value})}/>
-        </div>
-
-        <div className=" flex flex-col gap-2">
-            <label htmlFor="ssn"><Text text={{eng: "Social Security Number", swe: "Personnummer"}} /></label>
-            <Input className="bg-light-blue font-semibold" name="ssn" value={employee.ssn || ""} onChange={(e) => setEmployee({...employee, ssn: e.target.value})}/>
-        </div>
-
         <div className=" flex flex-col gap-2">
             <label htmlFor="role"><Text text={{eng: "Role", swe: "Roll"}} /></label>
             <Input className="bg-light-blue font-semibold" name="role" value={employee.role || ""} onChange={(e) => setEmployee({...employee, role: e.target.value})}/>

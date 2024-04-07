@@ -52,6 +52,15 @@ impl Model for User {
             preferred_language: row.get("preferred_language"),
         }
     }
+
+    async fn insert(&self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+        todo!();
+    }
+
+    async fn update(&self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+        todo!();
+    }
+
 }
 
 impl User {

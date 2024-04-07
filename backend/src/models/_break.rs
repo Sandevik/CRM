@@ -22,4 +22,12 @@ impl Model for Break {
             updated: row.get("updated"),
         }
     }
+
+    async fn insert(&self, data: &actix_web::web::Data<crate::AppState>) -> Result<(), sqlx::Error> {
+        todo!()
+    }
+
+    async fn update(&self, data: &actix_web::web::Data<crate::AppState>) -> Result<(), sqlx::Error> {
+        todo!();
+    }
 }

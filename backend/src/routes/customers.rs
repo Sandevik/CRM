@@ -3,7 +3,7 @@ use actix_web_httpauth::middleware::HttpAuthentication;
 use chrono::{NaiveDate};
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
-use crate::{middleware::owns_or_admin_middleware::RequiresUuid, routes::Response};
+use crate::{models::Model ,middleware::owns_or_admin_middleware::RequiresUuid, routes::Response};
 use crate::{middleware::owns_or_admin_middleware::validator, AppState, models::customer::Customer};
 
 use super::Limit;
@@ -106,7 +106,7 @@ struct CreateCustomerRequest {
 #[post("/create")]
 async fn create_customer(data: web::Data<AppState>, body: web::Json<CreateCustomerRequest>) -> impl Responder {
     let customer: Customer = Customer::new(&Uuid::parse_str(&body.crm_uuid).unwrap_or_default(), body.first_name.clone(), body.last_name.clone(), body.date_of_birth.clone(), body.email.clone(), body.address.clone(), body.zip_code.clone(), body.city.clone(), body.country.clone(), body.company.clone(), body.phone_number.clone(), body.news_letter.clone());
-    match customer.insert(&Uuid::parse_str(&body.crm_uuid).unwrap_or_default(), &data).await {
+    match customer.insert(&data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
         Ok(_) => HttpResponse::Created().json(Response::<String>::created("Successfully created customer"))
     }

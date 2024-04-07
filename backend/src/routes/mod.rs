@@ -6,6 +6,7 @@ mod meetings;
 mod entries;
 mod tasks;
 mod employees;
+mod companies;
 mod test;
 
 use actix_web::web::ServiceConfig;
@@ -20,6 +21,7 @@ use entries::entries;
 use tasks::tasks;
 use test::test;
 use employees::employees;
+use companies::companies;
 use self::{customers::customers, crm::{create_crm, all_crms_by_user}};
 
 

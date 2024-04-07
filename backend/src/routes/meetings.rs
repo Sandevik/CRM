@@ -4,7 +4,7 @@ use chrono::{Datelike, NaiveDateTime, TimeZone, Utc};
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 
-use crate::{middleware::owns_or_admin_middleware::{validator, RequiresUuid}, AppState, models::meeting::Meeting};
+use crate::{middleware::owns_or_admin_middleware::{validator, RequiresUuid}, AppState, models::{Model, meeting::Meeting}};
 
 use super::{MeetingsOption, Response, Limit};
 
@@ -98,7 +98,7 @@ struct CreateMeetingRequest {
 pub async fn create_meeting(data: web::Data<AppState>, body: web::Json<CreateMeetingRequest>) -> impl Responder {
     let from = Utc.from_local_datetime(&NaiveDateTime::from_timestamp_millis(body.from).expect("Could not convert milliseconds to date")).unwrap();
     let to = Utc.from_local_datetime(&NaiveDateTime::from_timestamp_millis(body.to).expect("Could not convert milliseconds to date")).unwrap();
-    match Meeting::new(from, to, &Uuid::parse_str(&body.customer_uuid.as_str()).unwrap_or_default(), &Uuid::parse_str(&body.crm_uuid).unwrap_or_default(),).insert(&data, &Uuid::parse_str(body.crm_uuid.as_str()).unwrap_or_default()).await {
+    match Meeting::new(from, to, &Uuid::parse_str(&body.customer_uuid.as_str()).unwrap_or_default(), &Uuid::parse_str(&body.crm_uuid).unwrap_or_default(),).insert(&data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
         Ok(_) => HttpResponse::Created().json(Response::<String>::created("Successfully created meeting"))
     }
@@ -174,7 +174,7 @@ async fn update_meeting(data: web::Data<AppState>, body: web::Json<UpdateMeeting
         entry_id: None
     };
 
-    match meeting.update(&data, &Uuid::parse_str(&query.crm_uuid).unwrap_or_default()).await {
+    match meeting.update(&data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
         Ok(_) => HttpResponse::Ok().json(Response::<String>::ok("Successfully updated meeting", None))
     }

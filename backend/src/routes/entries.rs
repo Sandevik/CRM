@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use crate::routes::Response;
 
-use crate::{middleware::owns_or_admin_middleware::validator, models::entry::Entry, AppState};
+use crate::{middleware::owns_or_admin_middleware::validator, models::{Model, entry::Entry}, AppState};
 
 
 pub fn entries() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Response = ServiceResponse<EitherBody<BoxBody>>, Error = Error, InitError = ()>> {
@@ -37,7 +37,7 @@ struct CreateEntryRequest {
 #[post("/create")]
 async fn create_entry(data: web::Data<AppState>, body: web::Json<CreateEntryRequest>) -> impl Responder {
     match Entry::new(&body.content, Uuid::parse_str(&body.crm_uuid).unwrap_or_default(), Uuid::parse_str(&body.customer_uuid).unwrap_or_default(), match &body.added_at_meeting { Some(str_uuid) => Some(Uuid::parse_str(&str_uuid).unwrap_or_default()), None => None})
-        .insert(Uuid::parse_str(&body.crm_uuid).unwrap_or_default(), &data).await {
+        .insert(&data).await {
             Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
             Ok(_) => HttpResponse::Created().json(Response::<String>::created("Successfully created entry"))
     }
@@ -63,7 +63,7 @@ struct UpdateQuery {
 async fn edit_entry(data: web::Data<AppState>, body: web::Json<UpdateRequestBody>, query: web::Query<UpdateQuery>) -> impl Responder {
     let mut entry: Entry = Entry::new(&body.content, Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), Uuid::parse_str(&query.customer_uuid).unwrap_or_default(), match &body.added_at_meeting { Some(str_uuid) => Some(Uuid::parse_str(&str_uuid).unwrap_or_default()), None => None});
     entry.id = query.id.clone();
-    match entry.update(Uuid::parse_str(&query.crm_uuid).unwrap_or_default(), &data).await {
+    match entry.update(&data).await {
             Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
             Ok(_) => HttpResponse::Ok().json(Response::<String>::ok("Successfully updated entry", None))
         }

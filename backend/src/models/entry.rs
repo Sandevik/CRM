@@ -35,6 +35,37 @@ impl Model for Entry {
             updated: row.get("updated"),
         }
     }
+
+    async fn insert(&self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+        let query = "INSERT INTO `crm`.`entries` (`crm_uuid`, `customer_uuid`, `added`, `added_at_meeting`, `updated`, `content`) VALUES (?,?,?,?,?,?)";
+        match sqlx::query(&query)
+            .bind(&self.crm_uuid.hyphenated().to_string())
+            .bind(&self.customer_uuid.hyphenated().to_string())
+            .bind(&self.added)
+            .bind(&self.added_at_meeting)
+            .bind(&self.updated)
+            .bind(&self.content)
+            .execute(&data.pool)
+            .await {
+                Err(err) => Err(err),
+                Ok(_) => Ok(())
+            } 
+    }
+
+    async fn update(&self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+        match sqlx::query("UPDATE `crm`.`entries` SET `content` = ?, `added_at_meeting` = ?, `updated` = ? WHERE `customer_uuid` = ? AND `id` = ? AND `crm_uuid` = ? ")
+            .bind(&self.content)
+            .bind(&self.added_at_meeting)
+            .bind(Utc::now())
+            .bind(&self.customer_uuid.hyphenated().to_string())
+            .bind(&self.id )
+            .bind(&self.crm_uuid.hyphenated().to_string())
+            .execute(&data.pool)
+            .await {
+                Err(err) => Err(err),
+                Ok(_) => Ok(())
+            }
+    }
 }
 
 impl Entry {
@@ -50,36 +81,9 @@ impl Entry {
         }
     }
 
-    pub async fn insert(&self, crm_uuid: Uuid, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
-        let query = "INSERT INTO `crm`.`entries` (`crm_uuid`, `customer_uuid`, `added`, `added_at_meeting`, `updated`, `content`) VALUES (?,?,?,?,?,?)";
-        match sqlx::query(&query)
-            .bind(crm_uuid.hyphenated().to_string())
-            .bind(&self.customer_uuid.hyphenated().to_string())
-            .bind(&self.added)
-            .bind(&self.added_at_meeting)
-            .bind(&self.updated)
-            .bind(&self.content)
-            .execute(&data.pool)
-            .await {
-                Err(err) => Err(err),
-                Ok(_) => Ok(())
-            } 
-    }
+    
 
-    pub async fn update(&self, crm_uuid: Uuid, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
-        match sqlx::query("UPDATE `crm`.`entries` SET `content` = ?, `added_at_meeting` = ?, `updated` = ? WHERE `customer_uuid` = ? AND `id` = ? AND `crm_uuid` = ? ")
-            .bind(&self.content)
-            .bind(&self.added_at_meeting)
-            .bind(Utc::now())
-            .bind(&self.customer_uuid.hyphenated().to_string())
-            .bind(&self.id )
-            .bind(crm_uuid.hyphenated().to_string())
-            .execute(&data.pool)
-            .await {
-                Err(err) => Err(err),
-                Ok(_) => Ok(())
-            }
-    }
+    
 
     pub async fn get_all_by_customer_uuid(crm_uuid: &Uuid, customer_uuid: &Uuid, data: &web::Data<AppState>) -> Result<Vec<Self>, sqlx::Error> {
         match sqlx::query("SELECT * FROM `crm`.`entries` WHERE `customer_uuid` = ? AND `crm_uuid` = ? ORDER BY `added` DESC", )

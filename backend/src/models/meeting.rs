@@ -35,6 +35,41 @@ impl Model for Meeting {
             entry_id: row.get("entry_id"),
         }
     }
+
+    async fn insert(&self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+        let query = "INSERT INTO `crm`.`meetings` (`crm_uuid`, `uuid`, `customer_uuid`, `from`, `to`, `added`, `updated`, `entry_id`) VALUES (?,?,?,?,?,?,?,?)";
+        match sqlx::query(&query)
+            .bind(&self.crm_uuid.hyphenated().to_string())
+            .bind(&self.uuid.hyphenated().to_string())
+            .bind(&self.customer_uuid.hyphenated().to_string())
+            .bind(&self.from)
+            .bind(&self.to)
+            .bind(&self.added)
+            .bind(&self.updated)
+            .bind(&self.entry_id)
+            .execute(&data.pool)
+            .await {
+                Err(err) => Err(err),
+                Ok(_) => Ok(())
+            }
+    }
+
+    async fn update(&self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+        let query = "UPDATE `crm`.`meetings` SET `customer_uuid` = ?, `from` = ?, `to` = ?, `updated` = ? WHERE `uuid` = ? AND `crm_uuid` = ?";
+        match sqlx::query(&query)
+        .bind(&self.customer_uuid.hyphenated().to_string())
+        .bind(&self.from)
+        .bind(&self.to)
+        .bind(&self.updated)
+        .bind(&self.uuid.hyphenated().to_string())
+        .bind(&self.crm_uuid.hyphenated().to_string())
+            .execute(&data.pool)
+            .await {
+                Err(err) => Err(err),
+                Ok(_) => Ok(())
+            }
+    }
+
 }
 
 impl Meeting {
@@ -95,23 +130,7 @@ impl Meeting {
         Ok(meetings)
     }
 
-    pub async fn insert(&self, data: &web::Data<AppState>, crm_uuid: &Uuid) -> Result<(), sqlx::Error> {
-        let query = "INSERT INTO `crm`.`meetings` (`crm_uuid`, `uuid`, `customer_uuid`, `from`, `to`, `added`, `updated`, `entry_id`) VALUES (?,?,?,?,?,?,?,?)";
-        match sqlx::query(&query)
-            .bind(crm_uuid.hyphenated().to_string())
-            .bind(&self.uuid.hyphenated().to_string())
-            .bind(&self.customer_uuid.hyphenated().to_string())
-            .bind(&self.from)
-            .bind(&self.to)
-            .bind(&self.added)
-            .bind(&self.updated)
-            .bind(&self.entry_id)
-            .execute(&data.pool)
-            .await {
-                Err(err) => Err(err),
-                Ok(_) => Ok(())
-            }
-    }
+    
 
     pub async fn get_by_uuid(uuid: &Uuid, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<Option<Meeting>, sqlx::Error> {
         let query = "SELECT * FROM `crm`.`meetings` WHERE `uuid` = ? AND `crm_uuid` = ?";
@@ -193,21 +212,7 @@ impl Meeting {
             }
     }
 
-    pub async fn update(&self, data: &web::Data<AppState>, crm_uuid: &Uuid) -> Result<(), sqlx::Error> {
-        let query = "UPDATE `crm`.`meetings` SET `customer_uuid` = ?, `from` = ?, `to` = ?, `updated` = ? WHERE `uuid` = ? AND `crm_uuid` = ?";
-        match sqlx::query(&query)
-        .bind(&self.customer_uuid.hyphenated().to_string())
-        .bind(&self.from)
-        .bind(&self.to)
-        .bind(&self.updated)
-        .bind(&self.uuid.hyphenated().to_string())
-        .bind(crm_uuid.hyphenated().to_string())
-            .execute(&data.pool)
-            .await {
-                Err(err) => Err(err),
-                Ok(_) => Ok(())
-            }
-    }
+    
 
 
 

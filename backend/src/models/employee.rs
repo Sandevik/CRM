@@ -72,6 +72,62 @@ impl Model for Employee {
             access_level: None,
         }
     }
+
+    async fn insert(&self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+        let query = "INSERT INTO `crm`.`employees` (crm_uuid, uuid, first_name, last_name, date_of_birth, email, address, zip_code, city, country, ssn, contract_uuid, phone_number, role, driving_license_class, period_of_validity, added, updated) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        match sqlx::query(&query)
+            .bind(&self.crm_uuid.hyphenated().to_string())
+            .bind(&self.uuid.hyphenated().to_string())
+            .bind(&self.first_name)
+            .bind(&self.last_name)
+            .bind(&self.date_of_birth)
+            .bind(&self.email)
+            .bind(&self.address)
+            .bind(&self.zip_code)
+            .bind(&self.city)
+            .bind(&self.country)
+            .bind(&self.ssn)
+            .bind(match &self.contract_uuid {None => None, Some(uuid) => Some(uuid.hyphenated().to_string())})
+            .bind(&self.phone_number)
+            .bind(&self.role)
+            .bind(&self.driving_license_class)
+            .bind(&self.period_of_validity)
+            .bind(&self.added)
+            .bind(&self.updated)
+            .execute(&data.pool)
+            .await {
+                Err(err) => Err(err),
+                Ok(_) => Ok(())
+            }
+    }
+
+    async fn update(&self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+        let query = "UPDATE `crm`.`employees` SET first_name = ?, last_name = ?, date_of_birth = ?, email = ?, address = ?, zip_code = ?, city = ?, country = ?, ssn = ?, contract_uuid = ?, phone_number = ?, role = ?, driving_license_class = ?, period_of_validity = ?, updated = ? WHERE uuid = ? AND crm_uuid = ?";
+        match sqlx::query(&query)
+            .bind(&self.first_name)
+            .bind(&self.last_name)
+            .bind(&self.date_of_birth)
+            .bind(&self.email)
+            .bind(&self.address)
+            .bind(&self.zip_code)
+            .bind(&self.city)
+            .bind(&self.country)
+            .bind(&self.ssn)
+            .bind(match &self.contract_uuid {None => None, Some(uuid) => Some(uuid.hyphenated().to_string())})
+            .bind(&self.phone_number)
+            .bind(&self.role)
+            .bind(&self.driving_license_class)
+            .bind(&self.period_of_validity)
+            .bind(Utc::now())
+            .bind(&self.uuid.hyphenated().to_string())
+            .bind(&self.crm_uuid.hyphenated().to_string())
+            .execute(&data.pool)
+            .await {
+                Err(err) => Err(err),
+                Ok(_) => Ok(())
+            }
+    }
+
 }
 
 impl Employee {
@@ -145,7 +201,9 @@ impl Employee {
                 Err(err) => println!("{err}"),
                 Ok(rows) => {
                 rows.iter().for_each(|row| {
-                    employees.push(Employee::from_row(row));
+                    let mut emp = Employee::from_row(row);
+                    let _ = emp.get_access_level(data);
+                    employees.push(emp);
                 });
             }
         }
@@ -171,68 +229,17 @@ impl Employee {
                 Err(err) => println!("{err}"),
                 Ok(rows) => {
                     rows.iter().for_each(|row| {
-                        employees.push(Employee::from_row(row));
+                        let mut emp = Employee::from_row(row);
+                        let _ = emp.get_access_level(data);
+                        employees.push(emp);
                     });
                 }
             }
         Ok(employees)
     }
 
-    pub async fn insert(&self, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
-        let query = "INSERT INTO `crm`.`employees` (crm_uuid, uuid, first_name, last_name, date_of_birth, email, address, zip_code, city, country, ssn, access_level, contract_uuid, phone_number, role, driving_license_class, period_of_validity, added, updated) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-        match sqlx::query(&query)
-            .bind(crm_uuid.hyphenated().to_string())
-            .bind(&self.uuid.hyphenated().to_string())
-            .bind(&self.first_name)
-            .bind(&self.last_name)
-            .bind(&self.date_of_birth)
-            .bind(&self.email)
-            .bind(&self.address)
-            .bind(&self.zip_code)
-            .bind(&self.city)
-            .bind(&self.country)
-            .bind(&self.ssn)
-            .bind(&self.access_level)
-            .bind(match &self.contract_uuid {None => None, Some(uuid) => Some(uuid.hyphenated().to_string())})
-            .bind(&self.phone_number)
-            .bind(&self.role)
-            .bind(&self.driving_license_class)
-            .bind(&self.period_of_validity)
-            .bind(&self.added)
-            .bind(&self.updated)
-            .execute(&data.pool)
-            .await {
-                Err(err) => Err(err),
-                Ok(_) => Ok(())
-            }
-    }
-    pub async fn update(&self, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
-        let query = "UPDATE `crm`.`employees` SET first_name = ?, last_name = ?, date_of_birth = ?, email = ?, address = ?, zip_code = ?, city = ?, country = ?, ssn = ?, access_level = ?, contract_uuid = ?, phone_number = ?, role = ?, driving_license_class = ?, period_of_validity = ?, updated = ? WHERE uuid = ? AND crm_uuid = ?";
-        match sqlx::query(&query)
-            .bind(&self.first_name)
-            .bind(&self.last_name)
-            .bind(&self.date_of_birth)
-            .bind(&self.email)
-            .bind(&self.address)
-            .bind(&self.zip_code)
-            .bind(&self.city)
-            .bind(&self.country)
-            .bind(&self.ssn)
-            .bind(&self.access_level)
-            .bind(match &self.contract_uuid {None => None, Some(uuid) => Some(uuid.hyphenated().to_string())})
-            .bind(&self.phone_number)
-            .bind(&self.role)
-            .bind(&self.driving_license_class)
-            .bind(&self.period_of_validity)
-            .bind(Utc::now())
-            .bind(&self.uuid.hyphenated().to_string())
-            .bind(crm_uuid.hyphenated().to_string())
-            .execute(&data.pool)
-            .await {
-                Err(err) => Err(err),
-                Ok(_) => Ok(())
-            }
-    }
+   
+    
 
         // Returns the password to a newly created account if it did not exist before, else, returns None
         pub async fn associate_account(employee_uuid: &Uuid, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<Option<String>,sqlx::Error> {

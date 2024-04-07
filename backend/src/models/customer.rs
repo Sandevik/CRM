@@ -55,6 +55,55 @@ impl Model for Customer {
             note: row.get("note"),
         }
     }
+
+    async fn insert(&self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+        let query = "INSERT INTO `crm`.`customers` (crm_uuid, uuid, first_name, last_name, date_of_birth, email, address, zip_code, city, country, company, phone_number, news_letter, added, updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        match sqlx::query(&query)
+            .bind(&self.crm_uuid.hyphenated().to_string())
+            .bind(&self.uuid.hyphenated().to_string())
+            .bind(&self.first_name)
+            .bind(&self.last_name)
+            .bind(&self.date_of_birth)
+            .bind(&self.email)
+            .bind(&self.address)
+            .bind(&self.zip_code)
+            .bind(&self.city)
+            .bind(&self.country)
+            .bind(&self.company)
+            .bind(&self.phone_number)
+            .bind(&self.news_letter)
+            .bind(&self.added)
+            .bind(&self.updated)
+            .execute(&data.pool)
+            .await {
+                Err(err) => Err(err),
+                Ok(_) => Ok(())
+            }
+    }
+
+    async fn update(&self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+        match sqlx::query("UPDATE `crm`.`customers` SET `first_name` = ?, `last_name` = ?, `date_of_birth` = ?, `email` = ?, `address` = ?, `zip_code` = ?, `city` = ?, `country` = ?, `company` = ?, `phone_number` = ?, `news_letter` = ?, `updated` = ? WHERE `uuid` = ? AND `crm_uuid` = ?")
+            .bind(&self.first_name)
+            .bind(&self.last_name)
+            .bind(&self.date_of_birth)
+            .bind(&self.email)
+            .bind(&self.address)
+            .bind(&self.zip_code)
+            .bind(&self.city)
+            .bind(&self.country)
+            .bind(&self.company)
+            .bind(&self.phone_number)
+            .bind(&self.news_letter)
+            .bind(Utc::now())
+            .bind(&self.uuid.hyphenated().to_string())
+            .bind(&self.crm_uuid.hyphenated().to_string())
+            .execute(&data.pool)
+            .await {
+                Err(err) => Err(err),
+                Ok(_) => Ok(())
+            }   
+}
+
 }
 
 impl Customer {
@@ -153,53 +202,9 @@ impl Customer {
         Ok(customers)
     }
 
-    pub async fn insert(&self, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
-        let query = "INSERT INTO `crm`.`customers` (crm_uuid, uuid, first_name, last_name, date_of_birth, email, address, zip_code, city, country, company, phone_number, news_letter, added, updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        match sqlx::query(&query)
-            .bind(crm_uuid.hyphenated().to_string())
-            .bind(&self.uuid.hyphenated().to_string())
-            .bind(&self.first_name)
-            .bind(&self.last_name)
-            .bind(&self.date_of_birth)
-            .bind(&self.email)
-            .bind(&self.address)
-            .bind(&self.zip_code)
-            .bind(&self.city)
-            .bind(&self.country)
-            .bind(&self.company)
-            .bind(&self.phone_number)
-            .bind(&self.news_letter)
-            .bind(&self.added)
-            .bind(&self.updated)
-            .execute(&data.pool)
-            .await {
-                Err(err) => Err(err),
-                Ok(_) => Ok(())
-            }
-    }
+    
 
-    pub async fn update(&self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
-            match sqlx::query("UPDATE `crm`.`customers` SET `first_name` = ?, `last_name` = ?, `date_of_birth` = ?, `email` = ?, `address` = ?, `zip_code` = ?, `city` = ?, `country` = ?, `company` = ?, `phone_number` = ?, `news_letter` = ?, `updated` = ? WHERE `uuid` = ? AND `crm_uuid` = ?")
-                .bind(&self.first_name)
-                .bind(&self.last_name)
-                .bind(&self.date_of_birth)
-                .bind(&self.email)
-                .bind(&self.address)
-                .bind(&self.zip_code)
-                .bind(&self.city)
-                .bind(&self.country)
-                .bind(&self.company)
-                .bind(&self.phone_number)
-                .bind(&self.news_letter)
-                .bind(Utc::now())
-                .bind(&self.uuid.hyphenated().to_string())
-                .bind(&self.crm_uuid.hyphenated().to_string())
-                .execute(&data.pool)
-                .await {
-                    Err(err) => Err(err),
-                    Ok(_) => Ok(())
-                }   
-    }
+    
 
     pub async fn update_note(&self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
         match sqlx::query("UPDATE `crm`.`customers` SET `note` = ?, `updated` = ? WHERE `uuid` = ? AND `crm_uuid` = ?")

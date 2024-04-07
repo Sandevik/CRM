@@ -4,7 +4,7 @@ use chrono::{DateTime, NaiveDateTime, TimeZone, Utc};
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 
-use crate::{middleware::owns_or_admin_middleware::{validator, RequiresUuid}, models::task::{Recurrence, Task, TaskStatus}, AppState};
+use crate::{middleware::owns_or_admin_middleware::{validator, RequiresUuid}, models::{Model, task::{Recurrence, Task, TaskStatus}}, AppState};
 use crate::routes::Response;
 
 

@@ -3,7 +3,7 @@ use actix_web_httpauth::middleware::HttpAuthentication;
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 use chrono::NaiveDate;
-use crate::{models::employee::Employee, routes::Response};
+use crate::{models::{Model, employee::Employee}, routes::Response};
 use crate::{middleware::owns_or_admin_middleware::validator, AppState};
 
 use super::Limit;
@@ -112,6 +112,7 @@ struct CreateEmployeeRequest {
 #[post("/create")]
 async fn create_employee(data: web::Data<AppState>, body: web::Json<CreateEmployeeRequest>) -> impl Responder {
     let employee: Employee = Employee {
+        crm_uuid: Uuid::parse_str(&body.crm_uuid).unwrap(),
         user_uuid: match body.user_uuid.clone() {None => None, Some(str) => Some(match Uuid::parse_str(&str) {Err(_) => Uuid::new_v4(), Ok(u) => u})} ,
         first_name: body.first_name.clone(),
         last_name: body.last_name.clone(),
@@ -129,7 +130,7 @@ async fn create_employee(data: web::Data<AppState>, body: web::Json<CreateEmploy
         access_level: body.access_level,
         ..Employee::default()
     };
-    match employee.insert(&Uuid::parse_str(&body.crm_uuid).unwrap_or_default(), &data).await {
+    match employee.insert(&data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
         Ok(_) => HttpResponse::Created().json(Response::<String>::created("Successfully created employee"))
     }
@@ -169,6 +170,7 @@ struct UpdateEmployeeRequest {
 #[post("/update")]
 async fn update_employee(data: web::Data<AppState>, body: web::Json<UpdateEmployeeRequest>) -> impl Responder {
     let employee: Employee = Employee {
+        crm_uuid: Uuid::parse_str(&body.crm_uuid).unwrap_or_default(),
         uuid: Uuid::parse_str(&body.uuid.clone()).expect("Could not parse uuid string"),
         user_uuid: match body.user_uuid.clone() {None => None, Some(str) => Some(match Uuid::parse_str(&str) {Err(_) => Uuid::new_v4(), Ok(u) => u})} ,
         first_name: body.first_name.clone(),
@@ -187,7 +189,7 @@ async fn update_employee(data: web::Data<AppState>, body: web::Json<UpdateEmploy
         access_level: body.access_level,
         ..Employee::default()
     };
-    match employee.update(&Uuid::parse_str(&body.crm_uuid).unwrap_or_default(), &data).await {
+    match employee.update(&data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
         Ok(_) => HttpResponse::Ok().json(Response::<String>::ok("Successfully updated employee", None))
     }

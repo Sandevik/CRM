@@ -37,6 +37,14 @@ impl Model for Deal {
             updated: row.get("updated"),
         }
     }
+
+    async fn insert(&self, data: &actix_web::web::Data<crate::AppState>) -> Result<(), sqlx::Error> {
+        todo!();
+    }
+
+    async fn update(&self, data: &actix_web::web::Data<crate::AppState>) -> Result<(), sqlx::Error> {
+        todo!();
+    }
 }
 
 impl Deal {
