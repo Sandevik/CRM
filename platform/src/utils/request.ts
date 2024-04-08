@@ -4,7 +4,7 @@ export default async function <T extends Object, U extends Object = Object>(apiE
         let link = (process.env.NEXT_PUBLIC_DEV === "1" ? "http://localhost" : "https://"+ process.env.NEXT_PUBLIC_BACKEND_SERVER_ADDRESS || "localhost") + apiEndpoint
         const result = await fetch(link, {
             method,
-            body: method === "GET" || method === "DELETE" ? undefined : JSON.stringify(data),
+            body: method === "GET" ? undefined : JSON.stringify(data),
             credentials: "include",
             headers: {
                 "Content-Type": "application/json",

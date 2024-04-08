@@ -155,12 +155,14 @@ impl User {
         }
     } 
 
-    pub async fn insert_user(email: &String, first_name: &String, last_name: &String, phone_number: &String, password: &String, language: &String, data: &web::Data<AppState>) -> Result<sqlx::mysql::MySqlQueryResult, Error> {
+    pub async fn insert_user(email: &String, first_name: &String, last_name: &String, phone_number: &String, password: &String, language: &String, data: &web::Data<AppState>) -> Result<String, Error> {
+        let new_uuid = Uuid::new_v4().hyphenated().to_string();
         let res = Database::setup_users_table(&data.pool).await;
-        if res.is_err() {
-            return res;
+        if let Err(err) = res {
+            return Err(err);
         }
-        let result = sqlx::query("INSERT INTO `crm`. `users` (uuid, email, first_name, last_name, phone_number, preferred_language, password_hash, admin, joined, last_sign_in, subscription_ends, legacy_user) VALUES (uuid(),?,?,?,?,?,?,0,?,?,NULL,false)")
+        let result = sqlx::query("INSERT INTO `crm`. `users` (uuid, email, first_name, last_name, phone_number, preferred_language, password_hash, admin, joined, last_sign_in, subscription_ends, legacy_user) VALUES (?,?,?,?,?,?,?,0,?,?,NULL,false)")
+            .bind(new_uuid.clone())
             .bind(email)
             .bind(first_name)
             .bind(last_name)
@@ -171,7 +173,11 @@ impl User {
             .bind(Utc::now())
             .execute(&data.pool)
             .await;
-        result
+        if let Err(err) = result {
+            return Err(err)
+        } else {
+            return Ok(new_uuid);
+        }
     }
 
     pub async fn update_language(user_uuid: &Uuid, language: &String, data: &web::Data<AppState>) -> Result<(), Error> {
@@ -208,7 +214,7 @@ impl User {
         }
     }
 
-    pub async fn add_employee_user(&self, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+    pub async fn add_employee_user(&self, crm_uuid: &Uuid, employee_uuid: &Uuid, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
         // Check if user already is employee of crm 
         let query = "SELECT * FROM `crm` . `user_employee` WHERE `user_uuid` = ?";
         let employee_of = sqlx::query(query).bind(&self.uuid.hyphenated().to_string()).fetch_all(&data.pool).await;
@@ -223,18 +229,33 @@ impl User {
                 let query = format!(r#"
                     INSERT INTO `crm` . `user_employee` (uuid, crm_uuid, user_uuid) VALUES (UUID(),?,?)
                 "#);    
-                match sqlx::query(&query)
+                let res = sqlx::query(&query)
                 .bind(crm_uuid.hyphenated().to_string())
                 .bind(&self.uuid.hyphenated().to_string())
+                .execute(&data.pool).await;
+                if let Err(err) = res {
+                    return Err(err);
+                }
+                if let Err(err) = sqlx::query("UPDATE `crm` . `employees` SET user_uuid = ? WHERE uuid = ? AND crm_uuid = ?")
+                .bind(&self.uuid.hyphenated().to_string())
+                .bind(employee_uuid.hyphenated().to_string())
+                .bind(crm_uuid.hyphenated().to_string())
                 .execute(&data.pool)
                 .await {
-                    Err(err) => Err(err),
-                    Ok(_) => {
-                        Ok(())
-                    }
+                    return Err(err);
+                }
+                Ok(())
+            } else {
+
+                if let Err(err) = sqlx::query("UPDATE `crm` . `employees` SET user_uuid = ? WHERE uuid = ? AND crm_uuid = ?")
+                .bind(&self.uuid.hyphenated().to_string())
+                .bind(employee_uuid.hyphenated().to_string())
+                .bind(crm_uuid.hyphenated().to_string())
+                .execute(&data.pool)
+                .await {
+                    return Err(err);
                 }
 
-            } else {
                 return Ok(());
             }
         }

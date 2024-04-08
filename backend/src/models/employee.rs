@@ -40,8 +40,10 @@ pub struct Employee {
     pub contract_uuid: Option<Uuid>,
     #[serde(rename(serialize = "accessLevel", deserialize = "accessLevel"))]
     pub access_level: Option<i32>,
-    #[serde(rename(serialize = "hasUserAccount", deserialize = "hasUserAccount"))]
-    pub has_user_account: bool,
+    #[serde(rename(serialize = "canReportTime", deserialize = "canReportTime"))]
+    pub can_report_time: Option<bool>,
+    #[serde(rename(serialize = "isAdmin", deserialize = "isAdmin"))]
+    pub is_admin: Option<bool>,
     pub added: DateTime<Utc>,
     pub updated: DateTime<Utc>
 }
@@ -68,8 +70,9 @@ impl Model for Employee {
             period_of_validity: row.get("period_of_validity"),
             added: row.get("added"),
             updated: row.get("updated"),
-            has_user_account: row.get("has_user_account"),
             access_level: None,
+            can_report_time: None,
+            is_admin: None,
         }
     }
 
@@ -154,7 +157,8 @@ impl Employee {
             period_of_validity: None,
             added: Utc::now(),
             updated: Utc::now(),
-            has_user_account: false,
+            can_report_time: Some(true),
+            is_admin: Some(false),
         }
     
     }
@@ -173,7 +177,10 @@ impl Employee {
                     None => Ok(None),
                     Some(row) => {
                         let mut emp = Self::from_row(&row);
-                        let _ = emp.get_access_level(data).await;
+                        let res = emp.get_access_values(data).await;
+                        if let Err(err) = res {
+                            println!("{err}");
+                        }
                         Ok(Some(emp))
                     }
                 }
@@ -200,11 +207,14 @@ impl Employee {
             .await{
                 Err(err) => println!("{err}"),
                 Ok(rows) => {
-                rows.iter().for_each(|row| {
-                    let mut emp = Employee::from_row(row);
-                    let _ = emp.get_access_level(data);
+                for row in rows {
+                    let mut emp = Employee::from_row(&row);
+                    let res = emp.get_access_values(data).await;
+                    if let Err(err) = res {
+                        println!("{err}");
+                    }
                     employees.push(emp);
-                });
+                }
             }
         }
         Ok(employees)
@@ -228,63 +238,55 @@ impl Employee {
             .await {
                 Err(err) => println!("{err}"),
                 Ok(rows) => {
-                    rows.iter().for_each(|row| {
-                        let mut emp = Employee::from_row(row);
-                        let _ = emp.get_access_level(data);
+                    for row in rows {
+                        let mut emp = Employee::from_row(&row);
+                        let res = emp.get_access_values(data).await;
+                        if let Err(err) = res {
+                            println!("{err}");
+                        }
                         employees.push(emp);
-                    });
+                    }
                 }
             }
         Ok(employees)
     }
 
    
-    
-
-        // Returns the password to a newly created account if it did not exist before, else, returns None
-        pub async fn associate_account(employee_uuid: &Uuid, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<Option<String>,sqlx::Error> {
-            match Employee::get_by_uuid(employee_uuid, crm_uuid, data).await {
-                Err(err) => Err(err),
-                Ok(emp_opt) => {
-                    match emp_opt {
-                        None => Err(sqlx::Error::ColumnNotFound("Employee could not be found".to_string())),
-                        Some(employee) => {
-                            if (employee.email == "".to_string()) || (employee.phone_number == "".to_string()) {
-                                return Err(sqlx::Error::ColumnNotFound("You need to have an email AND a phone number to create a user account".to_string()));
-                            } else {
-                                match User::get_by_email_or_phone_number_sep(&employee.email.clone(), &employee.phone_number.clone(), data).await {
-                                    Err(err) => Err(err),
-                                    Ok(user_opt) => {
-                                        match user_opt {
-                                            None => {
-                                                if employee.email == "".to_string() || employee.phone_number == "".to_string() {return Err(sqlx::Error::ColumnNotFound("Could not find email or phone number".to_string()))};
-                                                let create_res = Self::create_user_account(&employee, data).await;
-                                                if let Err(err) = create_res {
-                                                    return Err(err);
-                                                } else {
-                                                    let res = create_res.as_ref().unwrap().1.add_employee_user(crm_uuid, data).await;
-                                                    if let Err(err) = res {
-                                                        return Err(err);
-                                                    } else {
-                                                        let _ = sqlx::query("UPDATE `crm`.`employees` SET `has_user_account` = TRUE WHERE `uuid` = ?")
-                                                        .bind(&employee.uuid.hyphenated().to_string())
-                                                        .execute(&data.pool)
-                                                        .await;
-                                                        return Ok(Some(create_res.unwrap().0));
-                                                    }
-                                                }
-                                            },
-                                            Some(user) => { 
-                                                let res = user.add_employee_user(crm_uuid, data).await;
+    // Returns the password to a newly created account if it did not exist before, else, returns None
+    pub async fn associate_account(employee_uuid: &Uuid, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<Option<String>,sqlx::Error> {
+        match Employee::get_by_uuid(employee_uuid, crm_uuid, data).await {
+            Err(err) => Err(err),
+            Ok(emp_opt) => {
+                match emp_opt {
+                    None => Err(sqlx::Error::ColumnNotFound("Employee could not be found".to_string())),
+                    Some(employee) => {
+                        if (employee.email == "".to_string()) || (employee.phone_number == "".to_string()) {
+                            return Err(sqlx::Error::ColumnNotFound("You need to have an email AND a phone number to create a user account".to_string()));
+                        } else {
+                            match User::get_by_email_or_phone_number_sep(&employee.email.clone(), &employee.phone_number.clone(), data).await {
+                                Err(err) => Err(err),
+                                Ok(user_opt) => {
+                                    match user_opt {
+                                        None => {
+                                            if employee.email == "".to_string() || employee.phone_number == "".to_string() {return Err(sqlx::Error::ColumnNotFound("Could not find email or phone number".to_string()))};
+                                            let create_res = Self::create_user_account(&employee, data).await;
+                                            if let Err(err) = create_res {
+                                                return Err(err);
+                                            } else {
+                                                let res = create_res.as_ref().unwrap().1.add_employee_user(crm_uuid, &employee.uuid, data).await;
                                                 if let Err(err) = res {
                                                     return Err(err);
                                                 } else {
-                                                    let _ = sqlx::query("UPDATE `crm`.`employees` SET `has_user_account` = TRUE WHERE `uuid` = ?")
-                                                    .bind(&employee.uuid.hyphenated().to_string())
-                                                    .execute(&data.pool)
-                                                    .await;
-                                                    return Ok(None);
+                                                    return Ok(Some(create_res.unwrap().0));
                                                 }
+                                            }
+                                        },
+                                        Some(user) => { 
+                                            let res = user.add_employee_user(crm_uuid, &employee.uuid, data).await;
+                                            if let Err(err) = res {
+                                                return Err(err);
+                                            } else {
+                                                return Ok(None);
                                             }
                                         }
                                     }
@@ -295,64 +297,89 @@ impl Employee {
                 }
             }
         }
+    }
 
 
-        // Returns the password for the new user
-        async fn create_user_account(&self, data: &web::Data<AppState>) -> Result<(String, User), sqlx::Error> {
-            let mut pass = String::new();
-            let chars = vec!["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z","!",".","(",")","&","$","*"];
-            let mut rng = rand::thread_rng();
-            for _ in 1 ..= 20 {
-                let n: u8 = rng.gen_range(0..=58);
-                pass.push_str(chars[n as usize]);
-            }
-            let res = User::insert_user(&self.email.clone(), &self.first_name.clone().unwrap(), &self.last_name.clone().unwrap(), &self.phone_number.clone(), &pass, &"eng".to_string(), data).await;
-            if let Err(err) = res {
-                return Err(err);
-            } else {
-                let temp_user = User { email: self.email.clone(), phone_number: Some(self.phone_number.clone()), ..User::default()};
-                let _ = sqlx::query("UPDATE `crm`.`employees` SET `has_user_account` = TRUE WHERE `uuid` = ?")
+    // Returns the password for the new user
+    async fn create_user_account(&self, data: &web::Data<AppState>) -> Result<(String, User), sqlx::Error> {
+        let mut pass = String::new();
+        let chars = vec!["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z","!",".","(",")","&","$","*"];
+        let mut rng = rand::thread_rng();
+        for _ in 1 ..= 20 {
+            let n: u8 = rng.gen_range(0..=58);
+            pass.push_str(chars[n as usize]);
+        }
+        let res = User::insert_user(&self.email.clone(), &self.first_name.clone().unwrap(), &self.last_name.clone().unwrap(), &self.phone_number.clone(), &pass, &"eng".to_string(), data).await;
+        if let Err(err) = res {
+            return Err(err);
+        } else {
+            let new_user_uuid = res.unwrap();
+            let temp_user = User { email: self.email.clone(), phone_number: Some(self.phone_number.clone()), ..User::default()};
+            return Ok((pass, temp_user));
+        }
+    }
+
+    pub async fn disassociate_account(&self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+        match &self.user_uuid {
+            None => Ok(()),
+            Some(uuid) => {
+                if let Err(err) = sqlx::query("DELETE FROM `crm` . `user_employee` WHERE user_uuid = ?")
+                .bind(&uuid.hyphenated().to_string())
+                .execute(&data.pool).await {
+                    return Err(err);
+                }
+                if let Err(err) = sqlx::query("UPDATE `crm` . `employees` SET user_uuid = NULL WHERE uuid = ?")
                 .bind(&self.uuid.hyphenated().to_string())
-                .execute(&data.pool)
-                .await;
-                return Ok((pass, temp_user));
-            }
-        }
+                .execute(&data.pool).await {
+                    return Err(err);
+                }
+                Ok(())
+            } 
+        } 
+    }
 
-        async fn disassociate_account(&self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
-            todo!();
-        }
-
-        async fn get_access_level(&mut self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
-            match User::get_by_email_or_phone_number_sep(&self.email.clone(), &self.phone_number.clone(), data).await {
-                Err(err) => Err(err),
-                Ok(user_opt) => {
-                    match user_opt {
-                        None => {
-                            self.access_level = None;
-                            Ok(())
-                        },
-                        Some(u) => {
-                            match sqlx::query("SELECT access_level FROM `crm` . `user_employee` WHERE `crm_uuid` = ? AND `user_uuid` = ?")
-                            .bind(&self.crm_uuid.hyphenated().to_string())
-                            .bind(u.uuid.hyphenated().to_string())
-                            .fetch_optional(&data.pool)
-                            .await {
-                                Err(err) => Err(err),
-                                Ok(row_opt) => {
-                                    if let None = row_opt {
-                                        self.access_level = None;
-                                    }else{
-                                        self.access_level = Some(row_opt.unwrap().get("access_level"));
-                                    }
-                                    Ok(())
-                                } 
-                            }
+    async fn get_access_values(&mut self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+        match User::get_by_email_or_phone_number_sep(&self.email.clone(), &self.phone_number.clone(), data).await {
+            Err(err) => Err(err),
+            Ok(user_opt) => {
+                match user_opt {
+                    None => {
+                        self.access_level = None;
+                        self.is_admin = None;
+                        self.can_report_time = None;
+                        Ok(())
+                    },
+                    Some(u) => {
+                        match sqlx::query("SELECT access_level, can_report_time, is_admin FROM `crm` . `user_employee` WHERE `crm_uuid` = ? AND `user_uuid` = ?")
+                        .bind(&self.crm_uuid.hyphenated().to_string())
+                        .bind(u.uuid.hyphenated().to_string())
+                        .fetch_optional(&data.pool)
+                        .await {
+                            Err(err) => Err(err),
+                            Ok(row_opt) => {
+                                if let None = row_opt {
+                                    self.access_level = None;
+                                    self.is_admin = None;
+                                    self.can_report_time = None;
+                                }else{
+                                    let row = row_opt.unwrap();
+                                    self.access_level = row.get("access_level");
+                                    self.is_admin = row.get("is_admin");
+                                    self.can_report_time = row.get("can_report_time");
+                                }
+                                Ok(())
+                            } 
                         }
                     }
                 }
             }
-        } 
+        }
+    }
+
+
+    pub async fn update_access_values(&self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+        todo!()
+    }
 
        
  

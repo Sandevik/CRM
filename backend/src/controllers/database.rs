@@ -71,7 +71,6 @@ impl Database {
         `period_of_validity` TEXT,
         `email` VARCHAR(40) NOT NULL,
         `contract_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci,
-        `has_user_account` BOOLEAN NOT NULL DEFAULT FALSE,
         `added` DATETIME,
         `updated` DATETIME
         "#.to_string()

@@ -18,7 +18,7 @@ export default function EmployeeRow({employee}: {employee: Employee}) {
         <Link href={`/dashboard/c/${crm?.crmUuid}/employees/${employee.uuid}`} className="p-2 pl-4 truncate">{employee.firstName} {employee.lastName}</Link>
         <Link href={`/dashboard/c/${crm?.crmUuid}/employees/${employee.uuid}`} className="border-l-2 p-2 pl-4 border-background-light truncate">{employee.email}</Link>
         <Link href={`/dashboard/c/${crm?.crmUuid}/employees/${employee.uuid}`} className="hidden md:block border-l-2 p-2 pl-4 border-background-light truncate">{employee.phoneNumber || "-"}</Link>
-        <Link href={`/dashboard/c/${crm?.crmUuid}/employees/${employee.uuid}`} className="hidden md:block border-l-2 p-2 pl-4 border-background-light truncate">{employee.hasUserAccount ? <Text text={{eng:"Yes", swe: "Ja"}} /> : <Text text={{eng: "No", swe: "Nej"}}/>}</Link>
+        <Link href={`/dashboard/c/${crm?.crmUuid}/employees/${employee.uuid}`} className="hidden md:block border-l-2 p-2 pl-4 border-background-light truncate">{employee.userUuid ? <Text text={{eng:"Yes", swe: "Ja"}} /> : <Text text={{eng: "No", swe: "Nej"}}/>}</Link>
         <Link href={`/dashboard/c/${crm?.crmUuid}/employees/${employee.uuid}`} className="hidden md:block border-l-2 p-2 pl-4 border-background-light truncate">{employee.accessLevel || "-"}</Link>
     </li>
   )

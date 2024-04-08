@@ -3,7 +3,7 @@ use actix_web_httpauth::middleware::HttpAuthentication;
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 use chrono::NaiveDate;
-use crate::{models::{Model, employee::Employee}, routes::Response};
+use crate::{models::{employee::{self, Employee}, Model}, routes::Response};
 use crate::{middleware::owns_or_admin_middleware::validator, AppState};
 
 use super::Limit;
@@ -19,6 +19,7 @@ pub fn employees() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Res
         .service(search)
         .service(update_employee)
         .service(create_employee_account)
+        .service(disassociate_employee_account)
         ;
         
     scope
@@ -209,5 +210,23 @@ async fn create_employee_account(data: web::Data<AppState>, body: web::Json<Crea
     match Employee::associate_account(&Uuid::parse_str(&body.employee_uuid).unwrap(), &Uuid::parse_str(&body.crm_uuid).unwrap(), &data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
         Ok(new_pass_opt) => HttpResponse::Created().json(Response::<String>::ok(&format!("Successfully created employee user account"), new_pass_opt))
+    }
+}
+
+#[delete("/disassociate-user-account")]
+async fn disassociate_employee_account(data: web::Data<AppState>, body: web::Json<CreateEmployeeUserAccount>) -> impl Responder {
+    let emp = Employee::get_by_uuid(&Uuid::parse_str(&body.employee_uuid).unwrap(), &Uuid::parse_str(&body.crm_uuid).unwrap(), &data).await;
+    if let Err(err) = emp {
+        return HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string()));
+    } else {
+        match emp.unwrap() {
+            None => return HttpResponse::Ok().json(Response::<String>::ok("Unchanged", None)),
+            Some(employee) => {
+                return match employee.disassociate_account(&data).await {
+                    Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
+                    Ok(_) => HttpResponse::Ok().json(Response::<String>::ok("Successfully disassociated user account", None))
+                };
+            }
+        }
     }
 }
