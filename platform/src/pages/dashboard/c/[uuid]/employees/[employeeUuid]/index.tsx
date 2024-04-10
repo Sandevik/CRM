@@ -54,7 +54,7 @@ export default function Index() {
   }, [crm, params])
 
   useEffect(()=>{
-    if (employee){
+    if (employee && employee.uuid){
       fetchTasks();
     }
   },[employee])
@@ -111,7 +111,6 @@ export default function Index() {
       let res = await request(`/employees/update-permissions`, {
         userUuid: employee.userUuid,
         crmUuid: crm.crmUuid,
-        isAdmin,
         canReportTime,
         canHandleCustomers,
         canHandleEmployees,
@@ -123,11 +122,13 @@ export default function Index() {
       } 
     }
   }
+
   const setAdmin = async () => {
-    if (employee.userUuid && crm?.crmUuid) {
+    if (employee.uuid && crm?.crmUuid && isAdmin !== null) {
       let res = await request(`/employees/set-admin`, {
-        userUuid: employee.userUuid,
+        employeeUuid: employee.uuid,
         crmUuid: crm.crmUuid,
+        isAdmin
       }, "PUT");
       if (res.code === 200) {
         await fetchEmployee();
@@ -136,14 +137,12 @@ export default function Index() {
   }
 
   useEffect(()=>{
-    if (isAdmin === true && employee.isAdmin === false) {
       setAdmin();
-    };
   },[isAdmin])
 
   useEffect(()=>{
     handlePermissionChange();
-  }, [canHandleCustomers, canHandleEmployees, canHandleVehicles, canReportTime, canAccessCrm, isAdmin])
+  }, [canHandleCustomers, canHandleEmployees, canHandleVehicles, canReportTime, canAccessCrm])
 
   const disassociateAccount = async () => {
     alert("(Modal) You are about to disassociate this account")

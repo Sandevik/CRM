@@ -240,8 +240,6 @@ struct UpdateAccountPermissions {
     crm_uuid: String,
     #[serde(rename(serialize = "userUuid", deserialize = "userUuid"))]
     user_uuid: String,
-    #[serde(rename(serialize = "isAdmin", deserialize = "isAdmin"))]
-    is_admin: Option<bool>,
     #[serde(rename(serialize = "canReportTime", deserialize = "canReportTime"))]
     can_report_time: Option<bool>,
     #[serde(rename(serialize = "canHandleCustomers", deserialize = "canHandleCustomers"))]
@@ -259,7 +257,6 @@ async fn update_account_permissions(data: web::Data<AppState>, body: web::Json<U
     let emp = Employee {
         crm_uuid: Uuid::parse_str(&body.crm_uuid).expect("Could not parse crm_uuid"), 
         user_uuid: match Uuid::parse_str(&body.user_uuid){Err(err) => None, Ok(u) => Some(u)},
-        is_admin: body.is_admin,
         can_report_time: body.can_report_time,
         can_handle_customers: body.can_handle_customers,
         can_handle_employees: body.can_handle_employees,
@@ -269,7 +266,7 @@ async fn update_account_permissions(data: web::Data<AppState>, body: web::Json<U
     };
     match emp.update_permissions(&data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
-        Ok(_) => HttpResponse::Created().json(Response::<String>::ok("Successfully updated employee user permissions", None))
+        Ok(_) => HttpResponse::Ok().json(Response::<String>::ok("Successfully updated employee user permissions", None))
     }
 }
 
@@ -277,25 +274,24 @@ async fn update_account_permissions(data: web::Data<AppState>, body: web::Json<U
 struct SetAdmin {
     #[serde(rename(serialize = "crmUuid", deserialize = "crmUuid"))]
     crm_uuid: String,
-    #[serde(rename(serialize = "userUuid", deserialize = "userUuid"))]
-    user_uuid: String,
+    #[serde(rename(serialize = "employeeUuid", deserialize = "employeeUuid"))]
+    employee_uuid: String,
+    #[serde(rename(serialize = "isAdmin", deserialize = "isAdmin"))]
+    is_admin: bool
 }
 
 #[put("/set-admin")]
 async fn set_admin(data: web::Data<AppState>, body: web::Json<SetAdmin>) -> impl Responder {
-    let emp = Employee {
-        crm_uuid: Uuid::parse_str(&body.crm_uuid).expect("Could not parse crm_uuid"), 
-        user_uuid: match Uuid::parse_str(&body.user_uuid){Err(err) => None, Ok(u) => Some(u)},
-        is_admin: Some(true),
-        can_report_time: Some(true),
-        can_handle_customers: Some(true),
-        can_handle_employees: Some(true),
-        can_handle_vehicles: Some(true),
-        can_access_crm: Some(true),
-        ..Employee::default()
+    let current_emp = Employee::get_by_uuid(&Uuid::parse_str(&body.employee_uuid).expect("Could not parse employee_uuid"), &Uuid::parse_str(&body.crm_uuid).expect("Could not parse crm_uuid"), &data).await.expect("Could not find employee");
+    if let None = current_emp {
+        return HttpResponse::NotFound().json(Response::<String>::not_found("Could not find employee"));
+    }
+    let emp: Employee = Employee {
+        is_admin: Some(body.is_admin),
+        ..current_emp.unwrap()
     };
-    match emp.update_permissions(&data).await {
+    match emp.update_admin(&data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
-        Ok(_) => HttpResponse::Created().json(Response::<String>::ok("Successfully updated employee user permissions", None))
+        Ok(_) => HttpResponse::Ok().json(Response::<String>::ok("Successfully updated employee admin state", None))
     }
 }

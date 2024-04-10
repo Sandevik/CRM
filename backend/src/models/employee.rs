@@ -404,8 +404,7 @@ impl Employee {
 
 
     pub async fn update_permissions(&self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
-        match sqlx::query("UPDATE `crm` . `user_employee` SET `is_admin` = ?, `can_report_time` = ?, `can_handle_customers` = ?, `can_handle_employees` = ?, `can_handle_vehicles` = ?, `can_access_crm` = ? WHERE `crm_uuid` = ? AND `user_uuid` = ?")
-        .bind(&self.is_admin)
+        match sqlx::query("UPDATE `crm` . `user_employee` SET `can_report_time` = ?, `can_handle_customers` = ?, `can_handle_employees` = ?, `can_handle_vehicles` = ?, `can_access_crm` = ? WHERE `crm_uuid` = ? AND `user_uuid` = ?")
         .bind(&self.can_report_time)
         .bind(match self.can_access_crm {
             Some(value) => {
@@ -441,5 +440,20 @@ impl Employee {
         }
     }
 
-       
+    pub async fn update_admin(&self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+        match sqlx::query("UPDATE `crm` . `user_employee` SET `is_admin` = ?, `can_report_time` = ?, `can_handle_customers` = ?, `can_handle_employees` = ?, `can_handle_vehicles` = ?, `can_access_crm` = ? WHERE `crm_uuid` = ? AND `user_uuid` = ?")
+        .bind(&self.is_admin)
+        .bind(match self.is_admin {None => self.can_report_time, Some(val) => {if val {Some(true)} else {self.can_report_time}}})
+        .bind(match self.is_admin {None => self.can_handle_customers, Some(val) => {if val {Some(true)} else {self.can_handle_customers}}})
+        .bind(match self.is_admin {None => self.can_handle_employees, Some(val) => {if val {Some(true)} else {self.can_handle_employees}}})
+        .bind(match self.is_admin {None => self.can_handle_vehicles, Some(val) => {if val {Some(true)} else {self.can_handle_vehicles}}})
+        .bind(match self.is_admin {None => self.can_access_crm, Some(val) => {if val {Some(true)} else {self.can_access_crm}}})
+        .bind(&self.crm_uuid.hyphenated().to_string())
+        .bind(&self.user_uuid.expect("ERROR: Could not update values as row does not have a user_uuid").hyphenated().to_string())
+        .execute(&data.pool)
+        .await {
+            Err(err) => Err(err),
+            Ok(_) => Ok(())
+        }
+    }
 }
