@@ -17,6 +17,7 @@ import { BsChevronRight, BsQuestionCircle } from 'react-icons/bs';
 import Input from '@/components/Input';
 import text from '@/utils/text';
 import { AuthContext } from '@/context/AuthContext';
+import Switch from '@/components/Switch';
 
 
 export default function Index() {
@@ -30,7 +31,23 @@ export default function Index() {
   const [edit, setEdit] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [expand, setExpand] = useState<boolean>(false);
-  const [selectedTab, setSelectedTab] = useState<"time" | "access" | "tasks">("tasks");
+  const [selectedTab, setSelectedTab] = useState<"time" | "settings" | "tasks">("tasks");
+
+  const [isAdmin, setIsAdmin] = useState<boolean>(employee.isAdmin || false);
+  const [canReportTime, setCanReportTime] = useState<boolean>(employee.canReportTime || false);
+  const [canHandleCustomers, setCanHandleCustomers] = useState<boolean>(employee.canHandleCustomers || false);
+  const [canHandleEmployees, setCanHandleEmployees] = useState<boolean>(employee.canHandleEmployees || false);
+  const [canHandleVehicles, setCanHandleVehicles] = useState<boolean>(employee.canHandleVehicles || false);
+  const [canAccessCrm, setCanAccessCrm] = useState<boolean>(employee.canAccessCrm || false);
+
+  useEffect(()=>{
+    setCanHandleCustomers(employee.canHandleCustomers || false)
+    setCanHandleEmployees(employee.canHandleEmployees || false)
+    setCanHandleVehicles(employee.canHandleVehicles || false)
+    setCanReportTime(employee.canReportTime || false)
+    setIsAdmin(employee.isAdmin || false)
+    setCanAccessCrm(employee.canAccessCrm || false);
+  },[employee])
 
   useEffect(()=>{
     fetchEmployee();
@@ -42,8 +59,7 @@ export default function Index() {
     }
   },[employee])
 
-  useEffect(()=>{fetchEmployee()},[])
-
+  useEffect(()=>{fetchEmployee()},[params])
 
   const createEmployeeUser = async () => {
     if (crm?.crmUuid && params?.employeeUuid) {
@@ -74,8 +90,6 @@ export default function Index() {
     }
   }
 
-  
-
   const handleEdit = async () => {
     if (edit) {
       if (crm?.crmUuid) {
@@ -92,10 +106,47 @@ export default function Index() {
     setEdit(!edit);
   }
 
-  const handleAccessLevelEdit = async () => {}
+  const handlePermissionChange = async () => {
+    if (employee.userUuid && crm?.crmUuid) {
+      let res = await request(`/employees/update-permissions`, {
+        userUuid: employee.userUuid,
+        crmUuid: crm.crmUuid,
+        isAdmin,
+        canReportTime,
+        canHandleCustomers,
+        canHandleEmployees,
+        canHandleVehicles,
+        canAccessCrm
+      }, "PUT");
+      if (res.code === 200) {
+        await fetchEmployee();
+      } 
+    }
+  }
+  const setAdmin = async () => {
+    if (employee.userUuid && crm?.crmUuid) {
+      let res = await request(`/employees/set-admin`, {
+        userUuid: employee.userUuid,
+        crmUuid: crm.crmUuid,
+      }, "PUT");
+      if (res.code === 200) {
+        await fetchEmployee();
+      } 
+    }
+  }
 
+  useEffect(()=>{
+    if (isAdmin === true && employee.isAdmin === false) {
+      setAdmin();
+    };
+  },[isAdmin])
+
+  useEffect(()=>{
+    handlePermissionChange();
+  }, [canHandleCustomers, canHandleEmployees, canHandleVehicles, canReportTime, canAccessCrm, isAdmin])
 
   const disassociateAccount = async () => {
+    alert("(Modal) You are about to disassociate this account")
     if (employee.uuid && crm?.crmUuid) {
       let res = await request(`/employees/disassociate-user-account`, {
         employeeUuid: employee.uuid,
@@ -107,6 +158,9 @@ export default function Index() {
     }
   }
 
+  const disaccosiateAndRemoveAccount = async () => {
+    alert("(Modal) You are about to disassociate and remove this account")
+  } 
 
   return (
     <main className="px-2  max-w-[1800px] m-auto">
@@ -127,7 +181,7 @@ export default function Index() {
           </div>
           <div className="flex flex-col gap-2">
             <span className='text-md text-right'><Text text={{eng: "User Account", swe: "Användarkonto"}} /> </span>
-            <span className={`text-lg ${!employee?.userUuid && "italic text-md"} w-full flex justify-between gap-2 items-center relative`}>{!employee?.userUuid ? <PiPlugsFill className="text-light-red text-2xl" /> : <PiPlugsConnectedFill className="text-green-300 text-2xl" />}{!employee?.userUuid ? <Button disabled={!employee.email || !employee.phoneNumber} disabledReason={text({swe: "Användaren måste ha ett telefonnummer samt en emailadress", eng: "The user needs a phone number as well as an emailaddress"}, data)} onClick={() => createEmployeeUser()}><Text text={{eng: "Connect", swe: "Anslut"}} /></Button> : <Text text={{eng: "Connected", swe: "Anslutet"}} />}</span>
+            <span className={`text-lg ${!employee?.userUuid && "italic text-md"} w-full flex justify-between gap-2 items-center relative`}>{!employee?.userUuid ? <PiPlugsFill className="text-light-red text-2xl" /> : <PiPlugsConnectedFill className="text-green-300 text-2xl" />}{!employee?.userUuid ? <Button disabled={!employee.email || !employee.phoneNumber} onClick={() => createEmployeeUser()}><Text text={{eng: "Connect", swe: "Anslut"}} /></Button> : <Text text={{eng: "Connected", swe: "Anslutet"}} />}</span>
           </div>
         </div>
         <div className=" p-2 min-h-20 flex justify-between items-center gap-2 min-w-[90vw] lg:min-w-full">
@@ -223,7 +277,7 @@ export default function Index() {
         <ul className="flex ">
           <li className={`${selectedTab === "tasks" && "text-black px-2 clippath bg-light-blue"} px-3 text-lg font-semibold cursor-pointer transition-colors hover:text-greenish `} onClick={() => setSelectedTab("tasks")}><Text text={{swe: "Uppgifter", eng: "Tasks"}}/></li>
           <li className={`${selectedTab === "time" && "text-black clippath bg-light-blue"} px-3 text-lg font-semibold cursor-pointer transition-colors hover:text-greenish  `} onClick={() => setSelectedTab("time")}><Text text={{swe: "Tidsrapporteringar", eng: "Time Reports"}}/></li>
-          <li className={`${selectedTab === "access" && "text-black px-2 clippath bg-light-blue"} px-3 text-lg font-semibold cursor-pointer transition-colors hover:text-greenish `} onClick={() => setSelectedTab("access")}><Text text={{swe: "Behörigheter", eng: "Access"}}/></li>
+          <li className={`${selectedTab === "settings" && "text-black px-2 clippath bg-light-blue"} px-3 text-lg font-semibold cursor-pointer transition-colors hover:text-greenish `} onClick={() => setSelectedTab("settings")}><Text text={{swe: "Inställningar", eng: "Employee Settings"}}/></li>
         </ul>
       </nav>
 
@@ -238,11 +292,52 @@ export default function Index() {
       <AddTask active={addTask} setActive={setAddTask} refetchTasks={fetchTasks} employee={employee} />  
       </div>}
 
-      {selectedTab === "time" && <div>Tidsrapportering</div>  }
-      {selectedTab === "access" && <div>behörigheter</div>  }
+      {selectedTab === "time" && <div className="p-2">Tidsrapportering</div>  }
+      
+      
+      {selectedTab === "settings" && 
+      <div className="p-2">
+        <h3>Inställningar Och Behörigheter</h3>
+
+        <div className={`${!employee.userUuid && "opacity-65"}`}>
+          <div className="flex items-center gap-2">
+            <Switch disabled={!employee.userUuid}  value={isAdmin} setValue={setIsAdmin} />
+            <span className="text-lg font-semibold"><Text text={{swe: "Administratör", eng: "Administrator"}}/></span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Switch disabled={!employee.userUuid} value={canReportTime} setValue={setCanReportTime} />
+            <span className="text-lg font-semibold"><Text text={{swe: "Kan tidsrapportera", eng: "Can report time"}}/></span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Switch disabled={!employee.userUuid} value={canAccessCrm !== null ? canAccessCrm : false} setValue={(val: boolean) => setCanAccessCrm(val || false)} />
+            <span className="text-lg font-semibold"><Text text={{swe: "Behörig till crm", eng: "Access to crm"}}/></span>
+          </div>
+
+          <div className={`${(!employee.canAccessCrm ? "opacity-50" : "opacity-100")} transition-opacity flex items-center gap-2`}>
+            <Switch disabled={!employee.userUuid || !canAccessCrm} value={canHandleCustomers} setValue={setCanHandleCustomers} />
+            <span className="text-lg font-semibold"><Text text={{swe: "Kan hantera kunder", eng: "Can handle customers"}}/></span>
+          </div>
+        
+          <div className={`${(!employee.canAccessCrm ? "opacity-50" : "opacity-100")} transition-opacity flex items-center gap-2`}>
+            <Switch disabled={!employee.userUuid || !canAccessCrm} value={canHandleEmployees} setValue={setCanHandleEmployees} />
+            <span className="text-lg font-semibold"><Text text={{swe: "Kan hantera anställda", eng: "Can handle employees"}}/></span>
+          </div>
+          
+          <div className={`${(!employee.canAccessCrm ? "opacity-50" : "opacity-100")} transition-opacity flex items-center gap-2`}>
+            <Switch disabled={!employee.userUuid || !canAccessCrm} value={canHandleVehicles} setValue={setCanHandleVehicles} />
+            <span className="text-lg font-semibold"><Text text={{swe: "Kan hantera fordon", eng: "Can handle vehicles"}}/></span>
+          </div>
+        </div>
+
+        <div className='flex gap-2'>
+          <Button red={true} onClick={() => disassociateAccount()}><Text text={{eng: "Disassociate Account", swe: "Avlänka konto"}}/></Button>
+          <Button red={true} onClick={() => disaccosiateAndRemoveAccount()} className='bg-light-red'><Text text={{eng: "Disassociate and remove account", swe: "Avlänka och ta bort konto"}}/></Button>
+        </div>
+      </div>}
 
 
-      <Button onClick={() => disassociateAccount()}>Disassociate</Button>
       
     </main>
   )

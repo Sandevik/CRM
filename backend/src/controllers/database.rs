@@ -215,7 +215,13 @@ impl Database {
             `uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL UNIQUE PRIMARY KEY,
             `user_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
             `crm_uuid` VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL,
-            `access_level` INT NOT NULL DEFAULT 0
+            `access_level` INT NOT NULL DEFAULT 0,
+            `can_report_time` BOOLEAN NOT NULL DEFAULT TRUE,
+            `can_handle_customers` BOOLEAN NOT NULL DEFAULT FALSE,
+            `can_handle_employees` BOOLEAN NOT NULL DEFAULT FALSE,
+            `can_handle_vehicles` BOOLEAN NOT NULL DEFAULT FALSE,
+            `is_admin` BOOLEAN NOT NULL DEFAULT FALSE,
+            `can_access_crm` BOOLEAN NOT NULL DEFAULT FALSE
           ) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;
         "#.to_string()
     }
@@ -241,6 +247,8 @@ impl Database {
                 `legacy_user` BOOLEAN NOT NULL DEFAULT FALSE,
                 `current_jwt` TEXT,
                 `preferred_language` VARCHAR(3) NOT NULL DEFAULT 'eng',
+                `created_by_employer_crm` VARCHAR(36),
+                `initial_login` BOOLEAN NOT NULL DEFAULT TRUE,
                 PRIMARY KEY (`uuid`(36)),
                 UNIQUE (`email`(50), `phone_number`(15))
               ) ENGINE = InnoDB COLLATE utf8_general_mysql500_ci;

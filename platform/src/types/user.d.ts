@@ -11,4 +11,6 @@ interface User {
     subscriptionEnds: string,
     legacyUser: boolean,
     preferredLanguage: string,
+    initialLogin: boolean,
+    createdByEmployerCrm: string | null,
 }

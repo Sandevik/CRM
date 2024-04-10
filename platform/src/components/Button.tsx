@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 
 interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  disabledReason?: string,
+  red?: boolean
 }
 
 export default function Button(props: Props) {
@@ -27,8 +27,8 @@ export default function Button(props: Props) {
 
   return (
     <>
-      {props.disabled && props.disabledReason !== "" && <span className={"absolute top-8 left-[23%] text-sm ripple-btn-reason"}>{props.disabledReason}</span>}
-      <button ref={ref} {...props} className={`${/.*(absolute|relative).*/.test(props.className || "") ? props.className : "relative"} ripple-btn text-black font-semibold flex justify-center items-center rounded-sm min-h-[33px] min-w-[100px] ${!props.disabled ? "hover:bg-gray-100 bg-light-blue" : "bg-gray-400 cursor-not-allowed"} transition-all $`}>{props.children}</button>
+      {/*props.disabled && <span className={"absolute top-8 left-[23%] text-sm ripple-btn-reason"}>{props.disabledReason}</span>*/}
+      <button ref={ref} {...props} className={`${/.*(absolute|relative).*/.test(props.className || "") ? props.className : "relative"} ripple-btn text-black font-semibold px-2 flex justify-center items-center rounded-sm min-h-[33px] min-w-[100px] ${!props.disabled ? `${props.red ? "bg-light-red hover:bg-red-500" : "bg-light-blue hover:bg-gray-100"}` : "bg-gray-400 cursor-not-allowed"} transition-all $`}>{props.children}</button>
     </>
   )
 }

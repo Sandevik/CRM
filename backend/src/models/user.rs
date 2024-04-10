@@ -31,6 +31,10 @@ pub struct User {
     pub current_jwt: Option<String>,
     #[serde(rename(serialize = "preferredLanguage", deserialize = "preferredLanguage"))]
     pub preferred_language: String,
+    #[serde(rename(serialize = "createdByEmployerCrm", deserialize = "createdByEmployerCrm"))]
+    pub created_by_employer_crm: Option<Uuid>,
+    #[serde(rename(serialize = "initialLogin", deserialize = "initialLogin"))]
+    pub initial_login: bool,
 }
 
 impl Model for User {
@@ -50,6 +54,8 @@ impl Model for User {
             subscription_ends: row.get("subscription_ends"),   
             current_jwt: row.get("current_jwt"),
             preferred_language: row.get("preferred_language"),
+            initial_login: row.get("initial_login"),
+            created_by_employer_crm: match row.get::<Option<&str>, &str>("created_by_employer_crm") {None => None, Some(str) => Some(Uuid::parse_str(&str).expect("ERROR: Could not parse employer_crm_uuid for this user."))},
         }
     }
 
@@ -90,22 +96,8 @@ impl User {
         }
     }
 
-
     pub async fn get_by_email(email: &str, data: &web::Data<AppState>) -> Result<Option<User>, Error> {
         let res = sqlx::query("SELECT * FROM `crm`.`users` WHERE email = ?").bind(email).fetch_optional(&data.pool).await;
-        match res {
-            Err(err) => return Err(err),
-            Ok(row) => {
-                match row {
-                    Some(msql_row) => return Ok(Some(Self::from_row(&msql_row))),
-                    None => return Ok(None),
-                }
-            }
-        }
-    }
-
-    pub async fn get_by_phone_number(phone_number: &String, data: &web::Data<AppState>) -> Result<Option<User>, Error> {
-        let res = sqlx::query("SELECT * FROM `crm`.`users` WHERE phone_number = ?").bind(phone_number).fetch_optional(&data.pool).await;
         match res {
             Err(err) => return Err(err),
             Ok(row) => {
@@ -155,13 +147,13 @@ impl User {
         }
     } 
 
-    pub async fn insert_user(email: &String, first_name: &String, last_name: &String, phone_number: &String, password: &String, language: &String, data: &web::Data<AppState>) -> Result<String, Error> {
+    pub async fn insert_user(email: &String, first_name: &String, last_name: &String, phone_number: &String, password: &String, language: &String, created_by_employer_crm: Option<String>, data: &web::Data<AppState>) -> Result<String, Error> {
         let new_uuid = Uuid::new_v4().hyphenated().to_string();
         let res = Database::setup_users_table(&data.pool).await;
         if let Err(err) = res {
             return Err(err);
         }
-        let result = sqlx::query("INSERT INTO `crm`. `users` (uuid, email, first_name, last_name, phone_number, preferred_language, password_hash, admin, joined, last_sign_in, subscription_ends, legacy_user) VALUES (?,?,?,?,?,?,?,0,?,?,NULL,false)")
+        let result = sqlx::query("INSERT INTO `crm`. `users` (uuid, email, first_name, last_name, phone_number, preferred_language, password_hash, admin, joined, last_sign_in, subscription_ends, legacy_user, created_by_employer_crm) VALUES (?,?,?,?,?,?,?,0,?,?,NULL,false,?)")
             .bind(new_uuid.clone())
             .bind(email)
             .bind(first_name)
@@ -171,6 +163,7 @@ impl User {
             .bind(Hashing::hash(password))
             .bind(Utc::now())
             .bind(Utc::now())
+            .bind(created_by_employer_crm)
             .execute(&data.pool)
             .await;
         if let Err(err) = result {
@@ -264,11 +257,15 @@ impl User {
     }
 
     pub fn new(email: &String, first_name: &String, last_name: &String, password_hash: &String, phone_number: Option<String>, preferred_language: String) -> Self {
-        User { uuid: Uuid::new_v4(), email: email.to_string(), first_name: first_name.to_string(), last_name: last_name.to_string(), password_hash: password_hash.to_string(), phone_number, admin: false, joined: Utc::now(), last_sign_in: None, subscription_ends: None, legacy_user: false, current_jwt: None, preferred_language}
+        User { uuid: Uuid::new_v4(), email: email.to_string(), first_name: first_name.to_string(), last_name: last_name.to_string(), password_hash: password_hash.to_string(), phone_number, admin: false, joined: Utc::now(), last_sign_in: None, subscription_ends: None, legacy_user: false, current_jwt: None, preferred_language, initial_login: true, created_by_employer_crm: None}
     }
 
     pub fn default() -> Self {
-        User { uuid: Uuid::new_v4(), email: "".to_string(), first_name: "".to_string(), last_name: "".to_string(), password_hash: "".to_string(), phone_number: None, admin: false, joined: Utc::now(), last_sign_in: None, subscription_ends: None, legacy_user: false, current_jwt: None, preferred_language: "eng".to_string()}
+        User { uuid: Uuid::new_v4(), email: "".to_string(), first_name: "".to_string(), last_name: "".to_string(), password_hash: "".to_string(), phone_number: None, admin: false, joined: Utc::now(), last_sign_in: None, subscription_ends: None, legacy_user: false, current_jwt: None, preferred_language: "eng".to_string(), initial_login: true, created_by_employer_crm: None}
+    }
+
+    pub fn delete_account_by_uuid(uuid: &Uuid, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+        todo!()
     }
 
 

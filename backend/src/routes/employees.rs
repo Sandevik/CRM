@@ -20,6 +20,8 @@ pub fn employees() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Res
         .service(update_employee)
         .service(create_employee_account)
         .service(disassociate_employee_account)
+        .service(update_account_permissions)
+        .service(set_admin)
         ;
         
     scope
@@ -228,5 +230,72 @@ async fn disassociate_employee_account(data: web::Data<AppState>, body: web::Jso
                 };
             }
         }
+    }
+}
+
+
+#[derive(Serialize, Deserialize)]
+struct UpdateAccountPermissions {
+    #[serde(rename(serialize = "crmUuid", deserialize = "crmUuid"))]
+    crm_uuid: String,
+    #[serde(rename(serialize = "userUuid", deserialize = "userUuid"))]
+    user_uuid: String,
+    #[serde(rename(serialize = "isAdmin", deserialize = "isAdmin"))]
+    is_admin: Option<bool>,
+    #[serde(rename(serialize = "canReportTime", deserialize = "canReportTime"))]
+    can_report_time: Option<bool>,
+    #[serde(rename(serialize = "canHandleCustomers", deserialize = "canHandleCustomers"))]
+    can_handle_customers: Option<bool>,
+    #[serde(rename(serialize = "canHandleEmployees", deserialize = "canHandleEmployees"))]
+    can_handle_employees: Option<bool>,
+    #[serde(rename(serialize = "canHandleVehicles", deserialize = "canHandleVehicles"))]
+    can_handle_vehicles: Option<bool>,
+    #[serde(rename(serialize = "canAccessCrm", deserialize = "canAccessCrm"))]
+    can_access_crm: bool
+}
+
+#[put("/update-permissions")]
+async fn update_account_permissions(data: web::Data<AppState>, body: web::Json<UpdateAccountPermissions>) -> impl Responder {
+    let emp = Employee {
+        crm_uuid: Uuid::parse_str(&body.crm_uuid).expect("Could not parse crm_uuid"), 
+        user_uuid: match Uuid::parse_str(&body.user_uuid){Err(err) => None, Ok(u) => Some(u)},
+        is_admin: body.is_admin,
+        can_report_time: body.can_report_time,
+        can_handle_customers: body.can_handle_customers,
+        can_handle_employees: body.can_handle_employees,
+        can_handle_vehicles: body.can_handle_vehicles,
+        can_access_crm: Some(body.can_access_crm),
+        ..Employee::default()
+    };
+    match emp.update_permissions(&data).await {
+        Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
+        Ok(_) => HttpResponse::Created().json(Response::<String>::ok("Successfully updated employee user permissions", None))
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+struct SetAdmin {
+    #[serde(rename(serialize = "crmUuid", deserialize = "crmUuid"))]
+    crm_uuid: String,
+    #[serde(rename(serialize = "userUuid", deserialize = "userUuid"))]
+    user_uuid: String,
+}
+
+#[put("/set-admin")]
+async fn set_admin(data: web::Data<AppState>, body: web::Json<SetAdmin>) -> impl Responder {
+    let emp = Employee {
+        crm_uuid: Uuid::parse_str(&body.crm_uuid).expect("Could not parse crm_uuid"), 
+        user_uuid: match Uuid::parse_str(&body.user_uuid){Err(err) => None, Ok(u) => Some(u)},
+        is_admin: Some(true),
+        can_report_time: Some(true),
+        can_handle_customers: Some(true),
+        can_handle_employees: Some(true),
+        can_handle_vehicles: Some(true),
+        can_access_crm: Some(true),
+        ..Employee::default()
+    };
+    match emp.update_permissions(&data).await {
+        Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
+        Ok(_) => HttpResponse::Created().json(Response::<String>::ok("Successfully updated employee user permissions", None))
     }
 }

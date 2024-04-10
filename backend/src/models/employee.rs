@@ -44,6 +44,14 @@ pub struct Employee {
     pub can_report_time: Option<bool>,
     #[serde(rename(serialize = "isAdmin", deserialize = "isAdmin"))]
     pub is_admin: Option<bool>,
+    #[serde(rename(serialize = "canHandleCustomers", deserialize = "canHandleCustomers"))]
+    pub can_handle_customers: Option<bool>,
+    #[serde(rename(serialize = "canHandleEmployees", deserialize = "canHandleEmployees"))]
+    pub can_handle_employees: Option<bool>,
+    #[serde(rename(serialize = "canHandleVehicles", deserialize = "canHandleVehicles"))]
+    pub can_handle_vehicles: Option<bool>,
+    #[serde(rename(serialize = "canAccessCrm", deserialize = "canAccessCrm"))]
+    pub can_access_crm: Option<bool>,
     pub added: DateTime<Utc>,
     pub updated: DateTime<Utc>
 }
@@ -73,6 +81,10 @@ impl Model for Employee {
             access_level: None,
             can_report_time: None,
             is_admin: None,
+            can_handle_customers: None,
+            can_handle_employees: None,
+            can_handle_vehicles: None,
+            can_access_crm: None,
         }
     }
 
@@ -159,6 +171,10 @@ impl Employee {
             updated: Utc::now(),
             can_report_time: Some(true),
             is_admin: Some(false),
+            can_handle_customers: Some(false),
+            can_handle_employees: Some(false),
+            can_handle_vehicles: Some(false),
+            can_access_crm: Some(false),
         }
     
     }
@@ -177,7 +193,7 @@ impl Employee {
                     None => Ok(None),
                     Some(row) => {
                         let mut emp = Self::from_row(&row);
-                        let res = emp.get_access_values(data).await;
+                        let res = emp.get_permissions(data).await;
                         if let Err(err) = res {
                             println!("{err}");
                         }
@@ -209,7 +225,7 @@ impl Employee {
                 Ok(rows) => {
                 for row in rows {
                     let mut emp = Employee::from_row(&row);
-                    let res = emp.get_access_values(data).await;
+                    let res = emp.get_permissions(data).await;
                     if let Err(err) = res {
                         println!("{err}");
                     }
@@ -240,7 +256,7 @@ impl Employee {
                 Ok(rows) => {
                     for row in rows {
                         let mut emp = Employee::from_row(&row);
-                        let res = emp.get_access_values(data).await;
+                        let res = emp.get_permissions(data).await;
                         if let Err(err) = res {
                             println!("{err}");
                         }
@@ -309,12 +325,12 @@ impl Employee {
             let n: u8 = rng.gen_range(0..=58);
             pass.push_str(chars[n as usize]);
         }
-        let res = User::insert_user(&self.email.clone(), &self.first_name.clone().unwrap(), &self.last_name.clone().unwrap(), &self.phone_number.clone(), &pass, &"eng".to_string(), data).await;
+        let res = User::insert_user(&self.email.clone(), &self.first_name.clone().unwrap(), &self.last_name.clone().unwrap(), &self.phone_number.clone(), &pass, &"eng".to_string(), Some(self.crm_uuid.hyphenated().to_string()), data).await;
         if let Err(err) = res {
             return Err(err);
         } else {
             let new_user_uuid = res.unwrap();
-            let temp_user = User { email: self.email.clone(), phone_number: Some(self.phone_number.clone()), ..User::default()};
+            let temp_user = User {uuid: Uuid::parse_str(&new_user_uuid).unwrap(), email: self.email.clone(), phone_number: Some(self.phone_number.clone()), ..User::default()};
             return Ok((pass, temp_user));
         }
     }
@@ -338,7 +354,7 @@ impl Employee {
         } 
     }
 
-    async fn get_access_values(&mut self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+    async fn get_permissions(&mut self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
         match User::get_by_email_or_phone_number_sep(&self.email.clone(), &self.phone_number.clone(), data).await {
             Err(err) => Err(err),
             Ok(user_opt) => {
@@ -347,10 +363,13 @@ impl Employee {
                         self.access_level = None;
                         self.is_admin = None;
                         self.can_report_time = None;
+                        self.can_handle_customers = None;
+                        self.can_handle_employees = None;
+                        self.can_handle_vehicles = None;
                         Ok(())
                     },
                     Some(u) => {
-                        match sqlx::query("SELECT access_level, can_report_time, is_admin FROM `crm` . `user_employee` WHERE `crm_uuid` = ? AND `user_uuid` = ?")
+                        match sqlx::query("SELECT * FROM `crm` . `user_employee` WHERE `crm_uuid` = ? AND `user_uuid` = ?")
                         .bind(&self.crm_uuid.hyphenated().to_string())
                         .bind(u.uuid.hyphenated().to_string())
                         .fetch_optional(&data.pool)
@@ -361,11 +380,18 @@ impl Employee {
                                     self.access_level = None;
                                     self.is_admin = None;
                                     self.can_report_time = None;
+                                    self.can_handle_customers = None;
+                                    self.can_handle_employees = None;
+                                    self.can_handle_vehicles = None;
                                 }else{
                                     let row = row_opt.unwrap();
                                     self.access_level = row.get("access_level");
                                     self.is_admin = row.get("is_admin");
                                     self.can_report_time = row.get("can_report_time");
+                                    self.can_handle_customers = row.get("can_handle_customers");
+                                    self.can_handle_employees = row.get("can_handle_employees");
+                                    self.can_handle_vehicles = row.get("can_handle_vehicles");
+                                    self.can_access_crm = row.get("can_access_crm");
                                 }
                                 Ok(())
                             } 
@@ -377,10 +403,43 @@ impl Employee {
     }
 
 
-    pub async fn update_access_values(&self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
-        todo!()
+    pub async fn update_permissions(&self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+        match sqlx::query("UPDATE `crm` . `user_employee` SET `is_admin` = ?, `can_report_time` = ?, `can_handle_customers` = ?, `can_handle_employees` = ?, `can_handle_vehicles` = ?, `can_access_crm` = ? WHERE `crm_uuid` = ? AND `user_uuid` = ?")
+        .bind(&self.is_admin)
+        .bind(&self.can_report_time)
+        .bind(match self.can_access_crm {
+            Some(value) => {
+                if value == true {
+                    self.can_handle_customers
+                } else {
+                    Some(false)
+                }
+            }, None => Some(false)})
+        .bind(match self.can_access_crm {
+                Some(value) => {
+                    if value == true {
+                        self.can_handle_employees
+                    } else {
+                        Some(false)
+                    }
+                }, None => Some(false)})
+        .bind(match self.can_access_crm {
+                    Some(value) => {
+                        if value == true {
+                            self.can_handle_vehicles
+                        } else {
+                            Some(false)
+                        }
+                    }, None => Some(false)})
+        .bind(match self.can_access_crm {Some(v) => Some(v), None => Some(false)})
+        .bind(&self.crm_uuid.hyphenated().to_string())
+        .bind(&self.user_uuid.expect("ERROR: Could not update values as row does not have a user_uuid").hyphenated().to_string())
+        .execute(&data.pool)
+        .await {
+            Err(err) => Err(err),
+            Ok(_) => Ok(())
+        }
     }
 
        
- 
 }

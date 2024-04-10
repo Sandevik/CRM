@@ -19,6 +19,10 @@ interface Employee {
     accessLevel: number | null,
     isAdmin: boolean | null,
     canReportTime: boolean | null,
+    canHandleCustomers: boolean | null,
+    canHandleEmployees: boolean | null,
+    canHandleVehicles: boolean | null,
+    canAccessCrm: boolean | null,
     added: string,
     updated: string
 }
