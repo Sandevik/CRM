@@ -17,6 +17,8 @@ export default function<T extends Object>({offset, limit, fetchUriNoParams, sear
     const [searchResult, setSearchResult] = useState<T[] | undefined>(undefined);
     const [cached, setCached] = useState<(T[])[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
+    const [notAllowed, setNotAllowed] = useState<boolean>(false);
+
 
     useEffect(()=>{
         (async () => {
@@ -38,7 +40,10 @@ export default function<T extends Object>({offset, limit, fetchUriNoParams, sear
           const res = await request<T[]>(`${fetchUriNoParams}?crmUuid=${crm?.crmUuid}&limit=${requestOptions.limit}&offset=${preFetch ? requestOptions.offset + requestOptions.limit : requestOptions.offset}`, {}, "GET");
           if (res.code === 200) {
             !preFetch && setResult(res.data || []);
+            setNotAllowed(false);
             return res.data;
+          } else if (res.code >= 400) {
+            setNotAllowed(true);
           }
         }
     }
@@ -71,5 +76,5 @@ export default function<T extends Object>({offset, limit, fetchUriNoParams, sear
         }
     }
 
-    return {data: searchResult && searchResult.length > 0 ? searchResult : result || [], nextResult, prevResult, setSearchQuery, refetch, searchQuery, searchResult, currentPage: (requestOptions.offset / requestOptions.limit) + 1, loading}
+    return {data: searchResult && searchResult.length > 0 ? searchResult : result || [], nextResult, prevResult, setSearchQuery, refetch, searchQuery, searchResult, currentPage: (requestOptions.offset / requestOptions.limit) + 1, loading, notAllowed}
 }

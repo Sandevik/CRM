@@ -3,15 +3,17 @@ use actix_web_httpauth::middleware::HttpAuthentication;
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 
-use crate::{AppState, controllers::jwt::Claims, routes::Response, middleware::{owns_or_admin_middleware::RequiresUuid, user_middleware::validator}, models::crm::CRM};
-use crate::middleware::owns_or_admin_middleware::validator as owner_validator;
+use crate::{AppState, controllers::jwt::Claims, routes::Response, middleware::{owns_or_admin_middleware::RequiresUuid, user_middleware::{validator, validator_user_self}}, models::crm::CRM};
+use crate::middleware::owns_or_admin_or_can_access_crm_can_handle_customers_employees_vehicles::validator as oacev_validator;
 
 
 pub fn create_crm() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Response = ServiceResponse<EitherBody<BoxBody>>, Error = Error, InitError = ()>>  {
     let user_middleware = HttpAuthentication::bearer(validator);
     let scope = web::scope("/create-crm")
         .wrap(user_middleware)
-        .service(create)        ;
+        .service(create)        
+        
+        ;
 
     scope
 }
@@ -80,15 +82,15 @@ async fn crms(data: web::Data<AppState>, req_user: Option<ReqData<Claims>>) -> i
 
 
 
-
-
 pub fn crm() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Response = ServiceResponse<EitherBody<BoxBody>>, Error = Error, InitError = ()>> {
-    let owns_or_admin_middleware = HttpAuthentication::bearer(owner_validator);
+    let owns_or_admin_middleware = HttpAuthentication::bearer(oacev_validator);
     
     let scope = web::scope("/crm")
         .wrap(owns_or_admin_middleware)
         .service(remove_by_uuid)
-        .service(read_crm);
+        .service(read_crm)
+        .service(read_employee_crm_by_user_uuid)
+        ;
         
     scope
 }
@@ -130,3 +132,29 @@ async fn remove_by_uuid(data: web::Data<AppState>, query: web::Query<RequiresUui
     }
 }
 
+
+
+pub fn crm_from_employee_user() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Response = ServiceResponse<EitherBody<BoxBody>>, Error = Error, InitError = ()>>  {
+    let user_middleware = HttpAuthentication::bearer(validator_user_self);
+    let scope = web::scope("/employee")
+        .wrap(user_middleware)
+        .service(read_employee_crm_by_user_uuid)        
+        
+        ;
+
+    scope
+}
+
+#[derive(Deserialize)]
+struct CrmByEmployeeReq {
+    #[serde(rename(deserialize = "employeeUserUuid"))]
+    employee_user_uuid: String,
+}
+
+#[get("/by-employee-user-uuid")]
+async fn read_employee_crm_by_user_uuid(data: web::Data<AppState>, query: web::Query<CrmByEmployeeReq>) -> impl Responder {
+    match CRM::get_all_by_user_uuid(&Uuid::parse_str(&query.employee_user_uuid).expect("ERROR: Could not parse user uuid"), &data).await {
+        Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
+        Ok(crm) => HttpResponse::Ok().json(Response::ok("Successfully retrieved crms", Some(crm)))
+    }
+}

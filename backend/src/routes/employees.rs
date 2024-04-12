@@ -4,15 +4,15 @@ use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 use chrono::NaiveDate;
 use crate::{models::{employee::{self, Employee}, Model}, routes::Response};
-use crate::{middleware::owns_or_admin_middleware::validator, AppState};
+use crate::{middleware::owns_or_admin_or_can_handle_employees::validator, AppState};
 
 use super::Limit;
 
 pub fn employees() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Response = ServiceResponse<EitherBody<BoxBody>>, Error = Error, InitError = ()>> {
-    let owner_or_admin_middleware = HttpAuthentication::bearer(validator);
+    let owns_or_admin_or_can_handle_employees_middleware = HttpAuthentication::bearer(validator);
     
     let scope = web::scope("/employees")
-        .wrap(owner_or_admin_middleware)
+        .wrap(owns_or_admin_or_can_handle_employees_middleware)
         .service(by_uuid)
         .service(create_employee)
         .service(get_all)

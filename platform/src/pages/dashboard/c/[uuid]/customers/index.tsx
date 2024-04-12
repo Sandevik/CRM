@@ -13,12 +13,13 @@ import Text from '@/components/Text';
 import EmptyList from '@/components/EmptyList';
 import { AuthContext } from '@/context/AuthContext';
 import text from '@/utils/text';
+import NotAllowed from '@/components/NotAllowed';
 
 export default function Index() {
     const {data: userData} = useContext(AuthContext);
     const [createCustomerActive, setCreateCustomerActive] = useState<boolean>(false);
     
-    const {data, refetch, nextResult, prevResult, setSearchQuery, searchQuery, searchResult, currentPage, loading} = useReq<Customer>({
+    const {data, refetch, nextResult, prevResult, setSearchQuery, searchQuery, searchResult, currentPage, loading, notAllowed} = useReq<Customer>({
       fetchUriNoParams: "/customers/all",
       searchUriNoParams: "/customers/search"
     })
@@ -32,6 +33,10 @@ export default function Index() {
     <main className='relative px-2 max-w-[1800px] m-auto'>
         <Navbar />
         <h1 className="text-3xl flex justify-center py-2 font-semibold"><Text text={{eng: "Customers", swe: "Kunder"}}/></h1>
+        {notAllowed 
+        ? <NotAllowed /> 
+        : <>
+        
         <div className='sticky mt-4 flex justify-center top-[110px]'>
         {data.length > 0 ? 
           <div className="flex gap-2 bg-background-dark bg-opacity-60">
@@ -56,6 +61,8 @@ export default function Index() {
               <span><Text text={{eng: "Page", swe: "Sida"}} /> {currentPage}</span>
             <Button onClick={() => nextResult()}><FaChevronRight/></Button>
           </div>
+          </>
+          }
     </main>
   )
 }

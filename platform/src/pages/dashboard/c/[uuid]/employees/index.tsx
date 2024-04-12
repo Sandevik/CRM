@@ -13,15 +13,16 @@ import EmployeeRow from '../../../../../components/EmployeeRow';
 import EmptyList from '@/components/EmptyList';
 import text from '@/utils/text';
 import { AuthContext } from '@/context/AuthContext';
+import NotAllowed from '@/components/NotAllowed';
 
 export default function Index() {
   const {data: userData} = useContext(AuthContext);
   const [createCustomerActive, setCreateEmployeeActive] = useState<boolean>(false);
     
-    const {data, refetch, nextResult, prevResult, setSearchQuery, searchQuery, searchResult, currentPage, loading} = useReq<Employee>({
+    const {data, refetch, nextResult, prevResult, setSearchQuery, searchQuery, searchResult, currentPage, loading, notAllowed} = useReq<Employee>({
       fetchUriNoParams: "/employees/all",
       searchUriNoParams: "/employees/search"
-    })
+    });
 
     const onSuccessfullSubmit = () => {
       setCreateEmployeeActive(false);
@@ -33,6 +34,9 @@ export default function Index() {
     <main className='relative px-2 max-w-[1800px] m-auto'>
         <Navbar />
         <h1 className="text-3xl flex justify-center py-2 font-semibold"><Text text={{eng: "Employees", swe: "Anställda"}}/></h1>
+        {notAllowed 
+        ? <NotAllowed /> 
+        : <>
         <div className='sticky mt-4 flex justify-center top-[110px]'>
         {data.length > 0 ? 
           <div className="flex gap-2 bg-background-dark bg-opacity-60">
@@ -57,6 +61,8 @@ export default function Index() {
               <span><Text text={{eng: "Page", swe: "Sida"}} /> {currentPage}</span>
             <Button onClick={() => nextResult()}><FaChevronRight /></Button>
           </div>
+          </>
+        }
     </main>
   )
 }

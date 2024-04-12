@@ -4,15 +4,15 @@ use chrono::{NaiveDate};
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 use crate::{models::Model ,middleware::owns_or_admin_middleware::RequiresUuid, routes::Response};
-use crate::{middleware::owns_or_admin_middleware::validator, AppState, models::customer::Customer};
+use crate::{middleware::owns_or_admin_or_can_handle_customers::validator, AppState, models::customer::Customer};
 
 use super::Limit;
 
 pub fn customers() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Response = ServiceResponse<EitherBody<BoxBody>>, Error = Error, InitError = ()>> {
-    let owner_or_admin_middleware = HttpAuthentication::bearer(validator);
+    let owns_or_admin_or_can_handle_customers_middleware = HttpAuthentication::bearer(validator);
     
     let scope = web::scope("/customers")
-        .wrap(owner_or_admin_middleware)
+        .wrap(owns_or_admin_or_can_handle_customers_middleware)
         .service(by_uuid)
         .service(create_customer)
         .service(get_all)

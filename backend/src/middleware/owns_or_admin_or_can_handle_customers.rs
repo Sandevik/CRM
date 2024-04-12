@@ -58,7 +58,7 @@ pub async fn validator(mut req: ServiceRequest, credentials: BearerAuth) -> Resu
                         None => Err((ErrorUnauthorized(r#"{"code": 401, "message": "Unauthorized"}"#), req)),
                         Some(user) => {
                             if user.current_jwt == Some(token_string) {
-                                if CRM::user_owns_or_is_admin(&user, &uuid, data).await.unwrap() {
+                                if CRM::user_owns_or_is_admin(&user, &uuid, data).await.unwrap() || CRM::user_can_handle_customers(&user, &uuid, data).await.expect("ERROR: Could not determine if user can handle customers") {
                                     let (_, mut payload) = actix_http::h1::Payload::create(true);
                                     payload.unread_data(body_clone.into());
                                     req.set_payload(payload.into());

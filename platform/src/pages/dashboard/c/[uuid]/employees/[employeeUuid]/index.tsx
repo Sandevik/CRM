@@ -157,7 +157,7 @@ export default function Index() {
     }
   }
 
-  const disaccosiateAndRemoveAccount = async () => {
+  const disassociateAndRemoveAccount = async () => {
     alert("(Modal) You are about to disassociate and remove this account")
   } 
 
@@ -332,7 +332,7 @@ export default function Index() {
 
         <div className='flex gap-2'>
           <Button red={true} onClick={() => disassociateAccount()}><Text text={{eng: "Disassociate Account", swe: "Avlänka konto"}}/></Button>
-          <Button red={true} onClick={() => disaccosiateAndRemoveAccount()} className='bg-light-red'><Text text={{eng: "Disassociate and remove account", swe: "Avlänka och ta bort konto"}}/></Button>
+          <Button red={true} onClick={() => disassociateAndRemoveAccount()} className='bg-light-red'><Text text={{eng: "Disassociate and remove account", swe: "Avlänka och ta bort konto"}}/></Button>
         </div>
       </div>}
 
