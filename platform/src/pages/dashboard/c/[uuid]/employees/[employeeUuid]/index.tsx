@@ -1,7 +1,7 @@
 import { useParams } from 'next/navigation'
 import React, { useContext, useEffect, useState } from 'react'
 import { FaUser } from "react-icons/fa";
-import Navbar from '../../Navbar';
+import Navbar from '../../../../../../components/Navbar';
 import TaskList from '@/components/TaskList';
 import { CurrentCrmContext } from '@/context/CurrentCrmContext';
 import request from '@/utils/request';
@@ -162,8 +162,7 @@ export default function Index() {
   } 
 
   return (
-    <main className="px-2  max-w-[1800px] m-auto">
-      <Navbar />
+    <main className="p-2">
 
       <div className="flex flex-col items-center lg:grid lg:grid-cols-3 bg-background-dark my-2 gap-2">
         <div className=" p-2 min-h-20 flex items-center min-w-[90vw] lg:min-w-full">

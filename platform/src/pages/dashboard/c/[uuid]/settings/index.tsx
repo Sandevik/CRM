@@ -1,5 +1,5 @@
 import React, { useContext } from 'react'
-import Navbar from '../Navbar'
+import Navbar from '../../../../../components/Navbar'
 import Button from '@/components/Button'
 import { CurrentCrmContext } from '@/context/CurrentCrmContext';
 import request from '@/utils/request';
@@ -22,7 +22,6 @@ export default function Index() {
   
     return (
     <div>
-        <Navbar />
         Settings
         <Button onClick={() => removeCrm()}>Remove crm</Button>  
         <Button onClick={() => alert("create function")}>Clear cache</Button>

@@ -4,7 +4,7 @@ import Text from './Text'
 
 export default function EmptyPage({text}: {text: Language}) {
   return (
-    <div className="w-full h-full grid place-items-center relative">
+    <div className="w-full h-full grid place-items-center relative z-1">
         <div className="z-1 flex items-center">
             <div className="flex items-center gap-4">
                 <p className="text-2xl"><Text text={text}/></p>

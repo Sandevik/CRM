@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import Navbar from '../Navbar'
+import Navbar from '../../../../../components/Navbar'
 import { bk1, bk2, bk3, bk4 } from '@/utils/BK';
 import Input from '@/components/Input';
 
@@ -40,8 +40,7 @@ export default function Index() {
 
 
   return (
-    <main className="px-2 max-w-[1800px] m-auto">
-      <Navbar />
+    <main className="p-2 ">
       Hanera lager men också bilar och lastbilar m.m (service och uppgifter)
       Automatisk bk klass uträknare med transportstyrelsens api & bk klass uppgifter
       <br />

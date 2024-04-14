@@ -1,6 +1,6 @@
 import TaskList from '@/components/TaskList';
 import Meetings from '../../../../components/Meetings';
-import Navbar from './Navbar';
+import Navbar from '../../../../components/Navbar';
 import { useContext, useEffect, useState } from 'react';
 import { CurrentCrmContext } from '@/context/CurrentCrmContext';
 import request from '@/utils/request';
@@ -43,9 +43,8 @@ export default function Index() {
   }
 
   return (
-    <div className='flex h-[calc(100dvh-3em)] max-w-[1800px] m-auto'>
+    <div className='flex h-[calc(100dvh-3em)] p-2'>
       <main className="flex-grow">
-        <Navbar />
         <div className="p-2">
 
           <div>

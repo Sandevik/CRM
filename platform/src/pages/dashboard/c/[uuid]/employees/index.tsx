@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react'
-import Navbar from '../Navbar'
+import Navbar from '../../../../../components/Navbar'
 import Input from '@/components/Input'
 import useReq from '@/hooks/useReq';
 import Button from '@/components/Button';
@@ -31,8 +31,7 @@ export default function Index() {
 
 
   return (
-    <main className='relative px-2 max-w-[1800px] m-auto'>
-        <Navbar />
+    <main className='relative p-2 '>
         <h1 className="text-3xl flex justify-center py-2 font-semibold"><Text text={{eng: "Employees", swe: "Anställda"}}/></h1>
         {notAllowed 
         ? <NotAllowed /> 
