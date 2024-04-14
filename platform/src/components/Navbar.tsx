@@ -26,7 +26,7 @@ export default function Navbar() {
             <li className='text-2xl font-bold capitalize truncate'>
               <span>{crm?.name || "Coneqt"}</span>
             </li>
-            <li className={`${open ? "opacity-100 pointer-events-all" : "pointer-events-none translate-x-[15vw] opacity-0 transistion-opacity"} w-[18em] h-[calc(100dvh-3.5em)] absolute right-1 transition-all flex flex-col  top-14 bg-background-light p-5 gap-6`}>
+            <li className={`${open ? "opacity-100 pointer-events-all" : "pointer-events-none translate-x-[15vw] opacity-0 transistion-opacity"} w-[18em] h-[calc(100dvh-3.2em)] absolute right-1 transition-all flex flex-col  top-14 bg-background-light p-5 gap-6`}>
               <IoClose className={`text-3xl absolute top-3 right-4 cursor-pointer `} onClick={() => setOpen(false)}/>
                 <div className="flex flex-col justify-between h-[60%] max-w-[80%]">
                   <div className="flex flex-col gap-6">
