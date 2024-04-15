@@ -52,7 +52,7 @@ export default function Task({task, refetchTasks, focusTask, showCustomer}: {sho
         <div className={`absolute ${task.status === "Completed" || (task.recurrence !== null && Date.now() < new Date(task.start || "").getTime()) ? "bottom-0" : "bottom-9"} flex flex-col h-12 w-[95%] gap-2`}>
           <div className='w-full flex justify-between items-center'>
             {showCustomer && <div><Link className="text-greenish" href={`/dashboard/c/${crm?.crmUuid}/customers/${customer?.uuid}`}>{customer?.firstName} {customer?.lastName}</Link></div>}
-            <TiCog onClick={() => focusTask(task)} className="text-3xl hover:rotate-45 transition-all hover:text-light-blue cursor-pointer"/>
+            <TiCog onClick={() => focusTask(task)} className="text-3xl hover:rotate-45 transition-all hover:text-accent-color cursor-pointer"/>
           </div>
           {(!(task.status === "Completed") && !(task.recurrence !== null && Date.now() < new Date(task.start || "").getTime())) && <Button onClick={()=>completeTask()}><Text text={{eng: "Complete", swe: "Avklarad"}}/></Button>}
         </div>

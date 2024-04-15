@@ -33,7 +33,7 @@ export default function CalendarPart({activeDate, meetingWithDay, currentDate}: 
   
     return (
     <li className={`h-32 p-2 hover:bg-light-purple transition-colors ${new Date(activeDate.getFullYear(), activeDate.getMonth(), meetingWithDay.day).toDateString() === currentDate.toDateString() ? "bg-light-purple bg-opacity-60" : new Date(activeDate.getFullYear(), activeDate.getMonth(), meetingWithDay.day).getTime() < currentDate.getTime() ? "bg-background-light bg-opacity-50" : "bg-background-light" }`} key={meetingWithDay.day}>
-        <div className="flex justify-between text-light-blue">
+        <div className="flex justify-between text-accent-color">
             <span className="text-2xl font-semibold">{meetingWithDay.day}</span>
             <span className="text-md">{matchWeekDay(new Date(activeDate.getFullYear(), activeDate.getMonth() + 1, meetingWithDay.day).getDay())}</span>
         </div>

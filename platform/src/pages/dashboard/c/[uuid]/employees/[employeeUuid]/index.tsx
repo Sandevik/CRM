@@ -1,6 +1,6 @@
 import { useParams } from 'next/navigation'
 import React, { useContext, useEffect, useState } from 'react'
-import { FaUser } from "react-icons/fa";
+import { FaTasks, FaUser } from "react-icons/fa";
 import Navbar from '../../../../../../components/Navbar';
 import TaskList from '@/components/TaskList';
 import { CurrentCrmContext } from '@/context/CurrentCrmContext';
@@ -19,6 +19,7 @@ import text from '@/utils/text';
 import { AuthContext } from '@/context/AuthContext';
 import Switch from '@/components/Switch';
 import Screen from '@/components/Screen';
+import { IoIosTimer, IoMdSettings } from 'react-icons/io';
 
 
 export default function Index() {
@@ -175,8 +176,8 @@ export default function Index() {
         </div>
         <div className=" p-2 px-6 min-h-20 flex justify-between items-center gap-2 border-r-2 pr-4 border-l-2 pl-4 min-w-[90vw] lg:min-w-full">
           <div className='flex flex-col gap-2'>
-            {edit ? <Input className='bg-background-light w-full' placeholder={"john.doe@email.com"} value={employee?.email || ""} onChange={(e) => setEmployee({...employee, email: e.target.value})}/> : employee?.email ? <Link href={`mailto:${employee.email}`} className={`text-md truncate text-light-blue flex gap-2 items-center`}><MdEmail className="translate-y-[2px]"/>{employee.email}</Link> : <span className="truncate italic"><Text text={{eng:"No email was found", swe: "Ingen e-postadress hittades"}} /></span>}
-            {edit ? <Input className='bg-background-light w-full' value={employee?.phoneNumber || ""} onChange={(e) => setEmployee({...employee, phoneNumber: e.target.value})}/> : employee?.phoneNumber ? <Link href={`tel:${employee.phoneNumber}`} className={`text-md truncate text-light-blue flex gap-2 items-center`}><MdLocalPhone className="translate-y-[2px]" />{employee.phoneNumber}</Link> : <span className="truncate italic"><Text text={{eng:"No phone number was found", swe: "Inget telefonnummer hittades"}} /></span>}
+            {edit ? <Input className='bg-background-light w-full' placeholder={"john.doe@email.com"} value={employee?.email || ""} onChange={(e) => setEmployee({...employee, email: e.target.value})}/> : employee?.email ? <Link href={`mailto:${employee.email}`} className={`text-md truncate text-accent-color flex gap-2 items-center`}><MdEmail className="translate-y-[2px]"/>{employee.email}</Link> : <span className="truncate italic"><Text text={{eng:"No email was found", swe: "Ingen e-postadress hittades"}} /></span>}
+            {edit ? <Input className='bg-background-light w-full' value={employee?.phoneNumber || ""} onChange={(e) => setEmployee({...employee, phoneNumber: e.target.value})}/> : employee?.phoneNumber ? <Link href={`tel:${employee.phoneNumber}`} className={`text-md truncate text-accent-color flex gap-2 items-center`}><MdLocalPhone className="translate-y-[2px]" />{employee.phoneNumber}</Link> : <span className="truncate italic"><Text text={{eng:"No phone number was found", swe: "Inget telefonnummer hittades"}} /></span>}
           </div>
           <div className="flex flex-col gap-2">
             <span className='text-md text-right'><Text text={{eng: "User Account", swe: "Användarkonto"}} /> </span>
@@ -186,18 +187,18 @@ export default function Index() {
         <div className=" p-2 min-h-20 flex justify-between items-center gap-2 min-w-[90vw] lg:min-w-full">
           <div className="flex flex-col gap-2">
             <span><Text text={{eng: "Contract", swe: "Kontrakt"}} /></span>
-            <span className='flex gap-2 items-center'> {employee?.contract_uuid ? <Link href={`/dashboard/c/${crm?.crmUuid}/employees/${employee?.uuid}/contract`} className='flex gap-2 items-center text-lg'><span className="underline text-light-blue"><Text text={{eng: "Active", swe: "Aktivt"}} /></span> </Link> : <Button onClick={()=>alert("todo")}><Text text={{eng: "Write", swe: "Skriv"}} /></Button>} <ImProfile className={`text-2xl translate-y-[1px] ${employee?.contract_uuid ? "text-green-300" : "text-light-red"}`} /></span>
+            <span className='flex gap-2 items-center'> {employee?.contract_uuid ? <Link href={`/dashboard/c/${crm?.crmUuid}/employees/${employee?.uuid}/contract`} className='flex gap-2 items-center text-lg'><span className="underline text-accent-color"><Text text={{eng: "Active", swe: "Aktivt"}} /></span> </Link> : <Button onClick={()=>alert("todo")}><Text text={{eng: "Write", swe: "Skriv"}} /></Button>} <ImProfile className={`text-2xl translate-y-[1px] ${employee?.contract_uuid ? "text-green-300" : "text-light-red"}`} /></span>
           </div>
           <div className='flex flex-col gap-2'>
-            <button onClick={() => handleEdit()} className="flex gap-2 items-center hover:text-light-blue transition-colors"><FaPen /><Text text={edit ? {eng: "Save", swe: "Spara"} : {eng:"Edit", swe:"Ändra"}} /></button>
+            <button onClick={() => handleEdit()} className="flex gap-2 items-center hover:text-accent-color transition-colors"><FaPen /><Text text={edit ? {eng: "Save", swe: "Spara"} : {eng:"Edit", swe:"Ändra"}} /></button>
           </div>
         </div>
         
       </div>
 
       <div>
-        <button onClick={() => setExpand(!expand)} className="flex gap-2 items-center text-light-blue"><BsChevronRight className={expand ? "rotate-90" : "rotate-0" + " transition-transform"}/><Text text={expand ? {eng: "View Less", swe: "Visa Mindre"}:{eng: "View More", swe: "Visa Mer"}}/></button>
-        <div className={`${expand ? "h-20 pointer-events-auto opacity-100": "h-0 pointer-events-none opacity-0"} transition-all p-4 grid grid-cols-3`}>
+        <button onClick={() => setExpand(!expand)} className="flex gap-2 items-center text-accent-color"><BsChevronRight className={expand ? "rotate-90" : "rotate-0" + " transition-transform"}/><Text text={expand ? {eng: "View Less", swe: "Visa Mindre"}:{eng: "View More", swe: "Visa Mer"}}/></button>
+        <div className={`${expand ? "h-26 pointer-events-auto opacity-100": "h-0 pointer-events-none opacity-0"} transition-all p-4 grid grid-cols-3`}>
           
           <div>
             <div className="grid grid-cols-2">
@@ -273,10 +274,10 @@ export default function Index() {
       </div>
 
       <nav>
-        <ul className="flex ">
-          <li className={`${selectedTab === "tasks" && "text-black px-2 clippath bg-light-blue"} px-3 text-lg font-semibold cursor-pointer transition-colors hover:text-greenish `} onClick={() => setSelectedTab("tasks")}><Text text={{swe: "Uppgifter", eng: "Tasks"}}/></li>
-          <li className={`${selectedTab === "time" && "text-black clippath bg-light-blue"} px-3 text-lg font-semibold cursor-pointer transition-colors hover:text-greenish  `} onClick={() => setSelectedTab("time")}><Text text={{swe: "Tidsrapporteringar", eng: "Time Reports"}}/></li>
-          <li className={`${selectedTab === "settings" && "text-black px-2 clippath bg-light-blue"} px-3 text-lg font-semibold cursor-pointer transition-colors hover:text-greenish `} onClick={() => setSelectedTab("settings")}><Text text={{swe: "Inställningar", eng: "Employee Settings"}}/></li>
+        <ul className="flex gap-2">
+          <li className={`${selectedTab === "tasks" && "text-black clippath bg-accent-color "} gap-2 px-3 pb-1 pt-0.5 text-lg font-semibold cursor-pointer transition-colors hover:text-greenish flex  items-center`} onClick={() => setSelectedTab("tasks")}><FaTasks /><Text text={{swe: "Uppgifter", eng: "Tasks"}}/></li>
+          <li className={`${selectedTab === "time" && "text-black clippath bg-accent-color "} gap-2 px-3 pb-1 pt-0.5 text-lg font-semibold cursor-pointer transition-colors hover:text-greenish flex items-center `} onClick={() => setSelectedTab("time")}><IoIosTimer /><Text text={{swe: "Tidsrapporteringar", eng: "Time Reports"}}/></li>
+          <li className={`${selectedTab === "settings" && "text-black clippath bg-accent-color "} gap-2 px-3 pb-1 pt-0.5 text-lg font-semibold cursor-pointer transition-colors hover:text-greenish flex items-center`} onClick={() => setSelectedTab("settings")}><IoMdSettings /><Text text={{swe: "Inställningar", eng: "Employee Settings"}}/></li>
         </ul>
       </nav>
 

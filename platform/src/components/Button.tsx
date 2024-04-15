@@ -28,7 +28,7 @@ export default function Button(props: Props) {
   return (
     <>
       {/*props.disabled && <span className={"absolute top-8 left-[23%] text-sm ripple-btn-reason"}>{props.disabledReason}</span>*/}
-      <button ref={ref} {...props} className={`${/.*(absolute|relative).*/.test(props.className || "") ? props.className : "relative"} ripple-btn text-black font-semibold px-2 flex justify-center items-center rounded-sm min-h-[33px] min-w-[100px] ${!props.disabled ? `${props.red ? "bg-light-red hover:bg-red-500" : "bg-light-blue hover:bg-gray-100"}` : "bg-gray-400 cursor-not-allowed"} transition-all $`}>{props.children}</button>
+      <button ref={ref} {...props} className={`${/.*(absolute|relative).*/.test(props.className || "") ? props.className : "relative"} ripple-btn text-black font-semibold px-2 flex justify-center items-center rounded-sm min-h-[33px] min-w-[100px] ${!props.disabled ? `${props.red ? "bg-light-red hover:bg-red-500" : "bg-accent-color hover:bg-gray-100"}` : "bg-gray-400 cursor-not-allowed"} transition-all $`}>{props.children}</button>
     </>
   )
 }

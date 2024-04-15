@@ -55,22 +55,22 @@ export default function NewCustomerForm({active, setCreateCustomerActive, onSucc
         <div className="grid grid-cols-2 gap-2">
             <div className=" flex flex-col gap-2">
                 <label htmlFor="first name"><Text text={{eng: "First name", swe: "Förnamn"}} /></label>
-                <Input className="bg-light-blue font-semibold" name="first name" value={customer.firstName || ""} onChange={(e) => setCustomer({...customer, firstName: e.target.value})}/>
+                <Input className="bg-accent-color font-semibold" name="first name" value={customer.firstName || ""} onChange={(e) => setCustomer({...customer, firstName: e.target.value})}/>
             </div>
 
             <div className=" flex flex-col gap-2">
                 <label htmlFor="last name"><Text text={{eng: "Last name", swe: "Efternamn"}} /></label>
-                <Input className="bg-light-blue font-semibold" name="last name"  value={customer.lastName || ""} onChange={(e) => setCustomer({...customer, lastName: e.target.value})}/>
+                <Input className="bg-accent-color font-semibold" name="last name"  value={customer.lastName || ""} onChange={(e) => setCustomer({...customer, lastName: e.target.value})}/>
             </div>
         </div>
         <div className=" flex flex-col gap-2">
             <label htmlFor="date of birth"><Text text={{eng: "Date of birth", swe: "Födelsedatum"}} /></label>
-            <Input className="bg-light-blue font-semibold" type='date' name="date of birth" value={customer.dateOfBirth || ""} onChange={(e) => setCustomer({...customer, dateOfBirth: e.target.value})}/>
+            <Input className="bg-accent-color font-semibold" type='date' name="date of birth" value={customer.dateOfBirth || ""} onChange={(e) => setCustomer({...customer, dateOfBirth: e.target.value})}/>
         </div>
         
         <div className=" flex flex-col gap-2">
             <label htmlFor="email">Email</label>
-            <Input className="bg-light-blue font-semibold" name="email" value={customer.email || ""} onChange={(e) => setCustomer({...customer, email: e.target.value})}/>
+            <Input className="bg-accent-color font-semibold" name="email" value={customer.email || ""} onChange={(e) => setCustomer({...customer, email: e.target.value})}/>
         </div>
 
         <div className='border-b-2'></div>
@@ -78,22 +78,22 @@ export default function NewCustomerForm({active, setCreateCustomerActive, onSucc
         <div className="grid grid-cols-2 gap-2">
             <div className=" flex flex-col gap-2">
                 <label htmlFor="address"><Text text={{eng: "Address", swe: "Adress"}} /></label>
-                <Input className="bg-light-blue font-semibold" name="address" value={customer.address || ""} onChange={(e) => setCustomer({...customer, address: e.target.value})}/>
+                <Input className="bg-accent-color font-semibold" name="address" value={customer.address || ""} onChange={(e) => setCustomer({...customer, address: e.target.value})}/>
             </div>
 
             <div className=" flex flex-col gap-2">
                 <label htmlFor="zip code"><Text text={{eng: "Zip code", swe: "Postkod"}} /></label>
-                <Input className="bg-light-blue font-semibold" name="zip code" value={customer.zipCode || ""} onChange={(e) => setCustomer({...customer, zipCode: e.target.value})}/>
+                <Input className="bg-accent-color font-semibold" name="zip code" value={customer.zipCode || ""} onChange={(e) => setCustomer({...customer, zipCode: e.target.value})}/>
             </div>
 
             <div className=" flex flex-col gap-2">
                 <label htmlFor="city"><Text text={{eng: "City", swe: "Stad"}} /></label>
-                <Input className="bg-light-blue font-semibold" name="city" value={customer.city || ""} onChange={(e) => setCustomer({...customer, city: e.target.value})}/>
+                <Input className="bg-accent-color font-semibold" name="city" value={customer.city || ""} onChange={(e) => setCustomer({...customer, city: e.target.value})}/>
             </div>
 
             <div className=" flex flex-col gap-2">
                 <label htmlFor="country"><Text text={{eng: "Country", swe: "Land"}} /></label>
-                <Input className="bg-light-blue font-semibold" name="country" value={customer.country || ""} onChange={(e) => setCustomer({...customer, country: e.target.value})}/>
+                <Input className="bg-accent-color font-semibold" name="country" value={customer.country || ""} onChange={(e) => setCustomer({...customer, country: e.target.value})}/>
             </div>
         </div>
 
@@ -101,12 +101,12 @@ export default function NewCustomerForm({active, setCreateCustomerActive, onSucc
         
         <div className=" flex flex-col gap-2">
             <label htmlFor="company"><Text text={{eng: "Company", swe: "Företag"}} /></label>
-            <Input className="bg-light-blue font-semibold" name="company" value={customer.company || ""} onChange={(e) => setCustomer({...customer, company: e.target.value})}/>
+            <Input className="bg-accent-color font-semibold" name="company" value={customer.company || ""} onChange={(e) => setCustomer({...customer, company: e.target.value})}/>
         </div>
         
         <div className=" flex flex-col gap-2">
             <label htmlFor="phone number"><Text text={{eng: "Phone number", swe: "Telefonnummer"}} /></label>
-            <Input className="bg-light-blue font-semibold" name="phone number" value={customer.phoneNumber || ""} onChange={(e) => setCustomer({...customer, phoneNumber: e.target.value})}/>
+            <Input className="bg-accent-color font-semibold" name="phone number" value={customer.phoneNumber || ""} onChange={(e) => setCustomer({...customer, phoneNumber: e.target.value})}/>
         </div>
         
         <div className=" flex gap-2 items-center">

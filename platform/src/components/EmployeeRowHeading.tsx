@@ -8,7 +8,7 @@ export default function EmployeeRowHeading() {
         <div className="border-l-2 p-2 pl-4 border-background-light truncate">Email</div>
         <div className="hidden md:block border-l-2 p-2 pl-4 border-background-light truncate"><Text text={{eng: "Phone number", swe: "Telefonnummer"}} /></div>
         <div className="hidden md:block border-l-2 p-2 pl-4 border-background-light truncate"><Text text={{eng: "Account Connected", swe: "Konto Kopplat"}} /></div>
-        <div className="hidden md:block border-l-2 p-2 pl-4 border-background-light truncate"><Text text={{eng: "Access Level", swe: "Behörighetsnivå"}}/></div>
+        <div className="hidden md:block border-l-2 p-2 pl-4 border-background-light truncate"><Text text={{eng: "Role", swe: "Roll"}}/></div>
     </li>
   )
 }

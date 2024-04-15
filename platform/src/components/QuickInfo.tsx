@@ -1,7 +1,7 @@
 import { CurrentCrmContext } from '@/context/CurrentCrmContext';
 import request from '@/utils/request';
 import React, { useContext, useEffect, useState } from 'react'
-import { FaPen } from 'react-icons/fa';
+import { FaPen, FaTasks } from 'react-icons/fa';
 import Button from '@/components/Button';
 import TaskList from './TaskList';
 import Text from '@/components/Text';
@@ -35,7 +35,7 @@ export default function QuickInfo({loading, customer, statistics, addingTask, se
       <div className="flex flex-col w-full gap-2 flex-1 ml-2">
         <div className='flex justify-between w-full'>
           <label htmlFor="note" ><Text text={{eng: "About", swe: "Om"}} /></label>
-          <button onClick={() => handleSaveNote(editing)} className="flex gap-2 items-center hover:text-light-blue" >< FaPen /> {!editing ? <Text text={{eng: "Edit", swe: "Ändra"}} /> : <Text text={{eng: "Save", swe: "Spara"}} />}</button>
+          <button onClick={() => handleSaveNote(editing)} className="flex gap-2 items-center hover:text-accent-color" >< FaPen /> {!editing ? <Text text={{eng: "Edit", swe: "Ändra"}} /> : <Text text={{eng: "Save", swe: "Spara"}} />}</button>
         </div>
         <textarea name="note" disabled={!editing} className={`min-h-52 ${editing ? "ring-light-purple" : "ring-background-dark"} scrollthumb resize-none ring-2 tranition-all rounded-md relative p-2 bg-background-light text-white  w-full `} value={currentNote} onChange={(e) => setCurrentNote(e.target.value)}></textarea>
       
@@ -43,7 +43,7 @@ export default function QuickInfo({loading, customer, statistics, addingTask, se
 
           <div className="h-full flex flex-col gap-6">
             <div className="flex justify-between items-end">
-              <span><Text text={{eng: "Tasks", swe: "Uppgifter"}} /></span>
+              <span className="flex gap-2 items-center"><FaTasks /><Text text={{eng: "Tasks", swe: "Uppgifter"}} /></span>
               <Button className='' onClick={()=>setAddTask(true)}><Text text={{eng: "New Task", swe: "Ny Uppgift"}} /></Button>
             </div>
             <TaskList loading={loading} showCustomers={false} tasks={tasks} refetchTasks={refetchTasks} focusTask={focusTask}/>

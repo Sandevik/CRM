@@ -75,22 +75,22 @@ export default function NewEmployeeForm({active, setCreateEmployeeActive, onSucc
         <div className="grid grid-cols-2 gap-2">
             <div className=" flex flex-col gap-2">
                 <label htmlFor="first name"><Text text={{eng: "First name", swe: "Förnamn"}} /></label>
-                <Input className="bg-light-blue font-semibold" name="first name" value={employee.firstName || ""} onChange={(e) => setEmployee({...employee, firstName: e.target.value})}/>
+                <Input className="bg-accent-color font-semibold" name="first name" value={employee.firstName || ""} onChange={(e) => setEmployee({...employee, firstName: e.target.value})}/>
             </div>
 
             <div className=" flex flex-col gap-2">
                 <label htmlFor="last name"><Text text={{eng: "Last name", swe: "Efternamn"}} /></label>
-                <Input className="bg-light-blue font-semibold" name="last name"  value={employee.lastName || ""} onChange={(e) => setEmployee({...employee, lastName: e.target.value})}/>
+                <Input className="bg-accent-color font-semibold" name="last name"  value={employee.lastName || ""} onChange={(e) => setEmployee({...employee, lastName: e.target.value})}/>
             </div>
         </div>
         <div className=" flex flex-col gap-2">
             <label htmlFor="date of birth"><Text text={{eng: "Date of birth", swe: "Födelsedatum"}} /></label>
-            <Input className="bg-light-blue font-semibold" type='date' name="date of birth" value={employee.dateOfBirth || ""} onChange={(e) => setEmployee({...employee, dateOfBirth: e.target.value})}/>
+            <Input className="bg-accent-color font-semibold" type='date' name="date of birth" value={employee.dateOfBirth || ""} onChange={(e) => setEmployee({...employee, dateOfBirth: e.target.value})}/>
         </div>
         
         <div className=" flex flex-col gap-2">
             <label htmlFor="ssn"><Text text={{eng: "Social Security Number", swe: "Personnummer"}} /></label>
-            <Input className="bg-light-blue font-semibold" name="ssn" value={employee.ssn || ""} onChange={(e) => setEmployee({...employee, ssn: e.target.value})}/>
+            <Input className="bg-accent-color font-semibold" name="ssn" value={employee.ssn || ""} onChange={(e) => setEmployee({...employee, ssn: e.target.value})}/>
         </div>
     
         <div className='border-b-2'></div>
@@ -100,7 +100,7 @@ export default function NewEmployeeForm({active, setCreateEmployeeActive, onSucc
                 <label htmlFor="email">Email *</label>
                 {error && (employee.email === "" || employee.email === null) && <Text text={{swe: "Detta fält är nödvändigt!", eng: "This field is required!"}} />}
             </div>
-            <Input type='email' className={`bg-light-blue font-semibold ${ error && (employee.email === "" || employee.email === null) ? "ring-2 ring-red-400" : ""}`} name="email" value={employee.email || ""} onChange={(e) => setEmployee({...employee, email: e.target.value})}/>
+            <Input type='email' className={`bg-accent-color font-semibold ${ error && (employee.email === "" || employee.email === null) ? "ring-2 ring-red-400" : ""}`} name="email" value={employee.email || ""} onChange={(e) => setEmployee({...employee, email: e.target.value})}/>
         </div>
         
         <div className=" flex flex-col gap-2">
@@ -108,7 +108,7 @@ export default function NewEmployeeForm({active, setCreateEmployeeActive, onSucc
                 <label htmlFor="phone number"><Text text={{eng: "Phone number *", swe: "Telefonnummer *"}} /></label>
                 {error && (employee.phoneNumber === "" || employee.phoneNumber === null) && <Text text={{swe: "Detta fält är nödvändigt!", eng: "This field is required!"}} />}
             </div>
-            <Input required type='tel' className={`bg-light-blue font-semibold ${ error && (employee.phoneNumber === "" || employee.phoneNumber === null) ? "ring-2 ring-red-400" : ""}`} name="phone number" value={employee.phoneNumber || ""} onChange={(e) => setEmployee({...employee, phoneNumber: e.target.value})}/>
+            <Input required type='tel' className={`bg-accent-color font-semibold ${ error && (employee.phoneNumber === "" || employee.phoneNumber === null) ? "ring-2 ring-red-400" : ""}`} name="phone number" value={employee.phoneNumber || ""} onChange={(e) => setEmployee({...employee, phoneNumber: e.target.value})}/>
         </div>
 
 
@@ -117,22 +117,22 @@ export default function NewEmployeeForm({active, setCreateEmployeeActive, onSucc
         <div className="grid grid-cols-2 gap-2">
             <div className=" flex flex-col gap-2">
                 <label htmlFor="address"><Text text={{eng: "Address", swe: "Adress"}} /></label>
-                <Input className="bg-light-blue font-semibold" name="address" value={employee.address || ""} onChange={(e) => setEmployee({...employee, address: e.target.value})}/>
+                <Input className="bg-accent-color font-semibold" name="address" value={employee.address || ""} onChange={(e) => setEmployee({...employee, address: e.target.value})}/>
             </div>
 
             <div className=" flex flex-col gap-2">
                 <label htmlFor="zip code"><Text text={{eng: "Zip code", swe: "Postkod"}} /></label>
-                <Input className="bg-light-blue font-semibold" name="zip code" value={employee.zipCode || ""} onChange={(e) => setEmployee({...employee, zipCode: e.target.value})}/>
+                <Input className="bg-accent-color font-semibold" name="zip code" value={employee.zipCode || ""} onChange={(e) => setEmployee({...employee, zipCode: e.target.value})}/>
             </div>
 
             <div className=" flex flex-col gap-2">
                 <label htmlFor="city"><Text text={{eng: "City", swe: "Stad"}} /></label>
-                <Input className="bg-light-blue font-semibold" name="city" value={employee.city || ""} onChange={(e) => setEmployee({...employee, city: e.target.value})}/>
+                <Input className="bg-accent-color font-semibold" name="city" value={employee.city || ""} onChange={(e) => setEmployee({...employee, city: e.target.value})}/>
             </div>
 
             <div className=" flex flex-col gap-2">
                 <label htmlFor="country"><Text text={{eng: "Country", swe: "Land"}} /></label>
-                <Input className="bg-light-blue font-semibold" name="country" value={employee.country || ""} onChange={(e) => setEmployee({...employee, country: e.target.value})}/>
+                <Input className="bg-accent-color font-semibold" name="country" value={employee.country || ""} onChange={(e) => setEmployee({...employee, country: e.target.value})}/>
             </div>
         </div>
 
@@ -140,19 +140,19 @@ export default function NewEmployeeForm({active, setCreateEmployeeActive, onSucc
         
         <div className=" flex flex-col gap-2">
             <label htmlFor="role"><Text text={{eng: "Role", swe: "Roll"}} /></label>
-            <Input className="bg-light-blue font-semibold" name="role" value={employee.role || ""} onChange={(e) => setEmployee({...employee, role: e.target.value})}/>
+            <Input className="bg-accent-color font-semibold" name="role" value={employee.role || ""} onChange={(e) => setEmployee({...employee, role: e.target.value})}/>
         </div>
 
         <div className='border-b-2'></div>
 
         <div className=" flex flex-col gap-2">
             <label htmlFor="drivingLicenseClass"><Text text={{eng: "Driving License Class", swe: "Körkortsklass"}} /></label>
-            <Input className="bg-light-blue font-semibold" name="drivingLicenseClass" value={employee.drivingLicenseClass || ""} onChange={(e) => setEmployee({...employee, drivingLicenseClass: e.target.value})}/>
+            <Input className="bg-accent-color font-semibold" name="drivingLicenseClass" value={employee.drivingLicenseClass || ""} onChange={(e) => setEmployee({...employee, drivingLicenseClass: e.target.value})}/>
         </div>
         
         <div className=" flex flex-col gap-2">
             <label htmlFor="periodOfValidity"><Text text={{eng: "Period Of Validity", swe: "Giltighetsperiod"}} /></label>
-            <Input className="bg-light-blue font-semibold" name="periodOfValidity" value={employee.periodOfValidity || ""} onChange={(e) => setEmployee({...employee, periodOfValidity: e.target.value})}/>
+            <Input className="bg-accent-color font-semibold" name="periodOfValidity" value={employee.periodOfValidity || ""} onChange={(e) => setEmployee({...employee, periodOfValidity: e.target.value})}/>
         </div>
 
         <div className='border-b-2'></div>

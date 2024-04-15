@@ -62,7 +62,7 @@ export default function SignInForm() {
   return (
     <form className="bg-background-light bg-opacity-30 w-full h-full justify-center items-center p-4 custom-shadow-right z-10">
         <div className='max-w-[20em] m-auto flex flex-col gap-6 justify-center h-full mt-4'>
-        <h1 className="text-3xl mb-20 flex justify-center font-semibold text-light-blue">SIGN UP</h1>
+        <h1 className="text-3xl mb-20 flex justify-center font-semibold text-accent-color">SIGN UP</h1>
         <div className="h-14 flex gap-4 justify-center w-full items-center">
         {((credetials.password != credetials.retypedPassword) || error) && 
         <div className={`flex justify-center gap-8 items-center}`}>
@@ -84,8 +84,8 @@ export default function SignInForm() {
         <Button type='submit' className="p-2 rounded-md h-9 flex items-center justify-center font-semibold mt-7 " onClick={(e) => handleSignUp(e)}>{isLoading ? <Spinner /> : "Sign up"}</Button>
         <div className="flex flex-col items-center justify-center gap-6 w-full">
             <div className="flex w-full justify-between">
-                <Link href={"#"} className="text-light-blue underline">Forgot password</Link>
-                <Link href={"/sign-in"} className="text-light-blue underline">Sign in</Link>
+                <Link href={"#"} className="text-accent-color underline">Forgot password</Link>
+                <Link href={"/sign-in"} className="text-accent-color underline">Sign in</Link>
             </div>
         </div>
        </div>

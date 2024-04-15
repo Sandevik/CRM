@@ -38,10 +38,10 @@ export default function MeetingCard({meeting, refetchMeetings}: {meeting: Meetin
 
     return (
     <li className="border-b-2 border-light-purple min-h-[400px] flex flex-col justify-between relative p-2 bg-background-light bg-opacity-60 rounded-md">
-        <RiSettings3Fill onClick={() => setMeetingSettingsOpen(true)} className="absolute text-2xl top-3 right-3 cursor-pointer text-light-blue"/>
+        <RiSettings3Fill onClick={() => setMeetingSettingsOpen(true)} className="absolute text-2xl top-3 right-3 cursor-pointer text-accent-color"/>
         
         <div className={`absolute p-4 z-30 h-full w-full bg-background-light rounded-md top-0 right-0 backdrop-blur-md bg-opacity-60 ${meetingSettingsOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"} transition-opacity`}>
-            <IoClose onClick={() => setMeetingSettingsOpen(false)} className="absolute text-3xl top-3 right-3 cursor-pointer text-light-blue"/>
+            <IoClose onClick={() => setMeetingSettingsOpen(false)} className="absolute text-3xl top-3 right-3 cursor-pointer text-accent-color"/>
             <Button onClick={() => removeMeeting()}>Remove meeting</Button>
         </div>
         
@@ -49,7 +49,7 @@ export default function MeetingCard({meeting, refetchMeetings}: {meeting: Meetin
         <div className="flex flex-col gap-12 mt-8">
             <div className='flex flex-col gap-2 items-center justify-center'>
                 <FaUser className="text-[92px] bg-background-dark p-2 rounded-full" />
-                <Link href={`${crm?.crmUuid}/customers/${customer?.uuid}`} className='font-semibold text-lg text-light-blue hover:text-greenish transition-colors'>{customer ? customer.firstName + " " + customer.lastName : "Unknown customer"}</Link>
+                <Link href={`${crm?.crmUuid}/customers/${customer?.uuid}`} className='font-semibold text-lg text-accent-color hover:text-greenish transition-colors'>{customer ? customer.firstName + " " + customer.lastName : "Unknown customer"}</Link>
             </div>
 
 

@@ -118,16 +118,15 @@ export default function Index() {
 
   return (
       <Screen>
-        <Link href={`/dashboard/c/${crm?.crmUuid}/customers`} className="flex gap-2 items-center text-lg bg-light-blue hover:bg-greenish transition-colors absolute top-[2.7em] left-3 px-2 text-black rounded-md"><FaChevronLeft /> <div><Text text={{eng: "Customers", swe: "Kunder"}} /></div> </Link>
-        <main className='h-[calc(100dvh-9.1em)] rounded-md w-full mt-10 p-4 bg-background-light bg-opacity-50 flex flex-col lg:flex-row gap-4 overflow-y-scroll scrollthumb'>
+        <div className='h-[calc(100dvh-4em)] rounded-md w-full  p-4 bg-background-light bg-opacity-50 flex flex-col lg:flex-row gap-4 overflow-y-scroll scrollthumb'>
           <CustomerCard customer={customer} setEdit={setEdit} edit={edit}/>
           <div className="flex-1 w-full relative">
 
             <nav>
               <ul className="flex gap-1">
-                <li onClick={()=>setCurrentView("info")} className={`${currentView === "info" ? " bg-light-blue text-background-dark" : "bg-background-dark"} clippath transition-colors font-semibold cursor-pointer px-2 py-1`}>Information</li>
-                <li onClick={()=>setCurrentView("entries")} className={`${currentView === "entries" ? " bg-light-blue text-background-dark" : "bg-background-dark"} clippath transition-colors font-semibold cursor-pointer px-2 py-1`}><Text text={{eng: "Entries", swe: "Anteckningar"}} /></li>
-                <li onClick={()=>setCurrentView("meetings")} className={`${currentView === "meetings" ? " bg-light-blue text-background-dark" : "bg-background-dark"} clippath transition-colors font-semibold cursor-pointer px-2 py-1`}><Text text={{eng: "Meetings", swe: "Möten"}} /></li>
+                <li onClick={()=>setCurrentView("info")} className={`${currentView === "info" ? " bg-accent-color text-background-dark" : "bg-background-dark"} clippath transition-colors font-semibold cursor-pointer px-2 py-1`}>Information</li>
+                <li onClick={()=>setCurrentView("entries")} className={`${currentView === "entries" ? " bg-accent-color text-background-dark" : "bg-background-dark"} clippath transition-colors font-semibold cursor-pointer px-2 py-1`}><Text text={{eng: "Entries", swe: "Anteckningar"}} /></li>
+                <li onClick={()=>setCurrentView("meetings")} className={`${currentView === "meetings" ? " bg-accent-color text-background-dark" : "bg-background-dark"} clippath transition-colors font-semibold cursor-pointer px-2 py-1`}><Text text={{eng: "Meetings", swe: "Möten"}} /></li>
               </ul>
             </nav>
 
@@ -149,7 +148,7 @@ export default function Index() {
             </div>
 
           </div>
-        </main>
+        </div>
         <div className='absolute bottom-0 right-[15dvh]'>
           <AddMeeting closePopup={() => setNewMeetingActive(false)} active={newMeetingActive} onSuccessfulSubmit={fetchMeetings} withCustomerUuid={customer?.uuid} />
           <EditMeeting closePopup={() => setEditMeeting(null)} _meeting={editMeeting} onSuccessfulSubmit={fetchMeetings} />

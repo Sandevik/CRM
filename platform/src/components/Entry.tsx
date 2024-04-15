@@ -69,7 +69,7 @@ export default function Entry({entry, customer, refetchEntries}: {entry: Entry, 
         </div>
         <div className={`absolute right-2 flex gap-5 ${!expand ? "top-[1.7em]" : "top-2 cursor-pointer"}`}>
             <button onClick={() => removeEntry()} className="flex gap-2 items-center hover:text-light-red"> <FaTrash /> <Text text={{eng: "Remove", swe: "Ta bort"}} /> </button>
-            <button onClick={() => handleSave()} className="flex gap-2 items-center hover:text-light-blue" >< FaPen /> {currentContent !== initialEntry.content ? <Text text={{eng: "Save", swe: "Spara"}} /> : editing ? <Text text={{eng: "Close", swe: "Stäng"}} /> : <Text text={{eng: "Edit", swe: "Ändra"}} />}</button>
+            <button onClick={() => handleSave()} className="flex gap-2 items-center hover:text-accent-color" >< FaPen /> {currentContent !== initialEntry.content ? <Text text={{eng: "Save", swe: "Spara"}} /> : editing ? <Text text={{eng: "Close", swe: "Stäng"}} /> : <Text text={{eng: "Edit", swe: "Ändra"}} />}</button>
         </div>
         <textarea value={currentContent || ""} disabled={!editing} onChange={(e) => setCurrentContent(e.target.value)} className={`${expand ? "opacity-100 pointer-events-auto h-52 overflow-y-scroll" : "opacity-0 pointer-events-none h-0 overflow-y-hidden"} ${editing ? "ring-background-dark" : "ring-transparent"}  scrollthumb resize-none ring-2 transition-all rounded-md relative p-2 mt-8  bg-background-light text-white  w-full `}></textarea>
     </div>

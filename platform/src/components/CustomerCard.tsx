@@ -5,7 +5,7 @@ import request from '@/utils/request';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useContext } from 'react'
-import { FaUser } from "react-icons/fa";
+import { FaChevronLeft, FaUser } from "react-icons/fa";
 
 
 export default function CustomerCard({customer, edit, setEdit}: {customer: Customer | null, edit: boolean, setEdit: React.Dispatch<React.SetStateAction<boolean>>}) {
@@ -21,8 +21,8 @@ export default function CustomerCard({customer, edit, setEdit}: {customer: Custo
     }
   
     return (
-    <div className="lg:w-[30%] xl:w-[30em] h-full bg-background-dark p-2 rounded-md flex flex-col justify-between">
-        
+    <div className="lg:w-[30%] xl:w-[30em] h-full bg-background-dark p-2 rounded-md flex flex-col justify-between relative">
+        <Link href={`/dashboard/c/${crm?.crmUuid}/customers`} className="flex gap-2 items-center text-lg bg-accent-color hover:bg-greenish transition-colors absolute top-3 left-3 px-2 text-black rounded-md"><FaChevronLeft /> <div><Text text={{eng: "Customers", swe: "Kunder"}} /></div> </Link>
         <div className="lg:hidden flex gap-8 h-full justify-between m-auto items-center">
             <div className="flex flex-col lg:h-[20%] my-10 gap-4">
                 <FaUser className="text-7xl flex justify-center m-auto bg-background-light rounded-full p-4"/>

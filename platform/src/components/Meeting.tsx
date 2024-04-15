@@ -24,7 +24,7 @@ export default function Meeting({meeting, setEditMeeting, refetchMeetings}: {mee
       </li>
       <li className="flex gap-6">
         <div><Text text={{eng: "Added", swe: "Tillagd"}} /> {new Date(meeting.added).toLocaleDateString() + " " + new Date(meeting.added).toLocaleTimeString().substring(0, new Date(meeting.added).toLocaleTimeString().length - 3)}</div>
-        <button onClick={() => setEditMeeting(meeting)} className="hover:text-light-blue flex gap-1 items-center"><FaPen/> <Text text={{eng: "Edit", swe: "Ändra"}} /></button>
+        <button onClick={() => setEditMeeting(meeting)} className="hover:text-accent-color flex gap-1 items-center"><FaPen/> <Text text={{eng: "Edit", swe: "Ändra"}} /></button>
         <button onClick={() => removeMeeting()} className="hover:text-light-red flex gap-1 items-center"><FaTrash/><Text text={{eng: "Remove", swe: "Ta bort"}} /></button>
       </li>
     </ul>
