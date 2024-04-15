@@ -40,7 +40,9 @@ export default function BreadCrumb() {
     }
 
   return (
-    <ul className='flex items-center translate-y-[2px]'>
+    <ul className='flex items-center gap-1 translate-y-[2px]'>
+        {pathName !== "/dashboard" && <li><MdChevronRight className="text-xl ml-1"/></li>}
+        {pathName !== "/dashboard" && <li><Link href={`${crm?.crmUuid ? `/dashboard/c/${crm.crmUuid}` : "/dashboard"}`} className="text-[18px] flex items-center font-normal">{crm?.name || ""}</Link></li>}
         {pathName?.split("/")?.map((part, index) => (
           matchPart(part) != null && index !== 3 && <li key={part} className="flex items-center text-[18px] gap-1 font-normal">
             {index !== 0 && <MdChevronRight className="text-xl ml-1"/>}
