@@ -18,6 +18,7 @@ import Input from '@/components/Input';
 import text from '@/utils/text';
 import { AuthContext } from '@/context/AuthContext';
 import Switch from '@/components/Switch';
+import Screen from '@/components/Screen';
 
 
 export default function Index() {
@@ -162,7 +163,7 @@ export default function Index() {
   } 
 
   return (
-    <main className="p-2">
+    <Screen>
 
       <div className="flex flex-col items-center lg:grid lg:grid-cols-3 bg-background-dark my-2 gap-2">
         <div className=" p-2 min-h-20 flex items-center min-w-[90vw] lg:min-w-full">
@@ -337,6 +338,6 @@ export default function Index() {
 
 
       
-    </main>
+      </Screen>
   )
 }

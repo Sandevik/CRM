@@ -5,6 +5,7 @@ import UserRow from '../../../components/UserRow';
 import UserRowHeading from '../../../components/UserRowHeading';
 import { GrNext, GrPrevious  } from "react-icons/gr";
 import request from '@/utils/request';
+import Screen from '@/components/Screen';
 
 interface FetchOptions {
     offset: number,
@@ -38,7 +39,7 @@ export default function Index() {
 
   
  return (
-    <div>
+    <Screen>
         <span className='m-auto flex justify-center font-semibold'>{usersCount} total users</span>
         <div className="my-2 flex px-2 justify-center gap-6">
             <button className='bg-[var(--blue)] px-2 py-1 rounded-md' onClick={()=>handleDecrement()}><GrPrevious /></button>
@@ -52,6 +53,6 @@ export default function Index() {
         </ul>
         
         
-    </div>
+    </Screen>
   )
 }

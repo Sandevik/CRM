@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import Navbar from '../../../../../components/Navbar'
 import { bk1, bk2, bk3, bk4 } from '@/utils/BK';
 import Input from '@/components/Input';
+import Screen from '@/components/Screen';
 
 export default function Index() {
   const [{tjänsteVikt, totalVikt, tillåtenLastVikt, maxViktAxel, maxViktAxelGrupp}, setTruckValues] = useState<{tjänsteVikt: number, totalVikt: number, tillåtenLastVikt: number, maxViktAxel: number, maxViktAxelGrupp: number}>({tjänsteVikt: 13545, totalVikt: 28000, tillåtenLastVikt: 14455, maxViktAxel: 9000, maxViktAxelGrupp: 19000});
@@ -40,7 +41,7 @@ export default function Index() {
 
 
   return (
-    <main className="p-2 ">
+    <Screen>
       Hanera lager men också bilar och lastbilar m.m (service och uppgifter)
       Automatisk bk klass uträknare med transportstyrelsens api & bk klass uppgifter
       <br />
@@ -54,7 +55,7 @@ export default function Index() {
       <div>Kalkylerad maxlast: {bkSum}kg</div>
 
 
-    </main>
+    </Screen>
 
   )
 }

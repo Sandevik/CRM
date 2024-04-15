@@ -1,11 +1,11 @@
-import BreadCrumb from '@/components/BreadCrumb';
 import Text from '@/components/Text';
 import { AuthContext } from '@/context/AuthContext';
 import { CurrentCrmContext } from '@/context/CurrentCrmContext'
+import { MenuContext } from '@/context/MenuContext';
 import Link from 'next/link'
 import { usePathname } from 'next/navigation';
-import React, { useContext, useState } from 'react'
-import { FaBox, FaFileAlt, FaUserFriends, FaUserTag } from 'react-icons/fa';
+import React, { useContext } from 'react'
+import { FaBox, FaFileAlt, FaUserTag } from 'react-icons/fa';
 import { FaIdCardClip, FaTruckFront } from 'react-icons/fa6';
 import { FiLogIn } from 'react-icons/fi';
 import { IoMdSettings } from 'react-icons/io';
@@ -17,7 +17,7 @@ export default function Navbar() {
   const pathName = usePathname();
   const {crm} = useContext(CurrentCrmContext);
   const {data} = useContext(AuthContext);
-  const [open, setOpen] = useState<boolean>(true);
+  const {open, setOpen} = useContext(MenuContext);
   
   return (
     <nav className="w-full p-2 text-light-blue pr-4 sticky top-0 z-30 bg-background-light">
@@ -32,7 +32,7 @@ export default function Navbar() {
                   <div className="flex flex-col gap-6">
                     <div className="flex flex-col gap-3">
                       <h2 className="font-semibold text-xl">Coneqt</h2>
-                      <Link href={"/dashboard"} className={`${pathName === "/dashboard" && "z-50 text-black px-6 clippath bg-light-blue"} transition-colors hover:text-greenish flex gap-2 items-center `}> <MdOutlineSettingsSystemDaydream /> <Text text={{eng: "All Crms", swe: "Alla Crm"}} /> </Link>
+                      <Link href={"/dashboard"} className={`${pathName === "/dashboard" && "z-50 text-black px-6 clippath bg-light-blue"} transition-colors hover:text-greenish flex gap-2 items-center `}> <MdOutlineSettingsSystemDaydream /> <Text text={{eng: "Your Crms", swe: "Dina Crm"}} /> </Link>
                     </div>
                     <div className="flex flex-col gap-3">
                       <Link href={`/dashboard/c/${crm?.crmUuid}`} className={`${pathName?.split("/").length === 4 && "z-50 text-black px-6 clippath bg-light-blue"} transition-colors hover:text-greenish flex gap-2 items-center`}><MdDashboard /><Text text={{swe:"Panel", eng: "Dashboard"}}/></Link>

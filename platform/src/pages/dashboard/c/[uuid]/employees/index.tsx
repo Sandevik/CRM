@@ -14,6 +14,7 @@ import EmptyList from '@/components/EmptyList';
 import text from '@/utils/text';
 import { AuthContext } from '@/context/AuthContext';
 import NotAllowed from '@/components/NotAllowed';
+import Screen from '@/components/Screen';
 
 export default function Index() {
   const {data: userData} = useContext(AuthContext);
@@ -31,7 +32,7 @@ export default function Index() {
 
 
   return (
-    <main className='relative p-2 '>
+    <Screen>
         <h1 className="text-3xl flex justify-center py-2 font-semibold"><Text text={{eng: "Employees", swe: "Anställda"}}/></h1>
         {notAllowed 
         ? <NotAllowed /> 
@@ -62,6 +63,6 @@ export default function Index() {
           </div>
           </>
         }
-    </main>
+    </Screen>
   )
 }

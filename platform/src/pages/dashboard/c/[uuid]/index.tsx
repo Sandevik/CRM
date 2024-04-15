@@ -7,6 +7,7 @@ import request from '@/utils/request';
 import Text from '@/components/Text';
 import Button from '@/components/Button';
 import { AuthContext } from '@/context/AuthContext';
+import Screen from '@/components/Screen';
 
 export default function Index() {
   const {crm} = useContext(CurrentCrmContext);
@@ -43,7 +44,7 @@ export default function Index() {
   }
 
   return (
-    <div className='flex h-[calc(100dvh-3em)] p-2'>
+    <Screen>
       <main className="flex-grow">
         <div className="p-2">
 
@@ -81,6 +82,6 @@ export default function Index() {
           <Button>Ooga</Button>
       </div>
       </main>
-    </div>
+    </Screen>
   )
 }

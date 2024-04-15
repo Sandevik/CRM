@@ -18,6 +18,7 @@ import FocusedTask from '../../../../../../components/FocusedTask';
 import CustomerCard from '../../../../../../components/CustomerCard';
 import EditCustomer from '../../../../../../components/EditCustomer';
 import Text from '@/components/Text';
+import Screen from '@/components/Screen';
 
 export interface Statistics {
   meetings_count: number,
@@ -116,7 +117,7 @@ export default function Index() {
   },[currentView])
 
   return (
-      <div className='relative w-full pl-3 pr-2 '>
+      <Screen>
         <Link href={`/dashboard/c/${crm?.crmUuid}/customers`} className="flex gap-2 items-center text-lg bg-light-blue hover:bg-greenish transition-colors absolute top-[2.7em] left-3 px-2 text-black rounded-md"><FaChevronLeft /> <div><Text text={{eng: "Customers", swe: "Kunder"}} /></div> </Link>
         <main className='h-[calc(100dvh-9.1em)] rounded-md w-full mt-10 p-4 bg-background-light bg-opacity-50 flex flex-col lg:flex-row gap-4 overflow-y-scroll scrollthumb'>
           <CustomerCard customer={customer} setEdit={setEdit} edit={edit}/>
@@ -157,6 +158,6 @@ export default function Index() {
         <AddTask active={addTask} setActive={setAddTask} customer={customer} refetchTasks={fetchTasks} />
         <NewEntryForm active={newEntryActive} refetchEntries={fetchEntries} close={() => setNewEntryActive(false)} customer={customer}/>
         <EditCustomer initialCustomer={customer} active={edit} _setCustomer={setCustomer} setEdit={setEdit}/>
-      </div>
+      </Screen>
     )
 }

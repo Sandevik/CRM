@@ -4,6 +4,7 @@ import Button from '@/components/Button'
 import { CurrentCrmContext } from '@/context/CurrentCrmContext';
 import request from '@/utils/request';
 import { useRouter } from 'next/router';
+import Screen from '@/components/Screen';
 
 export default function Index() {
     const router = useRouter();
@@ -21,11 +22,11 @@ export default function Index() {
   
   
     return (
-    <div>
+    <Screen>
         Settings
         <Button onClick={() => removeCrm()}>Remove crm</Button>  
         <Button onClick={() => alert("create function")}>Clear cache</Button>
 
-    </div>
+    </Screen>
   )
 }
