@@ -10,7 +10,7 @@ import { FaIdCardClip, FaTruckFront } from 'react-icons/fa6';
 import { FiLogIn } from 'react-icons/fi';
 import { IoMdSettings } from 'react-icons/io';
 import { IoCalendarNumber, IoCalendarSharp, IoClose } from 'react-icons/io5';
-import { MdDashboard, MdOutlineSettingsSystemDaydream, MdPerson2 } from 'react-icons/md';
+import { MdChevronRight, MdDashboard, MdOutlineSettingsSystemDaydream, MdPerson2 } from 'react-icons/md';
 import { RiAdminFill, RiMenu3Fill } from 'react-icons/ri';
 import BreadCrumb from './BreadCrumb';
 
@@ -24,7 +24,7 @@ export default function Navbar() {
     <nav className="w-full p-2 text-accent-color pr-4 sticky top-0 z-30 bg-background-light">
         <ul className='flex justify-between items-center text-xl font-semibold overflow-x-hidden '>
             <li className='text-2xl font-bold capitalize truncate'>
-              <span className="flex gap-1 items-center">{crm?.name || "Coneqt"} <BreadCrumb /></span>
+              <div className="flex gap-1 items-center pl-2"><Link href="/">Coneqt</Link> <MdChevronRight className="text-xl ml-1 translate-y-[2px]"/> <Link href={`${crm?.crmUuid ? `/dashboard/c/${crm.crmUuid}` : "/dashboard"}`} className="text-[18px] flex items-center translate-y-[2px] font-normal">{crm?.name || ""}</Link> <BreadCrumb /></div>
             </li>
             <li className={`${open ? "opacity-100 pointer-events-all" : "pointer-events-none translate-x-[15vw] opacity-0 transistion-opacity"} w-[18em] h-[calc(100dvh-3.2em)] absolute right-1 transition-all flex flex-col  top-14 bg-background-light p-5 gap-6`}>
               <IoClose className={`text-3xl absolute top-3 right-4 cursor-pointer `} onClick={() => setOpen(false)}/>

@@ -9,21 +9,12 @@ export default function BreadCrumb() {
     const {crm} = useContext(CurrentCrmContext);
     const pathName = usePathname();
 
-    const parsePathNames = (pathName?: string): string[] => {
-        let list = pathName?.split("/").filter(part => part !== "");
-        const indexOfC = list?.indexOf("c");
-        list = list?.filter((part, index) => index !== indexOfC);
-        list = list?.filter((part, index) => index !== indexOfC);
-        
-        return list || [];
-    }
-
     const matchPart = (part: string): React.JSX.Element | null => {
       switch (part) {
         case "customers":
           return <Text text={{swe: "kunder", eng: "customers"}}/>
         case "dashboard":  
-          return <Text text={{swe: "panel", eng: "dashboard"}}/>
+          return null
         case "employees":
           return <Text text={{swe: "anställda", eng: "employees"}}/>
         case "schedule":
