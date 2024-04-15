@@ -19,6 +19,9 @@ import CustomerCard from '../../../../../../components/CustomerCard';
 import EditCustomer from '../../../../../../components/EditCustomer';
 import Text from '@/components/Text';
 import Screen from '@/components/Screen';
+import { LuMessageSquarePlus, LuMessagesSquare } from "react-icons/lu";
+import { BsFileText, BsPencilSquare } from 'react-icons/bs';
+import { GrStatusInfo } from 'react-icons/gr';
 
 export interface Statistics {
   meetings_count: number,
@@ -124,16 +127,16 @@ export default function Index() {
 
             <nav>
               <ul className="flex gap-1">
-                <li onClick={()=>setCurrentView("info")} className={`${currentView === "info" ? " bg-accent-color text-background-dark" : "bg-background-dark"} clippath transition-colors font-semibold cursor-pointer px-2 py-1`}>Information</li>
-                <li onClick={()=>setCurrentView("entries")} className={`${currentView === "entries" ? " bg-accent-color text-background-dark" : "bg-background-dark"} clippath transition-colors font-semibold cursor-pointer px-2 py-1`}><Text text={{eng: "Entries", swe: "Anteckningar"}} /></li>
-                <li onClick={()=>setCurrentView("meetings")} className={`${currentView === "meetings" ? " bg-accent-color text-background-dark" : "bg-background-dark"} clippath transition-colors font-semibold cursor-pointer px-2 py-1`}><Text text={{eng: "Meetings", swe: "Möten"}} /></li>
+                <li onClick={()=>setCurrentView("info")} className={`${currentView === "info" ? " bg-accent-color text-background-dark" : "bg-background-dark"} clippath transition-colors font-semibold cursor-pointer px-3 py-1 flex gap-2 items-center`}> <GrStatusInfo />Information</li>
+                <li onClick={()=>setCurrentView("entries")} className={`${currentView === "entries" ? " bg-accent-color text-background-dark" : "bg-background-dark"} clippath transition-colors font-semibold cursor-pointer px-3 py-1 flex gap-2 items-center`}><BsFileText /><Text text={{eng: "Entries", swe: "Anteckningar"}} /></li>
+                <li onClick={()=>setCurrentView("meetings")} className={`${currentView === "meetings" ? " bg-accent-color text-background-dark" : "bg-background-dark"} clippath transition-colors font-semibold cursor-pointer px-3 py-1 flex gap-2 items-center`}><LuMessagesSquare /><Text text={{eng: "Meetings", swe: "Möten"}} /></li>
               </ul>
             </nav>
 
             {currentView === "entries" ? 
-              <Button onClick={() => setNewEntryActive(true)} className='absolute top-0 right-0'><Text text={{eng: "New Entry", swe: "Ny Anteckning"}} /></Button>
+              <Button onClick={() => setNewEntryActive(true)} className='absolute top-0 right-0 flex gap-2 items-center'><BsPencilSquare /><Text text={{eng: "New Entry", swe: "Ny Anteckning"}} /></Button>
               : currentView === "meetings" ?
-              <Button onClick={() => setNewMeetingActive(true)} className='absolute top-0 right-0'><Text text={{eng: "New Meeting", swe: "Nytt Möte"}} /></Button>
+              <Button onClick={() => setNewMeetingActive(true)} className='absolute top-0 right-0 flex gap-2 items-center'><LuMessageSquarePlus /><Text text={{eng: "New Meeting", swe: "Nytt Möte"}} /></Button>
               : ""
             }
 

@@ -8,7 +8,7 @@ export default function CustomerRowHeading() {
         <div className="border-l-2 p-2 pl-4 border-background-light truncate">Email</div>
         <div className="hidden md:block border-l-2 p-2 pl-4 border-background-light truncate"><Text text={{eng: "Phone number", swe: "Telefonnummer"}} /></div>
         <div className="hidden md:block border-l-2 p-2 pl-4 border-background-light truncate"><Text text={{eng: "City", swe: "Stad"}} /></div>
-        <div className="hidden md:block border-l-2 p-2 pl-4 border-background-light truncate">Uuid</div>
+        <div className="hidden md:block border-l-2 p-2 pl-4 border-background-light truncate"><Text text={{eng: "Company", swe: "Företag"}}/></div>
     </li>
   )
 }

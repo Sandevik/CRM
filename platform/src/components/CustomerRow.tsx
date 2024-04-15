@@ -18,7 +18,7 @@ export default function CustomerRow({customer}: {customer: Customer}) {
         <Link href={`/dashboard/c/${crm?.crmUuid}/customers/${customer.uuid}`} className="border-l-2 p-2 pl-4 border-background-light truncate">{customer.email}</Link>
         <Link href={`/dashboard/c/${crm?.crmUuid}/customers/${customer.uuid}`} className="hidden md:block border-l-2 p-2 pl-4 border-background-light truncate">{customer.phoneNumber || "-"}</Link>
         <Link href={`/dashboard/c/${crm?.crmUuid}/customers/${customer.uuid}`} className="hidden md:block border-l-2 p-2 pl-4 border-background-light truncate">{customer.city}</Link>
-        <div className="border-l-2 p-2 pl-4 border-background-light truncate gap-2 items-center hidden md:flex">{ hasCopied ? <BsClipboard2CheckFill className="text-3xl cursor-pointer" onClick={() => copyToClipBoard(customer.uuid)} /> : <BsClipboard2Fill className="text-3xl cursor-pointer" onClick={() => copyToClipBoard(customer.uuid)} />} <div className="truncate">{customer.uuid}</div></div>
+        <div className="border-l-2 p-2 pl-4 border-background-light truncate gap-2 items-center hidden md:flex"> <div className="truncate">{customer.company || "-"}</div></div>
     </li>
   )
 }
