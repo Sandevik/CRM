@@ -121,16 +121,14 @@ export default function Index() {
 
   return (
       <Screen>
-        <div className='h-[calc(100dvh-4em)] rounded-md w-full  p-4 bg-background-light bg-opacity-50 flex flex-col lg:flex-row gap-4 overflow-y-scroll scrollthumb'>
+        <div className='h-[calc(100dvh-4em)] rounded-md w-full  p-4 bg-background-light bg-opacity-50 flex flex-col lg:flex-row gap-4 '>
           <CustomerCard customer={customer} setEdit={setEdit} edit={edit}/>
           <div className="flex-1 w-full relative">
 
-            <nav>
-              <ul className="flex gap-1">
-                <li onClick={()=>setCurrentView("info")} className={`${currentView === "info" ? " bg-accent-color text-background-dark" : "bg-background-dark"} clippath transition-colors font-semibold cursor-pointer px-3 py-1 flex gap-2 items-center`}> <GrStatusInfo />Information</li>
-                <li onClick={()=>setCurrentView("entries")} className={`${currentView === "entries" ? " bg-accent-color text-background-dark" : "bg-background-dark"} clippath transition-colors font-semibold cursor-pointer px-3 py-1 flex gap-2 items-center`}><BsFileText /><Text text={{eng: "Entries", swe: "Anteckningar"}} /></li>
-                <li onClick={()=>setCurrentView("meetings")} className={`${currentView === "meetings" ? " bg-accent-color text-background-dark" : "bg-background-dark"} clippath transition-colors font-semibold cursor-pointer px-3 py-1 flex gap-2 items-center`}><LuMessagesSquare /><Text text={{eng: "Meetings", swe: "Möten"}} /></li>
-              </ul>
+            <nav className="flex gap-1">
+              <button onClick={()=>setCurrentView("info")} className={`${currentView === "info" ? " bg-accent-color text-background-dark" : "bg-background-dark"} clippath transition-colors font-semibold cursor-pointer px-3 py-1 flex gap-2 items-center`}> <GrStatusInfo />Information</button>
+              <button onClick={()=>setCurrentView("entries")} className={`${currentView === "entries" ? " bg-accent-color text-background-dark" : "bg-background-dark"} clippath transition-colors font-semibold cursor-pointer px-3 py-1 flex gap-2 items-center`}><BsFileText /><Text text={{eng: "Entries", swe: "Anteckningar"}} /></button>
+              <button onClick={()=>setCurrentView("meetings")} className={`${currentView === "meetings" ? " bg-accent-color text-background-dark" : "bg-background-dark"} clippath transition-colors font-semibold cursor-pointer px-3 py-1 flex gap-2 items-center`}><LuMessagesSquare /><Text text={{eng: "Meetings", swe: "Möten"}} /></button>
             </nav>
 
             {currentView === "entries" ? 

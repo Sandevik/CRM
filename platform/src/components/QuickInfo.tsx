@@ -31,7 +31,7 @@ export default function QuickInfo({loading, customer, statistics, addingTask, se
   }
 
   return (
-    <div className='flex gap-4 flex-col md:flex-row h-[calc(100dvh-16em)] w-full overflow-y-scroll scrollthumb pr-6'>
+    <div className='flex gap-4 flex-col md:flex-row h-[calc(100dvh-9em)] w-full'>
       <div className="flex flex-col w-full gap-2 flex-1 ml-2">
         <div className='flex justify-between w-full'>
           <label htmlFor="note" ><Text text={{eng: "About", swe: "Om"}} /></label>
