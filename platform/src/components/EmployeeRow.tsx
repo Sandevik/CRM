@@ -14,12 +14,12 @@ export default function EmployeeRow({employee}: {employee: Employee}) {
     }
 
   return (
-    <li className="grid grid-cols-2 md:grid-cols-5 bg-background-light text-lg bg-opacity-60 hover:bg-background-light transition-colors">
+    <li className="grid grid-cols-2 md:grid-cols-5 bg-background-dark text-lg bg-opacity-60 border border-background-light rounded-md hover:bg-background-light transition-colors">
         <Link href={`/dashboard/c/${crm?.crmUuid}/employees/${employee.uuid}`} className="p-2 pl-4 truncate">{employee.firstName} {employee.lastName}</Link>
-        <Link href={`/dashboard/c/${crm?.crmUuid}/employees/${employee.uuid}`} className="border-l-2 p-2 pl-4 border-background-light truncate">{employee.email}</Link>
-        <Link href={`/dashboard/c/${crm?.crmUuid}/employees/${employee.uuid}`} className="hidden md:block border-l-2 p-2 pl-4 border-background-light truncate">{employee.phoneNumber || "-"}</Link>
-        <Link href={`/dashboard/c/${crm?.crmUuid}/employees/${employee.uuid}`} className="hidden md:block border-l-2 p-2 pl-4 border-background-light truncate">{employee.userUuid ? <Text text={{eng:"Yes", swe: "Ja"}} /> : <Text text={{eng: "No", swe: "Nej"}}/>}</Link>
-        <Link href={`/dashboard/c/${crm?.crmUuid}/employees/${employee.uuid}`} className="hidden md:block border-l-2 p-2 pl-4 border-background-light truncate">{employee.role}</Link>
+        <Link href={`/dashboard/c/${crm?.crmUuid}/employees/${employee.uuid}`} className=" p-2 pl-4 border-background-light truncate">{employee.email}</Link>
+        <Link href={`/dashboard/c/${crm?.crmUuid}/employees/${employee.uuid}`} className="hidden md:block  p-2 pl-4 border-background-light truncate">{employee.phoneNumber || "-"}</Link>
+        <Link href={`/dashboard/c/${crm?.crmUuid}/employees/${employee.uuid}`} className="hidden md:block  p-2 pl-4 border-background-light truncate">{employee.role}</Link>
+        <Link href={`/dashboard/c/${crm?.crmUuid}/employees/${employee.uuid}`} className="hidden md:block  p-2 pl-4 border-background-light truncate">{employee.userUuid ? <Text text={{eng:"Yes", swe: "Ja"}} /> : <Text text={{eng: "No", swe: "Nej"}}/>}</Link>
     </li>
   )
 }

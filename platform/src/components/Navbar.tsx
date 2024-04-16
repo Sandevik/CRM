@@ -27,34 +27,39 @@ export default function Navbar() {
               <div className="flex gap-1 items-center pl-2"><Link href="/dashboard">Coneqt</Link> <BreadCrumb /></div>
             </li>
             <li className={`${open ? "opacity-100 pointer-events-all" : "pointer-events-none translate-x-[15vw] opacity-0 transistion-opacity"} w-[18em] h-[calc(100dvh-3.2em)] absolute right-1 transition-all flex flex-col  top-14 bg-background-light p-5 gap-6`}>
-              <IoClose className={`text-3xl absolute top-3 right-4 cursor-pointer `} onClick={() => setOpen(false)}/>
-                <div className="flex flex-col justify-between h-[60%] max-w-[80%]">
+              <div className={`flex justify-between`}>
+                <span className={"text-xl"}>Coneqt</span>
+                <IoClose className={`text-3xl cursor-pointer `} onClick={() => setOpen(false)}/>
+              </div>
+                <div className="flex flex-col justify-between h-[60%] max-w-[100%]">
                   <div className="flex flex-col gap-6">
-                    <div className="flex flex-col gap-3">
-                      <h2 className="font-semibold text-xl">Coneqt</h2>
-                      {data?.user && <Link href={"/dashboard"} className={`${pathName === "/dashboard" ? " text-black px-6 clippath bg-accent-color" : "hover:translate-x-2"}  hover:text-greenish  transition-all flex gap-2 items-center `}> <MdOutlineSettingsSystemDaydream /> <Text text={{eng: "Your Crms", swe: "Dina Crm"}} /> </Link>}
+                    <div className="flex flex-col gap-3 ">
+                      {data?.user && <Link href={"/dashboard"} className={`${pathName === "/dashboard" ? " text-black px-6 clippath bg-accent-color" : "hover:translate-x-2 hover:text-greenish"}    transition-all flex gap-2 items-center `}> <MdOutlineSettingsSystemDaydream /> <Text text={{eng: "Your Crms", swe: "Dina Crm"}} /> </Link>}
+                      {data?.user?.admin && <Link href={"/dashboard/admin"} className={`${(/.+\/admin.*/).test(pathName) ? " text-black px-6 clippath bg-accent-color" : "hover:translate-x-2 hover:text-greenish"}    transition-all flex gap-2 items-center `}> <RiAdminFill /> Admin </Link> }
                     </div>
+                    <div className="border-b my-3 border-accent-color "></div>
                     <div className={`flex flex-col gap-3 ${data?.user && pathName !== "/dashboard" ? "opacity-100" : "opacity-0 -translate-y-2"} transition-all`}>
-                      <Link href={`/dashboard/c/${crm?.crmUuid}`} className={`${pathName?.split("/").length === 4 ? " text-black px-6 clippath bg-accent-color" : "hover:translate-x-2"}  hover:text-greenish  transition-all flex gap-2 items-center`}><MdDashboard /><Text text={{swe:"Panel", eng: "Dashboard"}}/></Link>
-                      <Link href={`/dashboard/c/${crm?.crmUuid}/calendar`} className={`${(/.+\/calendar.*/).test(pathName) ? " text-black px-6 clippath bg-accent-color" : "hover:translate-x-2"}  hover:text-greenish  transition-all flex gap-2 items-center mb-6`}><IoCalendarNumber /><Text text={{swe: "Kalender", eng: "Calendar"}} /></Link>
-                      <Link href={`/dashboard/c/${crm?.crmUuid}/schedule`} className={`${(/.+\/schedule/).test(pathName) ? " text-black px-6 clippath bg-accent-color" : "hover:translate-x-2"}  hover:text-greenish  transition-all flex gap-2 items-center `}><IoCalendarSharp /><Text text={{swe: "Scheman", eng: "Schedule"}} /></Link>
-                      <Link href={`/dashboard/c/${crm?.crmUuid}/employees`} className={`${(/.+\/employees.*/).test(pathName) ? " text-black px-6 clippath bg-accent-color" : "hover:translate-x-2"}  hover:text-greenish  transition-all flex gap-2 items-center`}><FaIdCardClip /><Text text={{swe: "Anställda", eng: "Employees"}} /></Link>
-                      <Link href={`/dashboard/c/${crm?.crmUuid}/customers`} className={`${(/.+\/customers.*/).test(pathName) ? " text-black px-6 clippath bg-accent-color" : "hover:translate-x-2"}  hover:text-greenish  transition-all flex gap-2 items-center mb-6`}><FaUserTag /><Text text={{swe: "Kunder", eng: "Customers"}}/></Link>
-                      <Link href={`/dashboard/c/${crm?.crmUuid}/vehicles`} className={`${(/.+\/vehicles.*/).test(pathName) ? " text-black px-6 clippath bg-accent-color" : "hover:translate-x-2"}  hover:text-greenish  transition-all flex gap-2 items-center `}><FaTruckFront /><Text text={{swe: "Fordon", eng: "Vehicles"}} /></Link>
-                      <Link href={`/dashboard/c/${crm?.crmUuid}/inventory`} className={`${(/.+\/inventory.*/).test(pathName) ? " text-black px-6 clippath bg-accent-color" : "hover:translate-x-2"}  hover:text-greenish  transition-all flex gap-2 items-center `}><FaBox /><Text text={{swe: "Lager", eng: "Inventory"}} /></Link>
-                      <Link href={`/dashboard/c/${crm?.crmUuid}/files`} className={`${(/.+\/files.*/).test(pathName) ? " text-black px-6 clippath bg-accent-color" : "hover:translate-x-2"}  hover:text-greenish  transition-all flex gap-2 items-center `}><FaFileAlt /><Text text={{swe: "Filer", eng: "Files"}} /></Link>
-                      {data?.user?.admin && <Link href={"/dashboard/admin"} className={`${(/.+\/admin.*/).test(pathName) ? " text-black px-6 clippath bg-accent-color" : "hover:translate-x-2"}  hover:text-greenish  transition-all flex gap-2 items-center `}> <RiAdminFill /> Admin </Link> }
+                      <Link href={`/dashboard/c/${crm?.crmUuid}`} className={`${pathName?.split("/").length === 4 ? " text-black px-6 clippath bg-accent-color" : "hover:translate-x-2 hover:text-greenish"}    transition-all flex gap-2 items-center`}><MdDashboard /><Text text={{swe:"Panel", eng: "Dashboard"}}/></Link>
+                      <Link href={`/dashboard/c/${crm?.crmUuid}/calendar`} className={`${(/.+\/calendar.*/).test(pathName) ? " text-black px-6 clippath bg-accent-color" : "hover:translate-x-2 hover:text-greenish"}    transition-all flex gap-2 items-center`}><IoCalendarNumber /><Text text={{swe: "Kalender", eng: "Calendar"}} /></Link>
+                      <Link href={`/dashboard/c/${crm?.crmUuid}/customers`} className={`${(/.+\/customers.*/).test(pathName) ? " text-black px-6 clippath bg-accent-color" : "hover:translate-x-2 hover:text-greenish"}    transition-all flex gap-2 items-center`}><FaUserTag /><Text text={{swe: "Kunder", eng: "Customers"}}/></Link>
+                      <div className="border-b my-3 border-accent-color "></div>
+                      <Link href={`/dashboard/c/${crm?.crmUuid}/schedule`} className={`${(/.+\/schedule/).test(pathName) ? " text-black px-6 clippath bg-accent-color" : "hover:translate-x-2 hover:text-greenish"}    transition-all flex gap-2 items-center `}><IoCalendarSharp /><Text text={{swe: "Schema", eng: "Schedule"}} /></Link>
+                      <Link href={`/dashboard/c/${crm?.crmUuid}/employees`} className={`${(/.+\/employees.*/).test(pathName) ? " text-black px-6 clippath bg-accent-color" : "hover:translate-x-2 hover:text-greenish"}    transition-all flex gap-2 items-center`}><FaIdCardClip /><Text text={{swe: "Anställda", eng: "Employees"}} /></Link>
+                      <div className="border-b my-3 border-accent-color "></div>
+                      <Link href={`/dashboard/c/${crm?.crmUuid}/vehicles`} className={`${(/.+\/vehicles.*/).test(pathName) ? " text-black px-6 clippath bg-accent-color" : "hover:translate-x-2 hover:text-greenish"}    transition-all flex gap-2 items-center `}><FaTruckFront /><Text text={{swe: "Fordon", eng: "Vehicles"}} /></Link>
+                      <Link href={`/dashboard/c/${crm?.crmUuid}/inventory`} className={`${(/.+\/inventory.*/).test(pathName) ? " text-black px-6 clippath bg-accent-color" : "hover:translate-x-2 hover:text-greenish"}    transition-all flex gap-2 items-center `}><FaBox /><Text text={{swe: "Lager", eng: "Inventory"}} /></Link>
+                      <Link href={`/dashboard/c/${crm?.crmUuid}/files`} className={`${(/.+\/files.*/).test(pathName) ? " text-black px-6 clippath bg-accent-color" : "hover:translate-x-2 hover:text-greenish"}    transition-all flex gap-2 items-center `}><FaFileAlt /><Text text={{swe: "Filer", eng: "Files"}} /></Link>
                     </div>
                   </div>
                   
                 </div>
                   <div className='absolute bottom-4 flex flex-col gap-3'>
-                    <Link href={"/help"} className={`${(/.+\/help.*/).test(pathName) && "z-50 text-black px-4 clippath bg-accent-color"} transition-colors hover:text-greenish flex gap-2 items-center `}> <MdOutlineSettingsSystemDaydream /> <Text text={{eng: "Help", swe: "Hjälp"}} /> </Link>
+                    <Link href={`/dashboard/c/${crm?.crmUuid}/settings`} className={`${(/.+\/settings.*/).test(pathName) ? " text-black px-6 clippath bg-accent-color" : "hover:translate-x-2 hover:text-greenish"}    transition-all flex gap-2 items-center `}><IoMdSettings /><Text text={{swe: "Inställningar", eng: "Settings"}} /></Link>
                     <div className='flex justify-between gap-20'>
-                      <Link href={`/dashboard/c/${crm?.crmUuid}/settings`} className={`${(/.+\/settings.*/).test(pathName) && "z-50 text-black px-4 clippath bg-accent-color"} transition-colors hover:text-greenish flex gap-2 items-center `}><IoMdSettings /><Text text={{swe: "Inställningar", eng: "Settings"}} /></Link>
+                    <Link href={"/help"} className={`${(/.+\/help.*/).test(pathName) ? " text-black" : "hover:text-greenish"} transition-colors  flex gap-2 items-center `}> <MdOutlineSettingsSystemDaydream /> <Text text={{eng: "Help", swe: "Hjälp"}} /> </Link>
                       <div>
-                        {data?.user && <Link href={"/account"} className={`${(/.+\/account.*/).test(pathName) && "z-50 text-black px-4 clippath bg-accent-color"} transition-colors hover:text-greenish flex gap-2 items-center `}> <MdPerson2 /> <Text text={{eng: "Account", swe: "Konto"}} /></Link>}
-                        {!data?.user && <Link href={"/sign-in"} className={`${(/.+\/sign-in/).test(pathName) && "z-50 text-black px-4 clippath bg-accent-color"} transition-colors hover:text-greenish flex gap-2 items-center `}><FiLogIn /><Text text={{eng: "Sign In", swe: "Logga In"}} /> </Link>}
+                        {data?.user && <Link href={"/account"} className={`${(/.+\/account.*/).test(pathName) ? " text-black" : "hover:text-greenish"} transition-colors  flex gap-2 items-center `}> <MdPerson2 /> <Text text={{eng: "Account", swe: "Konto"}} /></Link>}
+                        {!data?.user && <Link href={"/sign-in"} className={`${(/.+\/sign-in/).test(pathName) ? " text-black" : "hover:text-greenish"} transition-colors  flex gap-2 items-center `}><FiLogIn /><Text text={{eng: "Sign In", swe: "Logga In"}} /> </Link>}
                       </div>
                     </div>
                     

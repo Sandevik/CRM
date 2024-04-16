@@ -34,7 +34,8 @@ export default function BreadCrumb() {
         
           
         default:
-          /* if (part.length === 36) return null; */
+          /* if (pathName.includes("employees") && part.length === 36) return null; */
+          /* if (pathName.includes("customers") && part.length === 36) return null; */
           return <Text text={{eng: part, swe: part}}/>
       }
     }

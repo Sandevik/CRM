@@ -20,6 +20,10 @@ import { AuthContext } from '@/context/AuthContext';
 import Switch from '@/components/Switch';
 import Screen from '@/components/Screen';
 import { IoIosTimer, IoMdSettings } from 'react-icons/io';
+import AdditionalEmployeeDetails from '@/components/AdditionalEmployeeDetails';
+import EmployeeSettings from '@/views/EmployeeSettings';
+import EmployeeTasks from '@/views/EmployeeTasks';
+import EmployeeTimeReports from '@/views/EmployeeTimeReports';
 
 
 export default function Index() {
@@ -35,21 +39,8 @@ export default function Index() {
   const [expand, setExpand] = useState<boolean>(false);
   const [selectedTab, setSelectedTab] = useState<"time" | "settings" | "tasks">("tasks");
 
-  const [isAdmin, setIsAdmin] = useState<boolean>(employee.isAdmin || false);
-  const [canReportTime, setCanReportTime] = useState<boolean>(employee.canReportTime || false);
-  const [canHandleCustomers, setCanHandleCustomers] = useState<boolean>(employee.canHandleCustomers || false);
-  const [canHandleEmployees, setCanHandleEmployees] = useState<boolean>(employee.canHandleEmployees || false);
-  const [canHandleVehicles, setCanHandleVehicles] = useState<boolean>(employee.canHandleVehicles || false);
-  const [canAccessCrm, setCanAccessCrm] = useState<boolean>(employee.canAccessCrm || false);
+ 
 
-  useEffect(()=>{
-    setCanHandleCustomers(employee.canHandleCustomers || false)
-    setCanHandleEmployees(employee.canHandleEmployees || false)
-    setCanHandleVehicles(employee.canHandleVehicles || false)
-    setCanReportTime(employee.canReportTime || false)
-    setIsAdmin(employee.isAdmin || false)
-    setCanAccessCrm(employee.canAccessCrm || false);
-  },[employee])
 
   useEffect(()=>{
     fetchEmployee();
@@ -108,60 +99,7 @@ export default function Index() {
     setEdit(!edit);
   }
 
-  const handlePermissionChange = async () => {
-    if (employee.userUuid && crm?.crmUuid) {
-      let res = await request(`/employees/update-permissions`, {
-        userUuid: employee.userUuid,
-        crmUuid: crm.crmUuid,
-        canReportTime,
-        canHandleCustomers,
-        canHandleEmployees,
-        canHandleVehicles,
-        canAccessCrm
-      }, "PUT");
-      if (res.code === 200) {
-        await fetchEmployee();
-      } 
-    }
-  }
-
-  const setAdmin = async () => {
-    if (employee.uuid && crm?.crmUuid && isAdmin !== null) {
-      let res = await request(`/employees/set-admin`, {
-        employeeUuid: employee.uuid,
-        crmUuid: crm.crmUuid,
-        isAdmin
-      }, "PUT");
-      if (res.code === 200) {
-        await fetchEmployee();
-      } 
-    }
-  }
-
-  useEffect(()=>{
-      setAdmin();
-  },[isAdmin])
-
-  useEffect(()=>{
-    handlePermissionChange();
-  }, [canHandleCustomers, canHandleEmployees, canHandleVehicles, canReportTime, canAccessCrm])
-
-  const disassociateAccount = async () => {
-    alert("(Modal) You are about to disassociate this account")
-    if (employee.uuid && crm?.crmUuid) {
-      let res = await request(`/employees/disassociate-user-account`, {
-        employeeUuid: employee.uuid,
-        crmUuid: crm.crmUuid,
-      }, "DELETE");
-      if (res.code === 200) {
-        await fetchEmployee();
-      }
-    }
-  }
-
-  const disassociateAndRemoveAccount = async () => {
-    alert("(Modal) You are about to disassociate and remove this account")
-  } 
+  
 
   return (
     <Screen>
@@ -196,148 +134,17 @@ export default function Index() {
         
       </div>
 
-      <div>
-        <button onClick={() => setExpand(!expand)} className="flex gap-2 items-center text-accent-color"><BsChevronRight className={expand ? "rotate-90" : "rotate-0" + " transition-transform"}/><Text text={expand ? {eng: "View Less", swe: "Visa Mindre"}:{eng: "View More", swe: "Visa Mer"}}/></button>
-        <div className={`${expand ? "h-26 pointer-events-auto opacity-100": "h-0 pointer-events-none opacity-0"} transition-all p-4 grid grid-cols-3`}>
-          
-          <div>
-            <div className="grid grid-cols-2">
-              <div className="flex flex-col">
-                <div className="text-sm"><Text text={{eng: "Address", swe: "Adress"}} /></div>
-                <span className={`${!employee?.address && "italic"} text-md`}>{employee?.address || <Text text={{eng:"No address was found", swe: "Ingen address hittades"}} />}</span>
-              </div>
-              <div className="flex flex-col mt-2">
-                <div className="text-sm"><Text text={{eng: "Zip Code", swe: "Postkod"}} /></div>
-                <span className={`${!employee?.zipCode && "italic"} text-md`}>{employee?.zipCode || <Text text={{eng:"No zip code was found", swe: "Ingen postkod hittades"}} />}</span>
-              </div>
-            </div>
-            <div className="grid grid-cols-2">
-              <div className="flex flex-col">
-                <div className="text-sm"><Text text={{eng: "Country", swe: "Land"}} /></div>
-                <span className={`${!employee?.country && "italic"} text-md`}>{employee?.country || <Text text={{eng:"No country was found", swe: "Inget land hittades"}} />}</span>
-              </div>
-              <div className="flex flex-col mt-2">
-                <div className="text-sm"><Text text={{eng: "City", swe: "Stad"}} /></div>
-                <span className={`${!employee?.city && "italic"} text-md`}>{employee?.city || <Text text={{eng:"No city was found", swe: "Ingen stad hittades"}} />}</span>
-              </div>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-2">
-            <div className="flex flex-col ">
-              <div className="flex flex-col">
-                <div className="text-sm"><Text text={{eng: "Social Security Number", swe: "Personnummer"}} /></div>
-                <span className={`${!employee?.ssn && "italic"} text-md`}>{employee?.ssn || <Text text={{eng:"No social security number was found", swe: "Inget personnummer hittades"}} />}</span>
-              </div>
-              <div className="flex flex-col mt-2">
-                <div className="text-sm"><Text text={{eng: "Date Of Birth", swe: "Födelsedatum"}} /></div>
-                <span className={`${!employee?.dateOfBirth && "italic"} text-md`}>{employee?.dateOfBirth || <Text text={{eng:"No date of birth was found", swe: "Inget födelsedagsdatum hittades"}} />}</span>
-              </div>
-            </div>
-            <div className="flex flex-col">
-              <div className="text-sm"><Text text={{eng: "Access", swe: "Behörigheter"}} /></div>
+      <AdditionalEmployeeDetails expand={expand} setExpand={setExpand} employee={employee} />
 
-                <div className="flex flex-col">
-                  <span className={`${employee?.canReportTime === null && employee.canReportTime && "italic"} text-md`}>{employee?.canReportTime !== null && employee.canReportTime ? <Text text={{eng:"Can report time", swe: "Kan rapportera tid"}} /> : <Text text={{eng:"Cannot report time", swe: "Kan inte rapportera tid"}} />}</span>
-                  <span className={`${employee?.isAdmin === null && employee.isAdmin && "italic"} text-md`}>{employee?.isAdmin !== null && employee.isAdmin ? <Text text={{eng:"Administrator", swe: "Administratör"}} /> : ""}</span>
-                </div>
-
-            </div>
-          </div>
-          
-          <div>
-            <div className="grid grid-cols-2">
-              <div className="flex flex-col">
-                <div className="flex flex-col">
-                <div className="text-sm"><Text text={{eng: "Driving License Class", swe: "Körkortsklass"}} /></div>
-                  <span className={`${!employee?.drivingLicenseClass && "italic"} text-md`}>{employee?.drivingLicenseClass || <Text text={{eng:"No driving license class was found", swe: "Ingen körkortsklass hittades"}} />}</span>
-                </div>
-                <div className="flex flex-col mt-2">
-                  <div className="text-sm"><Text text={{eng: "Period Of Validity", swe: "Validitetsperiod"}} /></div>
-                  <span className={`${!employee?.periodOfValidity && "italic"} text-md`}>{employee?.periodOfValidity || <Text text={{eng:"No period of validity was found", swe: "Ingen valitetsperiod hittades"}} />}</span>
-                </div>
-              </div>
-            
-              <div className="flex flex-col ">
-              <div className="flex flex-col">
-                <div className="text-sm"><Text text={{eng: "Added", swe: "Tillagd"}} /></div>
-                <span>{new Date(employee?.added || "").toLocaleDateString() + " " + new Date(employee?.added || "").toLocaleTimeString() || ""}</span>
-              </div>
-              <div className="flex flex-col mt-2">
-                <div className="text-sm"><Text text={{eng: "Updated", swe: "Uppdaterad"}} /></div> 
-                <span>{new Date(employee?.updated || "").toLocaleDateString() + " " + new Date(employee?.updated || "").toLocaleTimeString() || ""}</span>
-              </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <nav>
-        <ul className="flex gap-2">
-          <li className={`${selectedTab === "tasks" && "text-black clippath bg-accent-color "} gap-2 px-3 pb-1 pt-0.5 text-lg font-semibold cursor-pointer transition-colors hover:text-greenish flex  items-center`} onClick={() => setSelectedTab("tasks")}><FaTasks /><Text text={{swe: "Uppgifter", eng: "Tasks"}}/></li>
-          <li className={`${selectedTab === "time" && "text-black clippath bg-accent-color "} gap-2 px-3 pb-1 pt-0.5 text-lg font-semibold cursor-pointer transition-colors hover:text-greenish flex items-center `} onClick={() => setSelectedTab("time")}><IoIosTimer /><Text text={{swe: "Tidsrapporteringar", eng: "Time Reports"}}/></li>
-          <li className={`${selectedTab === "settings" && "text-black clippath bg-accent-color "} gap-2 px-3 pb-1 pt-0.5 text-lg font-semibold cursor-pointer transition-colors hover:text-greenish flex items-center`} onClick={() => setSelectedTab("settings")}><IoMdSettings /><Text text={{swe: "Inställningar", eng: "Employee Settings"}}/></li>
-        </ul>
+      <nav className="flex gap-2">
+        <button className={`${selectedTab === "tasks" && "text-black clippath bg-accent-color z-20 "} gap-2 px-4 pb-1 pt-0.5 text-lg font-semibold cursor-pointer transition-colors hover:text-greenish flex  items-center`} onClick={() => setSelectedTab("tasks")}><FaTasks /><Text text={{swe: "Uppgifter", eng: "Tasks"}}/></button>
+        <button className={`${selectedTab === "time" && "text-black clippath bg-accent-color z-20 "} gap-2 px-4 pb-1 pt-0.5 text-lg font-semibold cursor-pointer transition-colors hover:text-greenish flex items-center `} onClick={() => setSelectedTab("time")}><IoIosTimer /><Text text={{swe: "Tidsrapporteringar", eng: "Time Reports"}}/></button>
+        <button className={`${selectedTab === "settings" && "text-black clippath bg-accent-color z-20 "} gap-2 px-4 pb-1 pt-0.5 text-lg font-semibold cursor-pointer transition-colors hover:text-greenish flex items-center`} onClick={() => setSelectedTab("settings")}><IoMdSettings /><Text text={{swe: "Anställningsinställningar", eng: "Employee Settings"}}/></button>
       </nav>
 
-      {selectedTab === "tasks" && <div>
-      <div className={`my-4 p-2 rounded-md`}>
-        <div className="flex justify-between items-center w-full mb-1">
-          <span className='font-semibold'>{tasks.length > 0 &&<Text text={{eng: "Tasks", swe: "Uppgifter"}} />}</span>
-          <Button onClick={() => setAddTask(true)}><Text text={{eng: "Add Task", swe: "Ny Uppgift"}} /></Button>
-        </div>
-        <TaskList loading={loading} focusTask={setFocusTask} showCustomers={false} tasks={tasks} refetchTasks={fetchTasks} />
-      </div>
-      <AddTask active={addTask} setActive={setAddTask} refetchTasks={fetchTasks} employee={employee} />  
-      </div>}
-
-      {selectedTab === "time" && <div className="p-2">Tidsrapportering</div>  }
-      
-      
-      {selectedTab === "settings" && 
-      <div className="p-2">
-        <h3>Inställningar Och Behörigheter</h3>
-
-        <div className={`${!employee.userUuid && "opacity-65"}`}>
-          <div className="flex items-center gap-2">
-            <Switch disabled={!employee.userUuid}  value={isAdmin} setValue={setIsAdmin} />
-            <span className="text-lg font-semibold"><Text text={{swe: "Administratör", eng: "Administrator"}}/></span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Switch disabled={!employee.userUuid} value={canReportTime} setValue={setCanReportTime} />
-            <span className="text-lg font-semibold"><Text text={{swe: "Kan tidsrapportera", eng: "Can report time"}}/></span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Switch disabled={!employee.userUuid} value={canAccessCrm !== null ? canAccessCrm : false} setValue={(val: boolean) => setCanAccessCrm(val || false)} />
-            <span className="text-lg font-semibold"><Text text={{swe: "Behörig till crm", eng: "Access to crm"}}/></span>
-          </div>
-
-          <div className={`${(!employee.canAccessCrm ? "opacity-50" : "opacity-100")} transition-opacity flex items-center gap-2`}>
-            <Switch disabled={!employee.userUuid || !canAccessCrm} value={canHandleCustomers} setValue={setCanHandleCustomers} />
-            <span className="text-lg font-semibold"><Text text={{swe: "Kan hantera kunder", eng: "Can handle customers"}}/></span>
-          </div>
-        
-          <div className={`${(!employee.canAccessCrm ? "opacity-50" : "opacity-100")} transition-opacity flex items-center gap-2`}>
-            <Switch disabled={!employee.userUuid || !canAccessCrm} value={canHandleEmployees} setValue={setCanHandleEmployees} />
-            <span className="text-lg font-semibold"><Text text={{swe: "Kan hantera anställda", eng: "Can handle employees"}}/></span>
-          </div>
-          
-          <div className={`${(!employee.canAccessCrm ? "opacity-50" : "opacity-100")} transition-opacity flex items-center gap-2`}>
-            <Switch disabled={!employee.userUuid || !canAccessCrm} value={canHandleVehicles} setValue={setCanHandleVehicles} />
-            <span className="text-lg font-semibold"><Text text={{swe: "Kan hantera fordon", eng: "Can handle vehicles"}}/></span>
-          </div>
-        </div>
-
-        <div className='flex gap-2'>
-          <Button red={true} onClick={() => disassociateAccount()}><Text text={{eng: "Disassociate Account", swe: "Avlänka konto"}}/></Button>
-          <Button red={true} onClick={() => disassociateAndRemoveAccount()} className='bg-light-red'><Text text={{eng: "Disassociate and remove account", swe: "Avlänka och ta bort konto"}}/></Button>
-        </div>
-      </div>}
-
-
+      <EmployeeTasks tasks={tasks} selectedTab={selectedTab} loading={loading} fetchTasks={fetchTasks} employee={employee} setFocusTask={setFocusTask} addTask={addTask} setAddTask={setAddTask} />
+      <EmployeeTimeReports selectedTab={selectedTab} />
+      <EmployeeSettings employee={employee} fetchEmployee={fetchEmployee} selectedTab={selectedTab}/>
       
       </Screen>
   )

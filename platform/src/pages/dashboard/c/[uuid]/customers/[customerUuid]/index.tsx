@@ -141,13 +141,15 @@ export default function Index() {
             }
 
             <div className="mt-3">
-            {currentView === "info" ?
-              <QuickInfo loading={loading} focusTask={setFocusedTask} customer={customer} statistics={statistics} addingTask={addTask} setAddTask={setAddTask} tasks={tasks} refetchTasks={fetchTasks}/>
-              : currentView === "entries" ?
-              <Entries refetchEntries={fetchEntries} entries={entries} customer={customer} />
-              : 
-              <Meetings refetchMeetings={fetchMeetings} setEditMeeting={setEditMeeting} meetings={meetings}/>
-            }
+              <div className={`${currentView === "info" ? "translate-x-0 opacity-100 pointer-events-auto h-auto" : "translate-x-5 opacity-0 pointer-events-none h-0"} transition-all`}>
+                <QuickInfo loading={loading} focusTask={setFocusedTask} customer={customer} statistics={statistics} addingTask={addTask} setAddTask={setAddTask} tasks={tasks} refetchTasks={fetchTasks}/>
+              </div>
+              <div className={`${currentView === "entries" ? "translate-x-0 opacity-100 pointer-events-auto h-auto" : "translate-x-5 opacity-0 pointer-events-none h-0"} transition-all`}>
+                <Entries refetchEntries={fetchEntries} entries={entries} customer={customer} />
+              </div>
+              <div className={`${currentView === "meetings" ? "translate-x-0 opacity-100 pointer-events-auto h-auto" : "translate-x-5 opacity-0 pointer-events-none h-0"} transition-all`}>
+                <Meetings refetchMeetings={fetchMeetings} setEditMeeting={setEditMeeting} meetings={meetings}/>
+              </div>
             </div>
 
           </div>
