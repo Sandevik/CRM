@@ -41,12 +41,16 @@ export default function QuickInfo({loading, customer, statistics, addingTask, se
       
         <div className='relative mt-2 p-1'>
 
+        <div className="opacity-10 text-background-dark">
+          <FaTasks className="absolute h-full w-full top-[50%] " />
+        </div>
+
           <div className="h-full flex flex-col gap-6">
             <div className="flex justify-between items-end">
               <span className="flex gap-2 items-center"><FaTasks /><Text text={{eng: "Tasks", swe: "Uppgifter"}} /></span>
               <Button className='' onClick={()=>setAddTask(true)}><Text text={{eng: "New Task", swe: "Ny Uppgift"}} /></Button>
             </div>
-            <TaskList loading={loading} showCustomers={false} tasks={tasks} refetchTasks={refetchTasks} focusTask={focusTask}/>
+            <TaskList showEmptyPage={false} loading={loading} showCustomers={false} tasks={tasks} refetchTasks={refetchTasks} focusTask={focusTask}/>
           </div>
 
         </div>
