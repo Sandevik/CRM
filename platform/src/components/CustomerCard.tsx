@@ -5,6 +5,7 @@ import request from '@/utils/request';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useContext } from 'react'
+import { BsChevronLeft } from 'react-icons/bs';
 import { FaChevronLeft, FaUser } from "react-icons/fa";
 
 
@@ -22,7 +23,7 @@ export default function CustomerCard({customer, edit, setEdit}: {customer: Custo
   
     return (
     <div className="lg:w-[30%] xl:w-[30em] h-full bg-background-dark p-2 rounded-md flex flex-col justify-between relative">
-        <Link href={`/dashboard/c/${crm?.crmUuid}/customers`} className="flex gap-2 items-center text-lg bg-accent-color hover:bg-greenish transition-colors absolute top-3 left-3 px-2 text-black rounded-md font-semibold"><FaChevronLeft /> <div><Text text={{eng: "Customers", swe: "Kunder"}} /></div> </Link>
+        <Link href={`/dashboard/c/${crm?.crmUuid}/customers`} className="flex gap-1 items-center text-lg bg-accent-color hover:bg-greenish transition-colors pr-2 text-black absolute top-3 left-3 rounded-md font-semibold"><BsChevronLeft /> <div className='-translate-y-[1px]'><Text text={{eng: "Customers", swe: "Kunder"}} /></div> </Link>
         <div className="lg:hidden flex gap-8 h-full justify-between m-auto items-center">
             <div className="flex flex-col lg:h-[20%] my-10 gap-4">
                 <FaUser className="text-7xl flex justify-center m-auto bg-background-light rounded-full p-4"/>

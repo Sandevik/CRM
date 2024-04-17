@@ -1,15 +1,22 @@
 import React, { useContext } from 'react'
 import Text from './Text'
-import { BsChevronRight } from 'react-icons/bs'
+import { BsChevronLeft, BsChevronRight } from 'react-icons/bs'
 import Input from './Input'
 import text from '@/utils/text'
 import { AuthContext } from '@/context/AuthContext'
+import Link from 'next/link'
+import { CurrentCrmContext } from '@/context/CurrentCrmContext'
 
 export default function AdditionalEmployeeDetails({employee, expand, setExpand, edit, setEmployee}: {employee: Employee, expand: boolean, setExpand: React.Dispatch<React.SetStateAction<boolean>>, edit: boolean, setEmployee: React.Dispatch<React.SetStateAction<Employee>>}) {
   const {data} = useContext(AuthContext);
+  const {crm} = useContext(CurrentCrmContext);
   return (
     <div>
-        <button onClick={() => setExpand(!expand)} className="flex gap-2 items-center text-accent-color"><BsChevronRight className={expand ? "rotate-90" : "rotate-0" + " transition-transform"}/><Text text={expand ? {eng: "View Less", swe: "Visa Mindre"}:{eng: "View More", swe: "Visa Mer"}}/></button>
+        <div className="flex gap-4">
+          <Link href={`/dashboard/c/${crm?.crmUuid}/employees`} className="flex gap-1 items-center text-lg bg-accent-color hover:bg-greenish transition-colors pr-2 text-black rounded-md font-semibold"><BsChevronLeft /> <div className='-translate-y-[1px]'><Text text={{eng: "Employees", swe: "Anställda"}} /></div> </Link>
+          <button onClick={() => setExpand(!expand)} className="flex gap-2 items-center text-accent-color"><BsChevronRight className={expand ? "rotate-90" : "rotate-0" + " transition-transform"}/><Text text={expand ? {eng: "View Less", swe: "Visa Mindre"}:{eng: "View More", swe: "Visa Mer"}}/></button>
+        </div>
+        
         <div className={`${expand ? "h-26 pointer-events-auto opacity-100": "h-0 pointer-events-none opacity-0"} transition-all p-4 grid grid-cols-3`}>
           
           <div>
