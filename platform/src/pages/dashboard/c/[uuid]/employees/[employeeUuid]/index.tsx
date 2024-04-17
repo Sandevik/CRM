@@ -104,15 +104,15 @@ export default function Index() {
   return (
     <Screen>
 
-      <div className="flex flex-col items-center lg:grid lg:grid-cols-3 bg-background-dark my-2 gap-2">
-        <div className=" p-2 min-h-20 flex items-center min-w-[90vw] lg:min-w-full">
+      <div className="flex flex-col items-center lg:grid lg:grid-cols-3 bg-background-dark my-2 lg:gap-2">
+        <div className=" p-2 min-h-20 flex items-center min-w-[90vw] lg:min-w-full border-b lg:border-b-0">
           <FaUser className="w-[30%] text-6xl"/>
           <div className="flex flex-col flex-1">
             <span className="text-xl font-semibold truncate">{employee?.firstName} {employee?.lastName}</span>
             <div className={`text-lg truncate flex justify-between gap-2 pr-1`}>{employee?.role || <span className={`${!employee?.role && "italic text-md"}`}><Text text={{eng:"No role was found", swe: "Ingen roll hittades"}} /></span>} {employee.isAdmin && <span><Text text={{swe:"Administratör", eng: "Administrator"}}/></span>}</div>
           </div>
         </div>
-        <div className=" p-2 px-6 min-h-20 flex justify-between items-center gap-2 border-r-2 pr-4 border-l-2 pl-4 min-w-[90vw] lg:min-w-full">
+        <div className=" p-2 px-6 min-h-20 flex justify-between items-center gap-2  lg:border-r-2 pr-4 lg:border-l-2 border-b lg:border-b-0 pl-4 min-w-[90vw] lg:min-w-full ">
           <div className='flex flex-col gap-2'>
             <Link href={`mailto:${employee.email}`} className={`text-md truncate text-accent-color flex gap-2 items-center`}><MdEmail className="translate-y-[2px]"/>{employee.email}</Link>
             <Link href={`tel:${employee.phoneNumber}`} className={`text-md truncate text-accent-color flex gap-2 items-center`}><MdLocalPhone className="translate-y-[2px]" />{employee.phoneNumber}</Link> 
@@ -122,7 +122,7 @@ export default function Index() {
             <span className={`text-lg ${!employee?.userUuid && "italic text-md"} w-full flex justify-between gap-2 items-center relative`}>{!employee?.userUuid ? <PiPlugsFill className="text-light-red text-2xl" /> : <PiPlugsConnectedFill className="text-green-300 text-2xl" />}{!employee?.userUuid ? <Button disabled={!employee.email || !employee.phoneNumber} onClick={() => createEmployeeUser()}><Text text={{eng: "Connect", swe: "Anslut"}} /></Button> : <Text text={{eng: "Connected", swe: "Anslutet"}} />}</span>
           </div>
         </div>
-        <div className=" p-2 min-h-20 flex justify-between items-center gap-2 min-w-[90vw] lg:min-w-full">
+        <div className=" p-2 min-h-20 flex justify-between items-center gap-2 min-w-[90vw] lg:min-w-full border-b lg:border-b-0 pb-4 mb-2">
           <div className="flex flex-col gap-2">
             <span><Text text={{eng: "Contract", swe: "Kontrakt"}} /></span>
             <span className='flex gap-2 items-center'> {employee?.contract_uuid ? <Link href={`/dashboard/c/${crm?.crmUuid}/employees/${employee?.uuid}/contract`} className='flex gap-2 items-center text-lg'><span className="underline text-accent-color"><Text text={{eng: "Active", swe: "Aktivt"}} /></span> </Link> : <Button onClick={()=>alert("todo")}><Text text={{eng: "Write", swe: "Skriv"}} /></Button>} <ImProfile className={`text-2xl translate-y-[1px] ${employee?.contract_uuid ? "text-green-300" : "text-light-red"}`} /></span>
@@ -136,7 +136,7 @@ export default function Index() {
 
       <AdditionalEmployeeDetails expand={expand} setExpand={setExpand} employee={employee} edit={edit} setEmployee={setEmployee} />
 
-      <nav className="flex gap-2 ">
+      <nav className="flex gap-2 ml-3">
         <button className={`${selectedTab === "tasks" && "text-black clippath bg-accent-color z-10 "} gap-2 px-4 pb-1 pt-0.5 text-lg font-semibold cursor-pointer transition-colors hover:text-greenish flex  items-center`} onClick={() => setSelectedTab("tasks")}><FaTasks /><Text text={{swe: "Uppgifter", eng: "Tasks"}}/></button>
         <button className={`${selectedTab === "time" && "text-black clippath bg-accent-color z-10 "} gap-2 px-4 pb-1 pt-0.5 text-lg font-semibold cursor-pointer transition-colors hover:text-greenish flex items-center `} onClick={() => setSelectedTab("time")}><IoIosTimer /><Text text={{swe: "Tidsrapporteringar", eng: "Time Reports"}}/></button>
         <button className={`${selectedTab === "settings" && "text-black clippath bg-accent-color z-10 "} gap-2 px-4 pb-1 pt-0.5 text-lg font-semibold cursor-pointer transition-colors hover:text-greenish flex items-center`} onClick={() => setSelectedTab("settings")}><IoMdSettings /><Text text={{swe: "Anställningsinställningar", eng: "Employee Settings"}}/></button>

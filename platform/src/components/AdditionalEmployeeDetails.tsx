@@ -12,7 +12,7 @@ export default function AdditionalEmployeeDetails({employee, expand, setExpand, 
   const {crm} = useContext(CurrentCrmContext);
   return (
     <div>
-        <div className="flex gap-4">
+        <div className="flex gap-4 ml-4">
           <Link href={`/dashboard/c/${crm?.crmUuid}/employees`} className="flex gap-1 items-center text-lg bg-accent-color hover:bg-greenish transition-colors pr-2 text-black rounded-md font-semibold"><BsChevronLeft /> <div className='-translate-y-[1px]'><Text text={{eng: "Employees", swe: "Anställda"}} /></div> </Link>
           <button onClick={() => setExpand(!expand)} className="flex gap-2 items-center text-accent-color"><BsChevronRight className={expand ? "rotate-90" : "rotate-0" + " transition-transform"}/><Text text={expand ? {eng: "View Less", swe: "Visa Mindre"}:{eng: "View More", swe: "Visa Mer"}}/></button>
         </div>
