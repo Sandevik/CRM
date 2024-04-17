@@ -333,7 +333,8 @@ impl CRM {
     }
 
     pub async fn get_all_by_user_uuid(user_uuid: &Uuid, data: &web::Data<AppState>) -> Result<Vec<CRM>, sqlx::Error> {
-        match sqlx::query("SELECT `crm` . `crm_users` . `crm_uuid`, `crm` . `crm_users` . `user_uuid`, `crm` . `crm_users` . `name`, `crm` . `crm_users` . `hidden`, `crm` . `crm_users` . `added` FROM `crm` . `crm_users` LEFT JOIN `crm` . `user_employee` ON `crm` . `crm_users` . `crm_uuid` = `crm` . `user_employee` . `crm_uuid` LEFT JOIN `crm` . `employees` ON `crm` . `employees` . `crm_uuid` = `crm` . `user_employee` . `crm_uuid` WHERE `crm` . `employees` . `user_uuid` = ? AND `crm` . `user_employee` . `can_access_crm` = TRUE AND `crm` . `crm_users` . `user_uuid` <> `crm` . `employees` . `user_uuid`")
+        match sqlx::query("SELECT `crm` . `crm_users` . `crm_uuid`, `crm` . `crm_users` . `user_uuid`, `crm` . `crm_users` . `name`, `crm` . `crm_users` . `hidden`, `crm` . `crm_users` . `added` FROM `crm` . `crm_users` LEFT JOIN `crm` . `user_employee` ON `crm` . `crm_users` . `crm_uuid` = `crm` . `user_employee` . `crm_uuid` WHERE `crm` . `user_employee` . `user_uuid` = ? AND `crm` . `user_employee` . `can_access_crm` = TRUE AND `crm` . `crm_users` . `user_uuid` <> ?")
+        .bind(&user_uuid.hyphenated().to_string())
         .bind(&user_uuid.hyphenated().to_string())
         .fetch_all(&data.pool)
         .await {

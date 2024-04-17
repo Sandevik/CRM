@@ -136,15 +136,20 @@ export default function Index() {
 
       <AdditionalEmployeeDetails expand={expand} setExpand={setExpand} employee={employee} />
 
-      <nav className="flex gap-2">
-        <button className={`${selectedTab === "tasks" && "text-black clippath bg-accent-color z-20 "} gap-2 px-4 pb-1 pt-0.5 text-lg font-semibold cursor-pointer transition-colors hover:text-greenish flex  items-center`} onClick={() => setSelectedTab("tasks")}><FaTasks /><Text text={{swe: "Uppgifter", eng: "Tasks"}}/></button>
-        <button className={`${selectedTab === "time" && "text-black clippath bg-accent-color z-20 "} gap-2 px-4 pb-1 pt-0.5 text-lg font-semibold cursor-pointer transition-colors hover:text-greenish flex items-center `} onClick={() => setSelectedTab("time")}><IoIosTimer /><Text text={{swe: "Tidsrapporteringar", eng: "Time Reports"}}/></button>
-        <button className={`${selectedTab === "settings" && "text-black clippath bg-accent-color z-20 "} gap-2 px-4 pb-1 pt-0.5 text-lg font-semibold cursor-pointer transition-colors hover:text-greenish flex items-center`} onClick={() => setSelectedTab("settings")}><IoMdSettings /><Text text={{swe: "Anställningsinställningar", eng: "Employee Settings"}}/></button>
+      <nav className="flex gap-2 ">
+        <button className={`${selectedTab === "tasks" && "text-black clippath bg-accent-color z-10 "} gap-2 px-4 pb-1 pt-0.5 text-lg font-semibold cursor-pointer transition-colors hover:text-greenish flex  items-center`} onClick={() => setSelectedTab("tasks")}><FaTasks /><Text text={{swe: "Uppgifter", eng: "Tasks"}}/></button>
+        <button className={`${selectedTab === "time" && "text-black clippath bg-accent-color z-10 "} gap-2 px-4 pb-1 pt-0.5 text-lg font-semibold cursor-pointer transition-colors hover:text-greenish flex items-center `} onClick={() => setSelectedTab("time")}><IoIosTimer /><Text text={{swe: "Tidsrapporteringar", eng: "Time Reports"}}/></button>
+        <button className={`${selectedTab === "settings" && "text-black clippath bg-accent-color z-10 "} gap-2 px-4 pb-1 pt-0.5 text-lg font-semibold cursor-pointer transition-colors hover:text-greenish flex items-center`} onClick={() => setSelectedTab("settings")}><IoMdSettings /><Text text={{swe: "Anställningsinställningar", eng: "Employee Settings"}}/></button>
       </nav>
 
-      <EmployeeTasks tasks={tasks} selectedTab={selectedTab} loading={loading} fetchTasks={fetchTasks} employee={employee} setFocusTask={setFocusTask} addTask={addTask} setAddTask={setAddTask} />
-      <EmployeeTimeReports selectedTab={selectedTab} />
-      <EmployeeSettings employee={employee} fetchEmployee={fetchEmployee} selectedTab={selectedTab}/>
+      <div className="relative h-[calc(100dvh-16.65em)]">
+        <EmployeeTasks tasks={tasks} selectedTab={selectedTab} loading={loading} fetchTasks={fetchTasks} employee={employee} setFocusTask={setFocusTask} addTask={addTask} setAddTask={setAddTask} />
+        <EmployeeTimeReports selectedTab={selectedTab} />
+        <EmployeeSettings employee={employee} fetchEmployee={fetchEmployee} selectedTab={selectedTab}/>
+      </div>
+      
+      <AddTask active={addTask} setActive={setAddTask} refetchTasks={fetchTasks} employee={employee} />
+
       
       </Screen>
   )

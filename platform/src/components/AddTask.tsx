@@ -2,6 +2,7 @@ import Button from '@/components/Button'
 import Input from '@/components/Input';
 import Text from '@/components/Text';
 import { CurrentCrmContext } from '@/context/CurrentCrmContext';
+import { MenuContext } from '@/context/MenuContext';
 import request from '@/utils/request';
 import React, { useContext, useEffect, useState } from 'react'
 import { IoClose, IoCalendar } from 'react-icons/io5';
@@ -17,6 +18,7 @@ interface Props {
 
 export default function AddTask({active, setActive, customer, employee, refetchTasks}: Props) {
     const {crm} = useContext(CurrentCrmContext);
+    const {open} = useContext(MenuContext);
     const [form, setForm] = useState<Omit<Task, "added" | "updated" | "recurrenceCount" | "uuid">>({
         deadline: null,
         crmUuid: crm?.crmUuid || "" ,
@@ -62,7 +64,7 @@ export default function AddTask({active, setActive, customer, employee, refetchT
     }
   
     return (
-        <div className={`${active ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"} transition-opacity absolute top-0 left-0 h-full w-full bg-background-dark bg-opacity-40 backdrop-blur-md grid place-items-center`}>
+        <div className={`${active ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"} transition-all z-10 absolute top-0 left-0 h-full ${open ? "w-[calc(100dvw-23em)] " : "w-[100vw]"} bg-background-dark bg-opacity-40 backdrop-blur-md grid place-items-center`}>
         <form className=" w-[40em] bg-background-light p-4 rounded-md relative flex flex-col gap-5">
             <h3 className="text-2xl font-semibold"><Text text={{eng: "Create a new task with", swe: "Skapa en ny uppgift för"}} /> {customer?.firstName || <Text text={{eng: "unknown", swe: "okänd"}} />}</h3>
             <IoClose onClick={() => close()} className="absolute top-2 right-2 text-4xl cursor-pointer"/>

@@ -80,7 +80,7 @@ export default function EmployeeSettings({selectedTab, employee, fetchEmployee}:
   
   
     return (
-    <div className={`p-2 ${selectedTab === "settings" ? "translate-x-0 opacity-100 pointer-events-auto h-auto" : "translate-x-5 opacity-0 pointer-events-none h-0"} transition-all`}>
+      <div className={`p-2 ${selectedTab === "settings" ? "translate-x-0 opacity-100 pointer-events-auto " : "translate-x-5 opacity-0 pointer-events-none"} absolute top-4 w-full h-full transition-all bg-background-light bg-opacity-50 rounded-md`}>
         <h3>Inställningar Och Behörigheter</h3>
 
         <div className={`${!employee.userUuid && "opacity-65"} flex justify-center gap-[10%] my-6 bg-background-light p-2 rounded-md`}>

@@ -29,6 +29,7 @@ export default function Index() {
   return (
     <main className="p-2">
         <SignOutBtn />
+        {data?.user?.uuid}
         <div className="flex flex-col gap-2 w-32">
           <label htmlFor="language"><Text text={{swe: "Språk", eng: "Language"}} /></label>
           <select name="language" value={language} onChange={(e) => setLanguage(e.target.value)} className="bg-background-light rounded-md">

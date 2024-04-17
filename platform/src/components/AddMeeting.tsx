@@ -44,7 +44,7 @@ export default function AddMeeting({closePopup, active, onSuccessfulSubmit, with
     }
   
     return (
-    <form className={`absolute bottom-3 left-[50%] translate-x-[-50%] w-[300px] z-20 rounded-md bg-background-light bg-opacity- p-4 ${active ? "pointer-events-auto opacity-100 translate-y-0" : "pointer-events-none opacity-0 translate-y-12"} transition-all`}>
+    <form className={`absolute bottom-3 left-[50%] translate-x-[-50%] w-[300px] z-20 rounded-md bg-background-light  p-4 ${active ? "pointer-events-auto opacity-100 translate-y-0" : "pointer-events-none opacity-0 translate-y-12"} transition-all`}>
         <IoClose className="absolute top-2 right-2 text-4xl text-gray-400 cursor-pointer" onClick={() => closePopup()}/>
         <div className="flex flex-col gap-4 mt-6">
             <div className="flex flex-col gap-2">

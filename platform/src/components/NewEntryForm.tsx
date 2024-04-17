@@ -3,6 +3,7 @@ import Input from '@/components/Input';
 import Text from '@/components/Text';
 import { AuthContext } from '@/context/AuthContext';
 import { CurrentCrmContext } from '@/context/CurrentCrmContext';
+import { MenuContext } from '@/context/MenuContext';
 import request from '@/utils/request';
 import text from '@/utils/text';
 import React, { useContext, useState } from 'react'
@@ -10,6 +11,7 @@ import { IoClose } from "react-icons/io5";
 
 export default function NewEntryForm({active, close, customer, refetchEntries}: {active: boolean, close: () => void, customer: Customer | null, refetchEntries: () => Promise<void>}) {
     const {crm} = useContext(CurrentCrmContext);
+    const {open} = useContext(MenuContext);
     const [form, setForm] = useState<{content: string, addedAtMeeting: string | null}>({content: "", addedAtMeeting: null})
     const [error, setError] = useState<boolean>(false);
     const {data} = useContext(AuthContext);
@@ -33,7 +35,7 @@ export default function NewEntryForm({active, close, customer, refetchEntries}: 
 
 
   return (
-    <div className={`${active ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"} transition-opacity absolute top-0 left-0 h-full w-full bg-background-dark bg-opacity-40 backdrop-blur-md grid place-items-center`}>
+    <div className={`${active ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"} transition-all absolute top-0 left-0 h-full ${open ? "w-[calc(100dvw-23em)] " : "w-[100vw]"} bg-background-dark bg-opacity-40 backdrop-blur-md grid place-items-center`}>
         <form className="h-[70%] w-[40em] bg-background-light p-4 rounded-md relative flex flex-col gap-5">
             <h3 className="text-2xl font-semibold"><Text text={{eng: "Create a new entry for", swe: "Skapa en ny anteckning för"}} /> {customer?.firstName || "unknown customer"}</h3>
             <IoClose onClick={() => close()} className="absolute top-2 right-2 text-4xl cursor-pointer"/>

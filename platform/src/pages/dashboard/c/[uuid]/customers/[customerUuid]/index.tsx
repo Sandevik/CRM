@@ -22,6 +22,7 @@ import Screen from '@/components/Screen';
 import { LuMessageSquarePlus, LuMessagesSquare } from "react-icons/lu";
 import { BsFileText, BsPencilSquare } from 'react-icons/bs';
 import { GrStatusInfo } from 'react-icons/gr';
+import { MenuContext } from '@/context/MenuContext';
 
 export interface Statistics {
   meetings_count: number,
@@ -34,6 +35,7 @@ export interface Statistics {
 export default function Index() {
   const params = useParams();
   const {crm} = useContext(CurrentCrmContext);
+  const {open} = useContext(MenuContext);
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [edit, setEdit] = useState<boolean>(false);
   const [entries, setEntries] = useState<Entry[]>([]);
@@ -152,7 +154,7 @@ export default function Index() {
 
           </div>
         </div>
-        <div className='absolute bottom-0 right-[15dvh]'>
+        <div className={`absolute bottom-[1em] ${open ? "right-[calc(34em)] " : "right-[11em]"} transition-all`}>
           <AddMeeting closePopup={() => setNewMeetingActive(false)} active={newMeetingActive} onSuccessfulSubmit={fetchMeetings} withCustomerUuid={customer?.uuid} />
           <EditMeeting closePopup={() => setEditMeeting(null)} _meeting={editMeeting} onSuccessfulSubmit={fetchMeetings} />
         </div>
