@@ -89,6 +89,7 @@ export default function Index() {
         let res = await request("/employees/update", {...employee, crmUuid: crm?.crmUuid}, "POST"); 
         if (res.code == 200) {
           setEdit(!edit);
+          fetchEmployee();
         } else {
           alert(res.message);
         }
@@ -99,7 +100,6 @@ export default function Index() {
     setEdit(!edit);
   }
 
-  
 
   return (
     <Screen>
@@ -114,8 +114,8 @@ export default function Index() {
         </div>
         <div className=" p-2 px-6 min-h-20 flex justify-between items-center gap-2 border-r-2 pr-4 border-l-2 pl-4 min-w-[90vw] lg:min-w-full">
           <div className='flex flex-col gap-2'>
-            {edit ? <Input className='bg-background-light w-full' placeholder={"john.doe@email.com"} value={employee?.email || ""} onChange={(e) => setEmployee({...employee, email: e.target.value})}/> : employee?.email ? <Link href={`mailto:${employee.email}`} className={`text-md truncate text-accent-color flex gap-2 items-center`}><MdEmail className="translate-y-[2px]"/>{employee.email}</Link> : <span className="truncate italic"><Text text={{eng:"No email was found", swe: "Ingen e-postadress hittades"}} /></span>}
-            {edit ? <Input className='bg-background-light w-full' value={employee?.phoneNumber || ""} onChange={(e) => setEmployee({...employee, phoneNumber: e.target.value})}/> : employee?.phoneNumber ? <Link href={`tel:${employee.phoneNumber}`} className={`text-md truncate text-accent-color flex gap-2 items-center`}><MdLocalPhone className="translate-y-[2px]" />{employee.phoneNumber}</Link> : <span className="truncate italic"><Text text={{eng:"No phone number was found", swe: "Inget telefonnummer hittades"}} /></span>}
+            <Link href={`mailto:${employee.email}`} className={`text-md truncate text-accent-color flex gap-2 items-center`}><MdEmail className="translate-y-[2px]"/>{employee.email}</Link>
+            <Link href={`tel:${employee.phoneNumber}`} className={`text-md truncate text-accent-color flex gap-2 items-center`}><MdLocalPhone className="translate-y-[2px]" />{employee.phoneNumber}</Link> 
           </div>
           <div className="flex flex-col gap-2">
             <span className='text-md text-right'><Text text={{eng: "User Account", swe: "Användarkonto"}} /> </span>
@@ -134,7 +134,7 @@ export default function Index() {
         
       </div>
 
-      <AdditionalEmployeeDetails expand={expand} setExpand={setExpand} employee={employee} />
+      <AdditionalEmployeeDetails expand={expand} setExpand={setExpand} employee={employee} edit={edit} setEmployee={setEmployee} />
 
       <nav className="flex gap-2 ">
         <button className={`${selectedTab === "tasks" && "text-black clippath bg-accent-color z-10 "} gap-2 px-4 pb-1 pt-0.5 text-lg font-semibold cursor-pointer transition-colors hover:text-greenish flex  items-center`} onClick={() => setSelectedTab("tasks")}><FaTasks /><Text text={{swe: "Uppgifter", eng: "Tasks"}}/></button>
