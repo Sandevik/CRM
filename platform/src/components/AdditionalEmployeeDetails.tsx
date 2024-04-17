@@ -17,7 +17,7 @@ export default function AdditionalEmployeeDetails({employee, expand, setExpand, 
           <button onClick={() => setExpand(!expand)} className="flex gap-2 items-center text-accent-color"><BsChevronRight className={expand ? "rotate-90" : "rotate-0" + " transition-transform"}/><Text text={expand ? {eng: "View Less", swe: "Visa Mindre"}:{eng: "View More", swe: "Visa Mer"}}/></button>
         </div>
         
-        <div className={`${expand ? "h-26 pointer-events-auto opacity-100": "h-0 pointer-events-none opacity-0"} transition-all p-4 grid grid-cols-3`}>
+        <div className={`${expand ? "h-26 pointer-events-auto opacity-100": "h-0 pointer-events-none opacity-0"} transition-all p-4 pb-0 mb-2 grid grid-cols-3`}>
           
           <div>
             <div className="grid grid-cols-2">

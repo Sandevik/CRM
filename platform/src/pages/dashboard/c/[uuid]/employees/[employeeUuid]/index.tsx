@@ -142,7 +142,7 @@ export default function Index() {
         <button className={`${selectedTab === "settings" && "text-black clippath bg-accent-color z-10 "} gap-2 px-4 pb-1 pt-0.5 text-lg font-semibold cursor-pointer transition-colors hover:text-greenish flex items-center`} onClick={() => setSelectedTab("settings")}><IoMdSettings /><Text text={{swe: "Anställningsinställningar", eng: "Employee Settings"}}/></button>
       </nav>
 
-      <div className={`relative ${expand ? "h-[calc(100dvh-23.55em)]" : "h-[calc(100dvh-16.85em)]"} `}>
+      <div className={`relative ${expand ? "h-[calc(100dvh-23.95em)]" : "h-[calc(100dvh-17.35em)]"} `}>
         <EmployeeTasks tasks={tasks} selectedTab={selectedTab} loading={loading} fetchTasks={fetchTasks} setFocusTask={setFocusTask} setAddTask={setAddTask} />
         <EmployeeTimeReports selectedTab={selectedTab} />
         <EmployeeSettings employee={employee} fetchEmployee={fetchEmployee} selectedTab={selectedTab}/>
