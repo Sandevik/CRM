@@ -109,7 +109,7 @@ export default function Index() {
           <FaUser className="w-[30%] text-6xl"/>
           <div className="flex flex-col flex-1">
             <span className="text-xl font-semibold truncate">{employee?.firstName} {employee?.lastName}</span>
-            <div className={`text-lg truncate flex justify-between gap-2 pr-1`}>{employee?.role || <span className={`${!employee?.role && "italic text-md"}`}><Text text={{eng:"No role was found", swe: "Ingen roll hittades"}} /></span>} {employee.isAdmin && <span><Text text={{swe:"Administratör", eng: "Administrator"}}/></span>}</div>
+            <div className={`text-lg truncate flex items-center justify-between gap-2 pr-1`}>{edit ? <Input className={`bg-background-dark border border-[#8D86C9] border-opacity-50 text-gray-200 w-full mr-2 placeholder:text-gray-500 ${!employee?.role || employee.role === "" ? "italic" : ""}`} placeholder={text({swe:"Roll", eng: "Role"}, data)} value={employee?.role || ""} onChange={(e) => setEmployee({...employee, role: e.target.value})}/> : employee.role ? employee.role : <span className={`${!employee?.role || employee.role === "" ? "italic" : ""} text-md`}>{employee.role === "" ? employee?.role : <Text text={{eng:"No role was found", swe: "Ingen roll hittades"}} />}</span>} {employee.isAdmin && <span><Text text={{swe:"Administratör", eng: "Administrator"}}/></span>}</div>
           </div>
         </div>
         <div className=" p-2 px-6 min-h-20 flex justify-between items-center gap-2  lg:border-r-2 pr-4 lg:border-l-2 border-b lg:border-b-0 pl-4 min-w-[90vw] lg:min-w-full ">
