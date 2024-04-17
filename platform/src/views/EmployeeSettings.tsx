@@ -4,6 +4,7 @@ import Text from '@/components/Text';
 import { CurrentCrmContext } from '@/context/CurrentCrmContext';
 import request from '@/utils/request';
 import React, { useContext, useEffect, useState } from 'react'
+import { IoMdSettings } from 'react-icons/io';
 
 export default function EmployeeSettings({selectedTab, employee, fetchEmployee}: {selectedTab: "tasks" | "settings" | "time", employee: Employee, fetchEmployee: () => Promise<void>}) {
     const {crm} = useContext(CurrentCrmContext);
@@ -83,7 +84,11 @@ export default function EmployeeSettings({selectedTab, employee, fetchEmployee}:
       <div className={`p-2 ${selectedTab === "settings" ? "translate-x-0 opacity-100 pointer-events-auto " : "translate-x-5 opacity-0 pointer-events-none"} absolute top-4 w-full h-full transition-all bg-background-light bg-opacity-50 rounded-md`}>
         <h3>Inställningar Och Behörigheter</h3>
 
-        <div className={`${!employee.userUuid && "opacity-65"} flex justify-center gap-[10%] my-6 bg-background-light p-2 rounded-md`}>
+        <div className="opacity-10 text-background-dark">
+          <IoMdSettings className="absolute h-full w-full top-0 " />
+        </div>
+
+        <div className={`${!employee.userUuid && "opacity-100"} flex justify-center gap-10 my-6 bg-background-light p-2 rounded-md`}>
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
               <Switch disabled={!employee.userUuid}  value={isAdmin} setValue={setIsAdmin} />
