@@ -16,7 +16,7 @@ export default function EmployeeTasks({selectedTab, tasks, loading, setAddTask, 
             <Button onClick={() => setAddTask(true)}><Text text={{eng: "Add Task", swe: "Ny Uppgift"}} /></Button>
         </div>
         <div className="mt-2 h-full">
-            <TaskList heightFull={true} loading={loading} focusTask={setFocusTask} showCustomers={false} tasks={tasks} refetchTasks={fetchTasks} />
+            <TaskList showEmptyPage={false} heightFull={true} loading={loading} focusTask={setFocusTask} showCustomers={false} tasks={tasks} refetchTasks={fetchTasks} />
         </div>   
     </div>
   )
