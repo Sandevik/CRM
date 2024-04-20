@@ -16,9 +16,9 @@ const config: Config = {
   
         "greenish": "#21A0AB",
   
-          "accent-color": "#C3DFE0",
-          "light-purple": "#8D86C9",
-          "light-red": "#EF798A",
+        "accent-color": "#C3DFE0",
+        "light-purple": "#8D86C9",
+        "light-red": "#EF798A",
           
   
       },
