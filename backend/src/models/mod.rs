@@ -1,5 +1,5 @@
 use actix_web::web;
-use sqlx::mysql::MySqlRow;
+use sqlx::{mysql::MySqlRow, MySql, Pool};
 
 use crate::AppState;
 
@@ -8,7 +8,6 @@ pub mod crm;
 pub mod customer;
 pub mod entry;
 pub mod employee;
-pub mod deal;
 pub mod meeting;
 pub mod task;
 pub mod time_report;
@@ -21,4 +20,13 @@ pub trait Model {
     fn from_row(row: &MySqlRow) -> Self;
     async fn insert(&self, data: &web::Data<AppState>) -> Result<(), sqlx::Error>;
     async fn update(&self, data: &web::Data<AppState>) -> Result<(), sqlx::Error>;
+    
+    // Handles semi automatic creation and altering of tables (migrations) 
+    fn sql_row_arrays() -> Vec<[&'static str; 2]>;
+
+    async fn create_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error>;
+    async fn alter_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error>;
+    //jämför med en DESC av en table!
+    async fn create_and_alter_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error>;
+    
 }

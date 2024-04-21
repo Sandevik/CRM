@@ -1,11 +1,11 @@
 use actix_web::web;
 use chrono::{Utc, DateTime};
 use serde::{self, Serialize, Deserialize};
-use sqlx::{Error, Row, mysql::MySqlRow};
+use sqlx::{mysql::MySqlRow, Error, MySql, Pool, Row};
 use uuid::Uuid;
 use crate::{AppState, controllers::{hashing::Hashing, database::Database}};
 
-use super::{employee, Model};
+use super::Model;
 
 #[derive(sqlx::FromRow, Debug, Serialize, Deserialize, Clone)]
 pub struct User {
@@ -38,6 +38,42 @@ pub struct User {
 }
 
 impl Model for User {
+
+    fn sql_row_arrays() -> Vec<[&'static str; 2]> {
+        vec![
+                ["uuid", "VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL UNIQUE"],
+                ["email", "VARCHAR(50) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL"],
+                ["first_name", "VARCHAR(30) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci"],
+                ["last_name", "VARCHAR(30) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci"],
+                ["address", "TEXT"],
+                ["zip_code", "TEXT"],
+                ["city", "TEXT"],
+                ["country", "TEXT"],
+                ["password_hash", "TEXT CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL"],
+                ["phone_number", "VARCHAR(15) NOT NULL"],
+                ["admin", "BOOLEAN NOT NULL DEFAULT FALSE"],
+                ["joined", "DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP"],
+                ["last_sign_in", "DATETIME DEFAULT CURRENT_TIMESTAMP"],
+                ["subscription_ends", "DATETIME"],
+                ["legacy_user", "BOOLEAN NOT NULL DEFAULT FALSE"],
+                ["current_jwt", "TEXT"],
+                ["preferred_language", "VARCHAR(3) NOT NULL DEFAULT 'eng'"],
+                ["created_by_employer_crm", "VARCHAR(36)"],
+                ["initial_login", "BOOLEAN NOT NULL DEFAULT TRUE"],
+        ]
+    }
+
+    async fn create_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
+        Database::create_table(Self::sql_row_arrays(), "users", Some("PRIMARY KEY (`uuid`(36)), UNIQUE (`email`(50), `phone_number`(15))"), pool).await
+    }
+
+    async fn alter_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
+        todo!();
+    }
+   
+    async fn create_and_alter_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
+       todo!()
+    }
     
     fn from_row(row: &MySqlRow) -> Self {
         User {
@@ -149,10 +185,6 @@ impl User {
 
     pub async fn insert_user(email: &String, first_name: &String, last_name: &String, phone_number: &String, password: &String, language: &String, created_by_employer_crm: Option<String>, data: &web::Data<AppState>) -> Result<String, Error> {
         let new_uuid = Uuid::new_v4().hyphenated().to_string();
-        let res = Database::setup_users_table(&data.pool).await;
-        if let Err(err) = res {
-            return Err(err);
-        }
         let result = sqlx::query("INSERT INTO `crm`. `users` (uuid, email, first_name, last_name, phone_number, preferred_language, password_hash, admin, joined, last_sign_in, subscription_ends, legacy_user, created_by_employer_crm) VALUES (?,?,?,?,?,?,?,0,?,?,NULL,false,?)")
             .bind(new_uuid.clone())
             .bind(email)

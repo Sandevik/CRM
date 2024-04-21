@@ -1,10 +1,10 @@
 use actix_web::web;
 use chrono::{DateTime, Utc};
 use serde::{Serialize, Deserialize};
-use sqlx::{mysql::MySqlRow, Row};
+use sqlx::{mysql::MySqlRow, MySql, Pool, Row};
 use uuid::Uuid;
 
-use crate::AppState;
+use crate::{controllers::database::Database, AppState};
 
 use super::Model;
 
@@ -24,6 +24,33 @@ pub struct Entry {
 }
 
 impl Model for Entry {
+
+    
+
+    fn sql_row_arrays() -> Vec<[&'static str; 2]> {
+        vec![
+        ["crm_uuid", "VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL"],
+        ["id", "INT NOT NULL AUTO_INCREMENT PRIMARY KEY"],
+        ["customer_uuid", "VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL"],
+        ["added", "DATETIME"],
+        ["added_at_meeting", "VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci"],
+        ["updated", "DATETIME"],
+        ["content", "TEXT"]
+        ]
+    }
+
+    async fn create_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
+        Database::create_table(Self::sql_row_arrays(), "entries", None, pool).await
+    }
+
+    async fn alter_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
+        todo!();
+    }
+   
+    async fn create_and_alter_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
+       todo!()
+    }
+
     fn from_row(row: &MySqlRow) -> Self {
         Entry {
             crm_uuid: Uuid::parse_str(row.get("crm_uuid")).unwrap_or_default(),
@@ -82,7 +109,9 @@ impl Entry {
     }
 
     
-
+    fn default() -> Self {
+        Self { crm_uuid: Uuid::new_v4(), id: 0, customer_uuid: Uuid::new_v4(), added_at_meeting: None, content: None, added: Some(Utc::now()), updated: Some(Utc::now()) }
+    }
     
 
     pub async fn get_all_by_customer_uuid(crm_uuid: &Uuid, customer_uuid: &Uuid, data: &web::Data<AppState>) -> Result<Vec<Self>, sqlx::Error> {

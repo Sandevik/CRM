@@ -1,10 +1,10 @@
 use actix_web::web;
 use chrono::{DateTime, Datelike, Days, Months, NaiveDate, NaiveTime, Utc};
 use serde::{Deserialize, Serialize};
-use sqlx::Row;
+use sqlx::{MySql, Pool, Row};
 use uuid::Uuid;
 
-use crate::AppState;
+use crate::{controllers::database::Database, AppState};
 
 use super::Model;
 
@@ -88,6 +88,37 @@ pub struct Task {
 }
 
 impl Model for Task {
+
+    fn sql_row_arrays() -> Vec<[&'static str; 2]> {
+        vec![
+        ["uuid", "VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL UNIQUE PRIMARY KEY"],
+        ["crm_uuid", "VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL"],
+        ["start", "DATETIME"],
+        ["deadline", "DATETIME"],
+        ["recurrence", "VARCHAR(7)"],
+        ["recurrence_count", "INT"],
+        ["status", "VARCHAR(10)"],
+        ["customer_uuid", "VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci"],
+        ["employee_uuid", "VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci"],
+        ["title", "VARCHAR(50)"],
+        ["added", "DATETIME"],
+        ["updated", "DATETIME"]
+        ]
+    }
+
+    async fn create_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
+        Database::create_table(Self::sql_row_arrays(), "tasks", None, pool).await
+    }
+
+    async fn alter_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
+        todo!();
+    }
+   
+    async fn create_and_alter_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
+       todo!()
+    }
+
+
     fn from_row(row: &sqlx::mysql::MySqlRow) -> Self {
         Task {
             uuid: Uuid::parse_str(row.get("uuid")).unwrap_or_default(),

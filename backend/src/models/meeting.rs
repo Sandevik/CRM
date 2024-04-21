@@ -1,9 +1,9 @@
 use actix_web::web;
 use chrono::{DateTime, Utc, Datelike, NaiveDate};
 use serde::{Serialize, Deserialize};
-use sqlx::{mysql::MySqlRow, Row};
+use sqlx::{mysql::MySqlRow, MySql, Pool, Row};
 use uuid::Uuid;
-use crate::{AppState, routes::{MeetingsOption, Limit}};
+use crate::{controllers::database::Database, routes::{Limit, MeetingsOption}, AppState};
 use super::Model;
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -23,6 +23,33 @@ pub struct Meeting {
 }
 
 impl Model for Meeting {
+
+    fn sql_row_arrays() -> Vec<[&'static str; 2]> {
+        vec![
+            ["crm_uuid", "VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL"],
+            ["uuid", "VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL PRIMARY KEY"],
+            ["customer_uuid", "VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL"],
+            ["from", "DATETIME"],
+            ["to", "DATETIME"],
+            ["added", "DATETIME"],
+            ["updated", "DATETIME"],
+            ["entry_id", "INT"]
+        ]
+    }
+
+    async fn create_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
+        Database::create_table(Self::sql_row_arrays(), "meetings", None, pool).await
+    }
+
+    async fn alter_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
+        todo!();
+    }
+   
+    async fn create_and_alter_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
+       todo!()
+    }
+
+
     fn from_row(row: &MySqlRow) -> Self {
         Meeting {
             crm_uuid: Uuid::parse_str(row.get("crm_uuid")).unwrap_or_default(),

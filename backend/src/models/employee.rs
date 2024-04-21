@@ -2,10 +2,10 @@ use actix_web::{error::ErrorBadRequest, web};
 use chrono::{DateTime, NaiveDate, Utc};
 use rand::Rng;
 use serde::{Serialize, Deserialize};
-use sqlx::{mysql::MySqlRow, Row};
+use sqlx::{mysql::MySqlRow, MySql, Pool, Row};
 use uuid::Uuid;
 
-use crate::{controllers::hashing::Hashing, routes::Limit, AppState};
+use crate::{controllers::{database::Database, hashing::Hashing}, routes::Limit, AppState};
 
 use super::{user::User, Model};
 
@@ -57,6 +57,46 @@ pub struct Employee {
 }
 
 impl Model for Employee {
+    
+    
+
+    fn sql_row_arrays() -> Vec<[&'static str; 2]> {
+        vec![
+            ["crm_uuid", "VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL"],
+            ["uuid", "VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL PRIMARY KEY"],
+            ["user_uuid", "VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci UNIQUE"],
+            ["first_name", "TEXT"],
+            ["last_name", "TEXT"],
+            ["date_of_birth", "DATE"],
+            ["ssn", "VARCHAR(12)"],
+            ["address", "TEXT"],
+            ["zip_code", "TEXT"],
+            ["city", "TEXT"],
+            ["country", "TEXT"],
+            ["phone_number", "VARCHAR(14) NOT NULL"],
+            ["role", "TEXT"],
+            ["driving_license_class", "TEXT"],
+            ["period_of_validity", "TEXT"],
+            ["email", "VARCHAR(40) NOT NULL"],
+            ["contract_uuid", "VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci"],
+            ["added", "DATETIME"],
+            ["updated", "DATETIME"]
+        ]
+    }
+
+    
+    async fn create_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
+        Database::create_table(Self::sql_row_arrays(), "employees", None, pool).await
+    }
+    
+    async fn alter_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
+        todo!();
+    }
+   
+    async fn create_and_alter_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
+       todo!()
+    }
+
     fn from_row(row: &MySqlRow) -> Self {
         Employee {
             crm_uuid: Uuid::parse_str(row.get("crm_uuid")).unwrap_or_default(), 
@@ -176,9 +216,7 @@ impl Employee {
             can_handle_vehicles: Some(false),
             can_access_crm: Some(false),
         }
-    
     }
-
 
     pub async fn get_by_uuid(employee_uuid: &Uuid, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<Option<Self>, sqlx::Error> {
         let query = "SELECT * FROM `crm`.`employees` WHERE uuid = ? AND `crm_uuid` = ?";

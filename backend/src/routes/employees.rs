@@ -256,7 +256,7 @@ struct UpdateAccountPermissions {
 async fn update_account_permissions(data: web::Data<AppState>, body: web::Json<UpdateAccountPermissions>) -> impl Responder {
     let emp = Employee {
         crm_uuid: Uuid::parse_str(&body.crm_uuid).expect("Could not parse crm_uuid"), 
-        user_uuid: match Uuid::parse_str(&body.user_uuid){Err(err) => None, Ok(u) => Some(u)},
+        user_uuid: match Uuid::parse_str(&body.user_uuid){Err(_) => None, Ok(u) => Some(u)},
         can_report_time: body.can_report_time,
         can_handle_customers: body.can_handle_customers,
         can_handle_employees: body.can_handle_employees,

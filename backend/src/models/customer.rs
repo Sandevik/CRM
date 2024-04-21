@@ -1,9 +1,9 @@
 use actix_web::web;
 use chrono::{DateTime, Utc, NaiveDate};
 use serde::{Serialize, Deserialize};
-use sqlx::{mysql::MySqlRow, Row};
+use sqlx::{mysql::MySqlRow, MySql, Pool, Row};
 use uuid::Uuid;
-use crate::{AppState, routes::Limit};
+use crate::{controllers::database::Database, routes::Limit, AppState};
 use super::{entry::Entry, meeting::Meeting, Model};
 
 #[derive(Serialize, Deserialize)]
@@ -35,6 +35,44 @@ pub struct Customer {
 }
 
 impl Model for Customer {
+    
+    
+    
+    fn sql_row_arrays() -> Vec<[&'static str; 2]> {
+        vec![
+        ["crm_uuid", "VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL"],
+        ["uuid", "VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL UNIQUE PRIMARY KEY"],
+        ["first_name", "TEXT"],
+        ["last_name", "TEXT"],
+        ["date_of_birth", "DATE"],
+        ["email", "VARCHAR(50) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL"],
+        ["address", "TEXT"],
+        ["zip_code", "TEXT"],
+        ["city", "TEXT"],
+        ["country", "TEXT"],
+        ["company", "TEXT"],
+        ["phone_number", "TEXT"],
+        ["news_letter", "BOOLEAN NOT NULL DEFAULT FALSE"],
+        ["added", "DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP"],
+        ["updated", "DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP"],
+        ["note", "TEXT"]
+        ]
+    }
+
+    
+    async fn create_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
+        Database::create_table(Self::sql_row_arrays(), "customers", None, pool).await
+    }
+
+    async fn alter_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
+        todo!();
+    }
+   
+    async fn create_and_alter_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
+       todo!()
+    }
+
+
     fn from_row(row: &MySqlRow) -> Self {
         Customer {
             crm_uuid: Uuid::parse_str(row.get("crm_uuid")).unwrap_or_default(),
@@ -111,6 +149,8 @@ impl Customer {
     pub fn default() -> Self {
         Customer { crm_uuid: Uuid::new_v4(), uuid: Uuid::new_v4(), first_name: None, last_name: None, date_of_birth: None, email: "".to_string(), address: None, zip_code: None, city: None, country: None, company: None, phone_number: None, news_letter: false, added: Utc::now(), updated: Utc::now(), note: None }
     }
+
+    
     pub fn new(crm_uuid: &Uuid, first_name: Option<String>, last_name: Option<String>, date_of_birth: Option<NaiveDate>, email: String, address: Option<String>, zip_code: Option<String>, city: Option<String>, country: Option<String>, company: Option<String>, phone_number: Option<String>, news_letter: bool) -> Self {
         Customer {
             crm_uuid: crm_uuid.clone(),

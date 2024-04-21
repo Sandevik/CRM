@@ -1,10 +1,10 @@
 use actix_web::web;
 use chrono::{Utc, DateTime};
 use serde::{Serialize, Deserialize};
-use sqlx::{mysql::{MySqlQueryResult, MySqlRow}, Row};
+use sqlx::{mysql::{MySqlQueryResult, MySqlRow}, MySql, Pool, Row};
 use uuid::Uuid;
-use crate::{AppState, models::user::User, routes::{Limit, MeetingsOption}};
-use super::{Model, customer::Customer, employee::Employee, meeting::Meeting, deal::Deal};
+use crate::{controllers::database::Database, models::user::User, routes::{Limit, MeetingsOption}, AppState};
+use super::{customer::Customer, employee::Employee, meeting::Meeting, Model};
 
 
 
@@ -17,17 +17,44 @@ pub struct CRM {
     name: String,
     added: DateTime<Utc>,
     hidden: bool,
+
     #[serde(skip_serializing_if = "Option::is_none")]
     customers: Option<Vec<Customer>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     employees: Option<Vec<Employee>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     meetings: Option<Vec<Meeting>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    deals: Option<Vec<Deal>>,
+
 }
 
 impl Model for CRM {
+
+    
+
+    fn sql_row_arrays() -> Vec<[&'static str; 2]> {
+        vec![
+            ["user_uuid", "VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL"],
+            ["crm_uuid", "VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL UNIQUE PRIMARY KEY"],
+            ["name", "VARCHAR(40) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL UNIQUE"],
+            ["added", "DATETIME"],
+            ["hidden", "BOOLEAN NOT NULL DEFAULT FALSE"]
+        ]
+    }
+
+    
+
+    async fn create_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
+        Database::create_table(Self::sql_row_arrays(), "crm_users", None, pool).await
+    }
+
+    async fn alter_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
+        todo!();
+    }
+   
+    async fn create_and_alter_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
+       todo!()
+    }
+
     fn from_row(row: &MySqlRow) -> Self {
         CRM {
             user_uuid: Uuid::parse_str(row.get("user_uuid")).expect("ERROR: Could not parse uuid for this crm."),
@@ -37,7 +64,6 @@ impl Model for CRM {
             hidden: row.get("hidden"),
             customers: None,
             employees: None,
-            deals: None,
             meetings: None,
         }
     }
@@ -55,8 +81,22 @@ impl Model for CRM {
 
 
 
+
+
 impl CRM {
 
+    fn default() -> Self {
+        Self {
+            user_uuid: Uuid::new_v4(),
+            crm_uuid: Uuid::new_v4(),
+            name: "".to_string(),
+            added: Utc::now(),
+            hidden: false,
+            customers: None,
+            employees: None,
+            meetings: None,
+        }
+    }
 
     pub async fn get_customers(&mut self, limit: Limit, offset: Option<u16>, data: &web::Data<AppState>) {
         match Customer::get_all(&self.crm_uuid, limit, offset, data).await {
