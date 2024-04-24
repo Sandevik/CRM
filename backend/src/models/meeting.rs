@@ -26,9 +26,9 @@ impl Model for Meeting {
 
     fn sql_row_arrays() -> Vec<[&'static str; 2]> {
         vec![
-            ["crm_uuid", "VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL"],
-            ["uuid", "VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL PRIMARY KEY"],
-            ["customer_uuid", "VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL"],
+            ["crm_uuid", "VARCHAR(36) NOT NULL"],
+            ["uuid", "VARCHAR(36) NOT NULL PRIMARY KEY"],
+            ["customer_uuid", "VARCHAR(36) NOT NULL"],
             ["from", "DATETIME"],
             ["to", "DATETIME"],
             ["added", "DATETIME"],
@@ -42,11 +42,11 @@ impl Model for Meeting {
     }
 
     async fn alter_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
-        todo!();
+        Database::alter_table(Self::sql_row_arrays(), "meetings", pool).await
     }
    
-    async fn create_and_alter_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
-       todo!()
+    async fn migrate_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
+        Database::migrate_table(Self::sql_row_arrays(), "meetings", None, pool).await
     }
 
 

@@ -27,6 +27,6 @@ pub trait Model {
     async fn create_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error>;
     async fn alter_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error>;
     //jämför med en DESC av en table!
-    async fn create_and_alter_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error>;
+    async fn migrate_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error>;
     
 }

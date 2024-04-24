@@ -62,9 +62,9 @@ impl Model for Employee {
 
     fn sql_row_arrays() -> Vec<[&'static str; 2]> {
         vec![
-            ["crm_uuid", "VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL"],
-            ["uuid", "VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL PRIMARY KEY"],
-            ["user_uuid", "VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci UNIQUE"],
+            ["crm_uuid", "VARCHAR(36) NOT NULL"],
+            ["uuid", "VARCHAR(36) NOT NULL PRIMARY KEY"],
+            ["user_uuid", "VARCHAR(36) UNIQUE"],
             ["first_name", "TEXT"],
             ["last_name", "TEXT"],
             ["date_of_birth", "DATE"],
@@ -78,7 +78,7 @@ impl Model for Employee {
             ["driving_license_class", "TEXT"],
             ["period_of_validity", "TEXT"],
             ["email", "VARCHAR(40) NOT NULL"],
-            ["contract_uuid", "VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci"],
+            ["contract_uuid", "VARCHAR(36)"],
             ["added", "DATETIME"],
             ["updated", "DATETIME"]
         ]
@@ -90,11 +90,11 @@ impl Model for Employee {
     }
     
     async fn alter_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
-        todo!();
+        Database::alter_table(Self::sql_row_arrays(), "employees", pool).await
     }
    
-    async fn create_and_alter_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
-       todo!()
+    async fn migrate_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
+        Database::migrate_table(Self::sql_row_arrays(), "employees", None, pool).await
     }
 
     fn from_row(row: &MySqlRow) -> Self {

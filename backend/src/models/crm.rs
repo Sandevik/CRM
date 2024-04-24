@@ -33,9 +33,9 @@ impl Model for CRM {
 
     fn sql_row_arrays() -> Vec<[&'static str; 2]> {
         vec![
-            ["user_uuid", "VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL"],
-            ["crm_uuid", "VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL UNIQUE PRIMARY KEY"],
-            ["name", "VARCHAR(40) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL UNIQUE"],
+            ["user_uuid", "VARCHAR(36) NOT NULL"],
+            ["crm_uuid", "VARCHAR(36) NOT NULL PRIMARY KEY"],
+            ["name", "VARCHAR(40) NOT NULL"],
             ["added", "DATETIME"],
             ["hidden", "BOOLEAN NOT NULL DEFAULT FALSE"]
         ]
@@ -48,11 +48,11 @@ impl Model for CRM {
     }
 
     async fn alter_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
-        todo!();
+        Database::alter_table(Self::sql_row_arrays(), "crm_users", pool).await
     }
    
-    async fn create_and_alter_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
-       todo!()
+    async fn migrate_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
+        Database::migrate_table(Self::sql_row_arrays(), "crm_users", None, pool).await
     }
 
     fn from_row(row: &MySqlRow) -> Self {

@@ -29,11 +29,11 @@ impl Model for Entry {
 
     fn sql_row_arrays() -> Vec<[&'static str; 2]> {
         vec![
-        ["crm_uuid", "VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL"],
+        ["crm_uuid", "VARCHAR(36) NOT NULL"],
         ["id", "INT NOT NULL AUTO_INCREMENT PRIMARY KEY"],
-        ["customer_uuid", "VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL"],
+        ["customer_uuid", "VARCHAR(36) NOT NULL"],
         ["added", "DATETIME"],
-        ["added_at_meeting", "VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci"],
+        ["added_at_meeting", "VARCHAR(36)"],
         ["updated", "DATETIME"],
         ["content", "TEXT"]
         ]
@@ -44,11 +44,11 @@ impl Model for Entry {
     }
 
     async fn alter_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
-        todo!();
+        Database::alter_table(Self::sql_row_arrays(), "entries", pool).await
     }
    
-    async fn create_and_alter_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
-       todo!()
+    async fn migrate_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
+        Database::migrate_table(Self::sql_row_arrays(), "entries", None, pool).await
     }
 
     fn from_row(row: &MySqlRow) -> Self {

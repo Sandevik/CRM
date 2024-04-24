@@ -18,7 +18,7 @@ impl Model for Break {
 
     fn sql_row_arrays() -> Vec<[&'static str; 2]> {
         vec![
-        ["break_uuid", "VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL PRIMARY KEY"],
+        ["break_uuid", "VARCHAR(36) NOT NULL PRIMARY KEY"],
         ["start_time", "TIME"],
         ["end_time", "TIME"],
         ["added", "DATETIME"],
@@ -31,13 +31,12 @@ impl Model for Break {
     }
 
     async fn alter_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
-        todo!();
+        Database::alter_table(Self::sql_row_arrays(), "breaks", pool).await
     }
    
-    async fn create_and_alter_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
-       todo!()
+    async fn migrate_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
+        Database::migrate_table(Self::sql_row_arrays(), "breaks", None, pool).await
     }
-
 
     fn from_row(row: &sqlx::mysql::MySqlRow) -> Self {
         Break {

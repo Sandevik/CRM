@@ -8,6 +8,7 @@ mod middleware;
 mod models;
 mod routes;
 
+use models::Model;
 use controllers::database::Database;
 use routes::routes;
 

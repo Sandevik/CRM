@@ -40,12 +40,12 @@ impl Model for Customer {
     
     fn sql_row_arrays() -> Vec<[&'static str; 2]> {
         vec![
-        ["crm_uuid", "VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL"],
-        ["uuid", "VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL UNIQUE PRIMARY KEY"],
+        ["crm_uuid", "VARCHAR(36) NOT NULL"],
+        ["uuid", "VARCHAR(36) NOT NULL UNIQUE PRIMARY KEY"],
         ["first_name", "TEXT"],
         ["last_name", "TEXT"],
         ["date_of_birth", "DATE"],
-        ["email", "VARCHAR(50) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL"],
+        ["email", "VARCHAR(50) NOT NULL"],
         ["address", "TEXT"],
         ["zip_code", "TEXT"],
         ["city", "TEXT"],
@@ -58,18 +58,18 @@ impl Model for Customer {
         ["note", "TEXT"]
         ]
     }
-
+    // NOT NULL PRIMARY KEY
     
     async fn create_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
         Database::create_table(Self::sql_row_arrays(), "customers", None, pool).await
     }
 
     async fn alter_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
-        todo!();
+        Database::alter_table(Self::sql_row_arrays(), "customers", pool).await
     }
    
-    async fn create_and_alter_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
-       todo!()
+    async fn migrate_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
+        Database::migrate_table(Self::sql_row_arrays(), "customers", None, pool).await
     }
 
 

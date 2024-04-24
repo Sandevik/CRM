@@ -91,15 +91,15 @@ impl Model for Task {
 
     fn sql_row_arrays() -> Vec<[&'static str; 2]> {
         vec![
-        ["uuid", "VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL UNIQUE PRIMARY KEY"],
-        ["crm_uuid", "VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci NOT NULL"],
+        ["uuid", "VARCHAR(36) NOT NULL UNIQUE PRIMARY KEY"],
+        ["crm_uuid", "VARCHAR(36) NOT NULL"],
         ["start", "DATETIME"],
         ["deadline", "DATETIME"],
         ["recurrence", "VARCHAR(7)"],
         ["recurrence_count", "INT"],
         ["status", "VARCHAR(10)"],
-        ["customer_uuid", "VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci"],
-        ["employee_uuid", "VARCHAR(36) CHARACTER SET utf8 COLLATE utf8_general_mysql500_ci"],
+        ["customer_uuid", "VARCHAR(36)"],
+        ["employee_uuid", "VARCHAR(36)"],
         ["title", "VARCHAR(50)"],
         ["added", "DATETIME"],
         ["updated", "DATETIME"]
@@ -111,11 +111,11 @@ impl Model for Task {
     }
 
     async fn alter_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
-        todo!();
+        Database::alter_table(Self::sql_row_arrays(), "tasks", pool).await
     }
    
-    async fn create_and_alter_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
-       todo!()
+    async fn migrate_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error> {
+        Database::migrate_table(Self::sql_row_arrays(), "tasks", None, pool).await
     }
 
 
