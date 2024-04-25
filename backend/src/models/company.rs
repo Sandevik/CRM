@@ -1,5 +1,3 @@
-use std::default;
-
 use actix_web::web;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -156,9 +154,6 @@ impl Company {
         }
     }
 
-    
-    
-
     pub async fn delete(self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
         match sqlx::query("DELETE FROM `crm` . `companies` WHERE crm_uuid = ?")
         .bind(self.crm_uuid.hyphenated().to_string())
@@ -168,6 +163,7 @@ impl Company {
             Ok(_) => Ok(())
         }
     }
+
     pub async fn delete_by_crm_uuid(crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
         match sqlx::query("DELETE FROM `crm` . `companies` WHERE crm_uuid = ?")
         .bind(crm_uuid.hyphenated().to_string())

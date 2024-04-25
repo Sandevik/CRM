@@ -1,11 +1,11 @@
-use actix_web::{error::ErrorBadRequest, web};
+use actix_web::web;
 use chrono::{DateTime, NaiveDate, Utc};
 use rand::Rng;
 use serde::{Serialize, Deserialize};
 use sqlx::{mysql::MySqlRow, MySql, Pool, Row};
 use uuid::Uuid;
 
-use crate::{controllers::{database::Database, hashing::Hashing}, routes::Limit, AppState};
+use crate::{controllers::database::Database, routes::Limit, AppState};
 
 use super::{user::User, Model};
 
@@ -17,7 +17,7 @@ pub struct Employee {
     #[serde(rename(serialize = "userUuid", deserialize = "userUuid"))]
     pub user_uuid: Option<Uuid>,
     #[serde(rename(serialize = "employmentOrder", deserialize = "employmentOrder"))]
-    pub employment_order: i32,
+    pub employment_number: i32,
     #[serde(rename(serialize = "firstName", deserialize = "firstName"))]
     pub first_name: Option<String>,
     #[serde(rename(serialize = "lastName", deserialize = "lastName"))]
@@ -35,11 +35,12 @@ pub struct Employee {
     pub role: Option<String>,
     #[serde(rename(serialize = "drivingLicenseClass", deserialize = "drivingLicenseClass"))]
     pub driving_license_class: Option<String>,
-    #[serde(rename(serialize = "periodOfValidity", deserialize = "periodOfValidity"))]
-    pub period_of_validity: Option<String>,
+    #[serde(rename(serialize = "driverCardNumber", deserialize = "driverCardNumber"))]
+    pub driver_card_number: Option<String>,
     pub email: String,
     #[serde(rename(serialize = "contractUuid", deserialize = "contractUuid"))]
     pub contract_uuid: Option<Uuid>,
+    pub note: Option<String>,
     #[serde(rename(serialize = "accessLevel", deserialize = "accessLevel"))]
     pub access_level: Option<i32>,
     #[serde(rename(serialize = "canReportTime", deserialize = "canReportTime"))]
@@ -67,7 +68,7 @@ impl Model for Employee {
             ["crm_uuid", "VARCHAR(36) NOT NULL"],
             ["uuid", "VARCHAR(36) NOT NULL PRIMARY KEY"],
             ["user_uuid", "VARCHAR(36) UNIQUE"],
-            ["employment_order", "INT AUTO_INCREMENT"],
+            ["employment_number", "INT NOT NULL UNIQUE AUTO_INCREMENT"],
             ["first_name", "TEXT"],
             ["last_name", "TEXT"],
             ["date_of_birth", "DATE"],
@@ -79,9 +80,10 @@ impl Model for Employee {
             ["phone_number", "VARCHAR(14) NOT NULL"],
             ["role", "TEXT"],
             ["driving_license_class", "TEXT"],
-            ["period_of_validity", "TEXT"],
+            ["driver_card_number", "TEXT"],
             ["email", "VARCHAR(40) NOT NULL"],
             ["contract_uuid", "VARCHAR(36)"],
+            ["note", "TEXT"],
             ["added", "DATETIME"],
             ["updated", "DATETIME"]
         ]
@@ -105,7 +107,7 @@ impl Model for Employee {
             crm_uuid: Uuid::parse_str(row.get("crm_uuid")).unwrap_or_default(), 
             uuid: Uuid::parse_str(row.get("uuid")).unwrap_or_default(),
             user_uuid: match row.get("user_uuid") { None => None, Some(str) => match Uuid::parse_str(str) {Err(_) => None, Ok(u) => Some(u)}},
-            employment_order: row.get("employment_order"),
+            employment_number: row.get("employment_number"),
             first_name: row.get("first_name"),
             last_name: row.get("last_name"),
             date_of_birth: row.get("date_of_birth"),
@@ -119,7 +121,8 @@ impl Model for Employee {
             phone_number: row.get("phone_number"),
             role: row.get("role"),
             driving_license_class: row.get("driving_license_class"),
-            period_of_validity: row.get("period_of_validity"),
+            driver_card_number: row.get("driver_card_number"),
+            note: row.get("note"),
             added: row.get("added"),
             updated: row.get("updated"),
             access_level: None,
@@ -133,7 +136,7 @@ impl Model for Employee {
     }
 
     async fn insert(&self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
-        let query = "INSERT INTO `crm`.`employees` (crm_uuid, uuid, first_name, last_name, date_of_birth, email, address, zip_code, city, country, ssn, contract_uuid, phone_number, role, driving_license_class, period_of_validity, added, updated) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        let query = "INSERT INTO `crm`.`employees` (crm_uuid, uuid, first_name, last_name, date_of_birth, email, address, zip_code, city, country, ssn, contract_uuid, phone_number, role, driving_license_class, driver_card_number, added, updated) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
         match sqlx::query(&query)
             .bind(&self.crm_uuid.hyphenated().to_string())
             .bind(&self.uuid.hyphenated().to_string())
@@ -150,7 +153,7 @@ impl Model for Employee {
             .bind(&self.phone_number)
             .bind(&self.role)
             .bind(&self.driving_license_class)
-            .bind(&self.period_of_validity)
+            .bind(&self.driver_card_number)
             .bind(&self.added)
             .bind(&self.updated)
             .execute(&data.pool)
@@ -161,7 +164,7 @@ impl Model for Employee {
     }
 
     async fn update(&self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
-        let query = "UPDATE `crm`.`employees` SET first_name = ?, last_name = ?, date_of_birth = ?, email = ?, address = ?, zip_code = ?, city = ?, country = ?, ssn = ?, contract_uuid = ?, phone_number = ?, role = ?, driving_license_class = ?, period_of_validity = ?, updated = ? WHERE uuid = ? AND crm_uuid = ?";
+        let query = "UPDATE `crm`.`employees` SET first_name = ?, last_name = ?, date_of_birth = ?, email = ?, address = ?, zip_code = ?, city = ?, country = ?, ssn = ?, contract_uuid = ?, phone_number = ?, role = ?, driving_license_class = ?, driver_card_number = ?, note = ?, updated = ? WHERE uuid = ? AND crm_uuid = ?";
         match sqlx::query(&query)
             .bind(&self.first_name)
             .bind(&self.last_name)
@@ -176,7 +179,8 @@ impl Model for Employee {
             .bind(&self.phone_number)
             .bind(&self.role)
             .bind(&self.driving_license_class)
-            .bind(&self.period_of_validity)
+            .bind(&self.driver_card_number)
+            .bind(&self.note)
             .bind(Utc::now())
             .bind(&self.uuid.hyphenated().to_string())
             .bind(&self.crm_uuid.hyphenated().to_string())
@@ -196,7 +200,7 @@ impl Employee {
             crm_uuid: Uuid::new_v4(), 
             uuid: Uuid::new_v4(),
             user_uuid: None,
-            employment_order: -1,
+            employment_number: -1,
             first_name: None,
             last_name: None,
             date_of_birth: None,
@@ -211,7 +215,8 @@ impl Employee {
             phone_number: "".to_string(),
             role: None,
             driving_license_class: None,
-            period_of_validity: None,
+            driver_card_number: None,
+            note: None,
             added: Utc::now(),
             updated: Utc::now(),
             can_report_time: Some(true),

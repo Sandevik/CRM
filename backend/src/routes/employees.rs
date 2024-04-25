@@ -3,7 +3,7 @@ use actix_web_httpauth::middleware::HttpAuthentication;
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 use chrono::NaiveDate;
-use crate::{models::{employee::{self, Employee}, Model}, routes::Response};
+use crate::{models::{employee::Employee, Model}, routes::Response};
 use crate::{middleware::owns_or_admin_or_can_handle_employees::validator, AppState};
 
 use super::Limit;
@@ -98,13 +98,14 @@ struct CreateEmployeeRequest {
     #[serde(rename(serialize = "zipCode", deserialize = "zipCode"))]
     zip_code: Option<String>,
     city: Option<String>,
+    country: Option<String>,
     #[serde(rename(serialize = "phoneNumber", deserialize = "phoneNumber"))]
     phone_number: String,
     role: Option<String>,
     #[serde(rename(serialize = "drivingLicenseClass", deserialize = "drivingLicenseClass"))]
     driving_license_class: Option<String>,
-    #[serde(rename(serialize = "periodOfValidity", deserialize = "periodOfValidity"))]
-    period_of_validity: Option<String>,
+    #[serde(rename(serialize = "driverCardNumber", deserialize = "driverCardNumber"))]
+    driver_card_number: Option<String>,
     email: String,
     #[serde(rename(serialize = "contract_uuid", deserialize = "contract_uuid"))]
     contract_uuid: Option<String>,
@@ -124,10 +125,11 @@ async fn create_employee(data: web::Data<AppState>, body: web::Json<CreateEmploy
         address: body.address.clone(),
         zip_code: body.zip_code.clone(),
         city: body.city.clone(),
+        country: body.country.clone(),
         phone_number: body.phone_number.clone(),
         role: body.role.clone(),
         driving_license_class: body.driving_license_class.clone(),
-        period_of_validity: body.period_of_validity.clone(),
+        driver_card_number: body.driver_card_number.clone(),
         email: body.email.clone(),
         contract_uuid: match body.contract_uuid.clone() {None => None, Some(str) => Some(match Uuid::parse_str(&str) {Err(_) => Uuid::new_v4(), Ok(u) => u})},
         access_level: body.access_level,
@@ -157,13 +159,15 @@ struct UpdateEmployeeRequest {
     #[serde(rename(serialize = "zipCode", deserialize = "zipCode"))]
     zip_code: Option<String>,
     city: Option<String>,
+    country: Option<String>,
     #[serde(rename(serialize = "phoneNumber", deserialize = "phoneNumber"))]
     phone_number: String,
     role: Option<String>,
+    note: Option<String>,
     #[serde(rename(serialize = "drivingLicenseClass", deserialize = "drivingLicenseClass"))]
     driving_license_class: Option<String>,
-    #[serde(rename(serialize = "periodOfValidity", deserialize = "periodOfValidity"))]
-    period_of_validity: Option<String>,
+    #[serde(rename(serialize = "driverCardNumber", deserialize = "driverCardNumber"))]
+    driver_card_number: Option<String>,
     email: String,
     #[serde(rename(serialize = "contract_uuid", deserialize = "contract_uuid"))]
     contract_uuid: Option<String>,
@@ -183,10 +187,12 @@ async fn update_employee(data: web::Data<AppState>, body: web::Json<UpdateEmploy
         address: body.address.clone(),
         zip_code: body.zip_code.clone(),
         city: body.city.clone(),
+        country: body.country.clone(),
         phone_number: body.phone_number.clone(),
         role: body.role.clone(),
+        note: body.note.clone(),
         driving_license_class: body.driving_license_class.clone(),
-        period_of_validity: body.period_of_validity.clone(),
+        driver_card_number: body.driver_card_number.clone(),
         email: body.email.clone(),
         contract_uuid: match body.contract_uuid.clone() {None => None, Some(str) => Some(match Uuid::parse_str(&str) {Err(_) => Uuid::new_v4(), Ok(u) => u})},
         access_level: body.access_level,

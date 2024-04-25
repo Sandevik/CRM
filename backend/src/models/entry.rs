@@ -25,8 +25,6 @@ pub struct Entry {
 
 impl Model for Entry {
 
-    
-
     fn sql_row_arrays() -> Vec<[&'static str; 2]> {
         vec![
         ["crm_uuid", "VARCHAR(36) NOT NULL"],
@@ -107,12 +105,6 @@ impl Entry {
             updated: Some(Utc::now())
         }
     }
-
-    
-    fn default() -> Self {
-        Self { crm_uuid: Uuid::new_v4(), id: 0, customer_uuid: Uuid::new_v4(), added_at_meeting: None, content: None, added: Some(Utc::now()), updated: Some(Utc::now()) }
-    }
-    
 
     pub async fn get_all_by_customer_uuid(crm_uuid: &Uuid, customer_uuid: &Uuid, data: &web::Data<AppState>) -> Result<Vec<Self>, sqlx::Error> {
         match sqlx::query("SELECT * FROM `crm`.`entries` WHERE `customer_uuid` = ? AND `crm_uuid` = ? ORDER BY `added` DESC", )

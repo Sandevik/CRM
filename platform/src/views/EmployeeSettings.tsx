@@ -86,6 +86,7 @@ export default function EmployeeSettings({selectedTab, employee, fetchEmployee}:
         <IoMdSettings className="absolute text-background-dark h-full w-full top-0 opacity-10 pointer-events-none" />
 
         <div className={`flex justify-center gap-10 mt-2 mb-6 bg-background-light p-2 rounded-md bg-opacity-100`}>
+          {!employee.userUuid && <span><Text text={{eng: "Employee need a user account for you to change these, create one above.", swe: "Den anställda behöver ett användar konto för att ändra dessa, skapa ett ovan."}} /></span>}
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
               <Switch disabled={!employee.userUuid}  value={isAdmin} setValue={setIsAdmin} />

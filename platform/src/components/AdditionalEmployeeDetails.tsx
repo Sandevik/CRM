@@ -54,15 +54,10 @@ export default function AdditionalEmployeeDetails({employee, expand, setExpand, 
               </div>
             </div>
             <div className="flex flex-col mr-4 gap-0.5 mb-1">
-              <div className="text-sm"><Text text={{eng: "Access", swe: "Behörigheter"}} /></div>
-
-                <div className="flex flex-col mr-4 gap-0.5 mb-1">
-                  <span className={`${employee?.canReportTime === null && employee.canReportTime && "italic"} text-md`}>{employee?.canReportTime !== null && employee?.canReportTime ? <Text text={{eng:"Can report time", swe: "Kan rapportera tid"}} /> : <Text text={{eng:"Cannot report time", swe: "Kan inte rapportera tid"}} />}</span>
-                  <span className={`${employee?.isAdmin === null && employee.isAdmin && "italic"} text-md`}>{employee?.isAdmin !== null && employee?.isAdmin ? <Text text={{eng:"Administrator", swe: "Administratör"}} /> : ""}</span>
-                </div>
-
+              <div className="text-sm"><Text text={{eng: "Note", swe: "Anteckning"}} /></div>
+              {edit ? <textarea className='bg-background-dark border border-[#8D86C9] h-full resize-none rounded-md border-opacity-50 text-gray-200 w-full mr-2 placeholder:text-gray-500' placeholder={text({swe:"Anteckning", eng: "Note"}, data)} value={employee?.note || ""} onChange={(e) => setEmployee({...employee, note: e.target.value})}/> : employee.note ? employee.note : <span className={`${!employee?.note || employee.note === "" ? "italic" : ""} text-md`}>{employee.note === "" ? employee?.note : <Text text={{eng:"No note was found", swe: "Ingen anteckning hittades"}} />}</span>}
+              </div>
             </div>
-          </div>
           
           <div>
             <div className="grid grid-cols-2">
@@ -73,8 +68,8 @@ export default function AdditionalEmployeeDetails({employee, expand, setExpand, 
 
                 </div>
                 <div className="flex flex-col mr-4 gap-0.5 mb-1  justify-center">
-                  <div className="text-sm"><Text text={{eng: "Period Of Validity", swe: "Validitetsperiod"}} /></div>
-                  {edit ? <Input className='bg-background-dark border border-[#8D86C9] border-opacity-50 text-gray-200 w-full mr-2 placeholder:text-gray-500' placeholder={text({swe:"Validitetsperiod", eng: "Period Of Validity"}, data)} value={employee?.periodOfValidity || ""} onChange={(e) => setEmployee({...employee, periodOfValidity: e.target.value})}/> : employee.periodOfValidity ? employee.periodOfValidity : <span className={`${!employee?.periodOfValidity || employee.periodOfValidity === "" ? "italic" : ""} text-md`}>{employee.periodOfValidity === "" ? employee?.periodOfValidity : <Text text={{eng:"No period of validity was found", swe: "Ingen validitetsperiod hittades"}} />}</span>}
+                  <div className="text-sm"><Text text={{eng: "Drivers Card Number", swe: "Förarkortsnummer"}} /></div>
+                  {edit ? <Input className='bg-background-dark border border-[#8D86C9] border-opacity-50 text-gray-200 w-full mr-2 placeholder:text-gray-500' placeholder={text({swe:"Förarkortsnummer", eng: "Drivers Card Number"}, data)} value={employee?.driverCardNumber || ""} onChange={(e) => setEmployee({...employee, driverCardNumber: e.target.value})}/> : employee.driverCardNumber ? employee.driverCardNumber : <span className={`${!employee?.driverCardNumber || employee.driverCardNumber === "" ? "italic" : ""} text-md`}>{employee.driverCardNumber === "" ? employee?.driverCardNumber : <Text text={{eng:"No driver card number was found", swe: "Inget förarkorsnummer hittades"}} />}</span>}
                 </div>
               </div>
             

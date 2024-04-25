@@ -184,8 +184,10 @@ impl User {
     } 
 
     pub async fn insert_user(email: &String, first_name: &String, last_name: &String, phone_number: &String, password: &String, language: &String, created_by_employer_crm: Option<String>, data: &web::Data<AppState>) -> Result<String, Error> {
+        let users_count = sqlx::query("SELECT COUNT(*) AS users_count FROM `crm`.`users`" ).fetch_one(&data.pool).await;
+
         let new_uuid = Uuid::new_v4().hyphenated().to_string();
-        let result = sqlx::query("INSERT INTO `crm`. `users` (uuid, email, first_name, last_name, phone_number, preferred_language, password_hash, admin, joined, last_sign_in, subscription_ends, legacy_user, created_by_employer_crm) VALUES (?,?,?,?,?,?,?,0,?,?,NULL,false,?)")
+        let result = sqlx::query("INSERT INTO `crm`. `users` (uuid, email, first_name, last_name, phone_number, preferred_language, password_hash, admin, joined, last_sign_in, subscription_ends, legacy_user, created_by_employer_crm) VALUES (?,?,?,?,?,?,?,?,?,?,NULL,false,?)")
             .bind(new_uuid.clone())
             .bind(email)
             .bind(first_name)
@@ -193,6 +195,7 @@ impl User {
             .bind(phone_number)
             .bind(language)
             .bind(Hashing::hash(password))
+            .bind(match users_count { Err(_) => false, Ok(row) => row.get::<i32, &str>("users_count") > 0})
             .bind(Utc::now())
             .bind(Utc::now())
             .bind(created_by_employer_crm)
@@ -286,10 +289,6 @@ impl User {
         }
         
         
-    }
-
-    pub fn new(email: &String, first_name: &String, last_name: &String, password_hash: &String, phone_number: Option<String>, preferred_language: String) -> Self {
-        User { uuid: Uuid::new_v4(), email: email.to_string(), first_name: first_name.to_string(), last_name: last_name.to_string(), password_hash: password_hash.to_string(), phone_number, admin: false, joined: Utc::now(), last_sign_in: None, subscription_ends: None, legacy_user: false, current_jwt: None, preferred_language, initial_login: true, created_by_employer_crm: None}
     }
 
     pub fn default() -> Self {

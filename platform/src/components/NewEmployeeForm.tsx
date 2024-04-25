@@ -23,10 +23,11 @@ export default function NewEmployeeForm({active, setCreateEmployeeActive, onSucc
         address: null,
         zipCode: null,
         city: null,
+        country: null,
         phoneNumber: null,
         role: null,
         drivingLicenseClass: null,
-        periodOfValidity: null,
+        driverCardNumber: null,
         email: null,
         contract_uuid: null,
         accessLevel: null,
@@ -58,10 +59,11 @@ export default function NewEmployeeForm({active, setCreateEmployeeActive, onSucc
                     address: null,
                     zipCode: null,
                     city: null,
+                    country: null,
                     phoneNumber: null,
                     role: null,
                     drivingLicenseClass: null,
-                    periodOfValidity: null,
+                    driverCardNumber: null,
                     email: null,
                     contract_uuid: null,
                     accessLevel: null,  
@@ -70,8 +72,8 @@ export default function NewEmployeeForm({active, setCreateEmployeeActive, onSucc
         }
     }
     return (
-    <div className={`${active ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"} transition-all z-10 absolute top-0 left-0 h-full ${open ? "w-[calc(100dvw-23em)] " : "w-[100vw]"} bg-background-dark bg-opacity-40 backdrop-blur-md grid place-items-center`}>
-        <form ref={ref} method='POST' action={""} className={`${active ? "opacity-100 pointer-events-auto translate-x-0" : "opacity-0 pointer-events-none translate-x-8 "} bg-background-light transition-all  rounded-md mt-12 flex flex-col gap-6 p-4 z-10`}>
+    <div className={`${active ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"} transition-all z-10 absolute top-0 left-0 h-full ${open ? "w-[calc(100dvw-23em)] " : "w-[100vw]"} bg-background-dark bg-opacity-40 backdrop-blur-md grid place-items-center z-20`}>
+        <form ref={ref} method='POST' action={""} className={`${active ? "opacity-100 pointer-events-auto translate-x-0" : "opacity-0 pointer-events-none translate-x-8 "} bg-background-light transition-all  rounded-md mt-12 flex flex-col gap-6 p-4 `}>
         <IoClose onClick={() => setCreateEmployeeActive(false)} className="text-4xl absolute top-4 right-4 cursor-pointer"/>
         
         <h3 className="text-xl font-semibold"><Text text={{eng: "Create a new employee", swe: "Skapa en ny anställd"}}/></h3>
@@ -160,8 +162,8 @@ export default function NewEmployeeForm({active, setCreateEmployeeActive, onSucc
                         </div>
 
                         <div className=" flex flex-col gap-2">
-                            <label htmlFor="periodOfValidity"><Text text={{eng: "Period Of Validity", swe: "Giltighetsperiod"}} /></label>
-                            <Input className="bg-accent-color font-semibold" name="periodOfValidity" value={employee.periodOfValidity || ""} onChange={(e) => setEmployee({...employee, periodOfValidity: e.target.value})}/>
+                            <label htmlFor="driverCardNumber"><Text text={{eng: "Driver Card Number", swe: "Förarkortsnummer"}} /></label>
+                            <Input className="bg-accent-color font-semibold" name="driverCardNumber" value={employee.driverCardNumber || ""} onChange={(e) => setEmployee({...employee, driverCardNumber: e.target.value})}/>
                         </div>
                     </div>
                 </div>

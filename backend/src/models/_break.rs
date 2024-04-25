@@ -8,8 +8,8 @@ use super::Model;
 
 pub struct Break {
     pub breaks_uuid: Uuid,
-    pub start_time: NaiveTime,
-    pub end_time: NaiveTime,
+    pub start_date_time: NaiveTime,
+    pub end_date_time: NaiveTime,
     pub added: DateTime<Utc>,
     pub updated: DateTime<Utc>
 }
@@ -19,8 +19,8 @@ impl Model for Break {
     fn sql_row_arrays() -> Vec<[&'static str; 2]> {
         vec![
         ["break_uuid", "VARCHAR(36) NOT NULL PRIMARY KEY"],
-        ["start_time", "TIME"],
-        ["end_time", "TIME"],
+        ["start_date_time", "TIME"],
+        ["end_date_time", "TIME"],
         ["added", "DATETIME"],
         ["updated", "DATETIME"]
         ]
@@ -41,8 +41,8 @@ impl Model for Break {
     fn from_row(row: &sqlx::mysql::MySqlRow) -> Self {
         Break {
             breaks_uuid: Uuid::parse_str(row.get("break_uuid")).unwrap_or_default(),
-            start_time: row.get("start_time"),
-            end_time: row.get("end_time"),
+            start_date_time: row.get("start_date_time"),
+            end_date_time: row.get("end_date_time"),
             added: row.get("added"),
             updated: row.get("updated"),
         }

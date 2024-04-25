@@ -50,7 +50,7 @@ export default function NewCustomerForm({active, setCreateCustomerActive, onSucc
     }
   
     return (
-        <div className={`${active ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"} transition-all z-10 absolute top-0 left-0 h-full ${open ? "w-[calc(100dvw-23em)] " : "w-[100vw]"} bg-background-dark bg-opacity-40 backdrop-blur-md grid place-items-center`}>
+        <div className={`${active ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"} transition-all z-10 absolute top-0 left-0 h-full ${open ? "w-[calc(100dvw-23em)] " : "w-[100vw]"} bg-background-dark bg-opacity-40 backdrop-blur-md grid place-items-center z-20`}>
         <form ref={ref} method='POST' action={""} className={`${active ? "opacity-100 pointer-events-auto translate-x-0" : "opacity-0 pointer-events-none translate-x-8 "} bg-background-light transition-all  rounded-md mt-12 flex flex-col gap-6 p-4 z-10`}>
         <IoClose onClick={() => setCreateCustomerActive(false)} className="text-4xl absolute top-4 right-4 cursor-pointer"/>
         
