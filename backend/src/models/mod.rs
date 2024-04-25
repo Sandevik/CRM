@@ -23,10 +23,8 @@ pub trait Model {
     
     // Handles semi automatic creation and altering of tables (migrations) 
     fn sql_row_arrays() -> Vec<[&'static str; 2]>;
-
     async fn create_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error>;
     async fn alter_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error>;
-    //jämför med en DESC av en table!
     async fn migrate_table(pool: &Pool<MySql>) -> Result<(), sqlx::Error>;
     
 }

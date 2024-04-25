@@ -16,6 +16,8 @@ pub struct Employee {
     pub uuid: Uuid,
     #[serde(rename(serialize = "userUuid", deserialize = "userUuid"))]
     pub user_uuid: Option<Uuid>,
+    #[serde(rename(serialize = "employmentOrder", deserialize = "employmentOrder"))]
+    pub employment_order: i32,
     #[serde(rename(serialize = "firstName", deserialize = "firstName"))]
     pub first_name: Option<String>,
     #[serde(rename(serialize = "lastName", deserialize = "lastName"))]
@@ -65,6 +67,7 @@ impl Model for Employee {
             ["crm_uuid", "VARCHAR(36) NOT NULL"],
             ["uuid", "VARCHAR(36) NOT NULL PRIMARY KEY"],
             ["user_uuid", "VARCHAR(36) UNIQUE"],
+            ["employment_order", "INT AUTO_INCREMENT"],
             ["first_name", "TEXT"],
             ["last_name", "TEXT"],
             ["date_of_birth", "DATE"],
@@ -102,6 +105,7 @@ impl Model for Employee {
             crm_uuid: Uuid::parse_str(row.get("crm_uuid")).unwrap_or_default(), 
             uuid: Uuid::parse_str(row.get("uuid")).unwrap_or_default(),
             user_uuid: match row.get("user_uuid") { None => None, Some(str) => match Uuid::parse_str(str) {Err(_) => None, Ok(u) => Some(u)}},
+            employment_order: row.get("employment_order"),
             first_name: row.get("first_name"),
             last_name: row.get("last_name"),
             date_of_birth: row.get("date_of_birth"),
@@ -192,6 +196,7 @@ impl Employee {
             crm_uuid: Uuid::new_v4(), 
             uuid: Uuid::new_v4(),
             user_uuid: None,
+            employment_order: -1,
             first_name: None,
             last_name: None,
             date_of_birth: None,
