@@ -67,8 +67,8 @@ impl Model for Employee {
         vec![
             ["crm_uuid", "VARCHAR(36) NOT NULL"],
             ["uuid", "VARCHAR(36) NOT NULL PRIMARY KEY"],
-            ["user_uuid", "VARCHAR(36) UNIQUE"],
-            ["employment_number", "INT NOT NULL UNIQUE AUTO_INCREMENT"],
+            ["user_uuid", "VARCHAR(36)"],
+            ["employment_number", "INT NOT NULL AUTO_INCREMENT"],
             ["first_name", "TEXT"],
             ["last_name", "TEXT"],
             ["date_of_birth", "DATE"],

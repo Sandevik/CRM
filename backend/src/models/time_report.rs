@@ -123,10 +123,7 @@ impl TimeReport {
     ///
     /// Returns `sqlx::Error` 
     pub async fn get_all_by_week_and_year(crm_uuid: &Uuid, employee_uuid: &Uuid, week: u32, year: i32, data: &web::Data<AppState>) -> Result<Vec<Self>, sqlx::Error> {
-        let (mut mon, mut sun) = week_bounds(week);
-        mon = mon.with_year(year).expect("ERROR: Could not parse monday date with year @ time_report.rs");
-        sun = sun.with_year(year).expect("ERROR: Could not parse sunday date with year @ time_report.rs");
-
+        let (mon, sun) = week_bounds(week, year);
         match sqlx::query("SELECT * FROM `crm` . `time_reports` WHERE `employee_uuid` = ? AND `crm_uuid` = ? AND `schedule_date` >= ? AND `schedule_date` <= ? ORDER BY `schedule_date`")
         .bind(employee_uuid.hyphenated().to_string())
         .bind(crm_uuid.hyphenated().to_string())
@@ -198,9 +195,8 @@ impl TimeReport {
 }
 
 
-fn week_bounds(week: u32) -> (NaiveDate, NaiveDate) {
-    let current_year = chrono::offset::Local::now().year();
-    let mon = NaiveDate::from_isoywd_opt(current_year, week, Weekday::Mon).expect(&format!("Could not get monday of week {week}"));
-    let sun = NaiveDate::from_isoywd_opt(current_year, week, Weekday::Sun).expect(&format!("Could not get monday of week {week}"));
+fn week_bounds(week: u32, year: i32) -> (NaiveDate, NaiveDate) {
+    let mon = NaiveDate::from_isoywd_opt(year, week, Weekday::Mon).expect(&format!("Could not get monday of week {week}"));
+    let sun = NaiveDate::from_isoywd_opt(year, week, Weekday::Sun).expect(&format!("Could not get monday of week {week}"));
     (mon, sun)
 }

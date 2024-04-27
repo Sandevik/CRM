@@ -46,7 +46,7 @@ impl Database {
                         // Add column "table_row[0]" as it does not exist
                         let query = format!("ALTER TABLE `crm` . `{table_name}` ADD COLUMN {} {}", table_row[0], table_row[1]);
                         if let Err(err) = sqlx::query(&query).execute(pool).await {
-                            panic!("ERROR: Could not add column on table '{}', {err}", table_row[0]);
+                            panic!("ERROR: Could not add column '{}' on table '{}', {err}", table_row[0], table_name);
                         }
                         
                     } else {
@@ -58,7 +58,7 @@ impl Database {
                             sql_type.push_str(" not null")
                         }
 
-                        if current_db_row.unwrap().get::<&str, &str>("Key") == "PRI".to_string() {
+                        if current_db_row.unwrap().get::<&str, &str>("Key") == "PRI" {
                             skip = true;
                         }
                         
@@ -66,7 +66,7 @@ impl Database {
                             // Modify Type of table_row[0] (or current_db_row) to be table_row[1]
                             let query = format!("ALTER TABLE `crm` . `{table_name}` MODIFY COLUMN {} {}", table_row[0], table_row[1]); 
                             if let Err(err) = sqlx::query(&query).execute(pool).await {
-                                panic!("ERROR: Could not modify column on table '{}', {err} ", table_row[0]);
+                                panic!("ERROR: Could not modify column '{}' on table '{}', {err} ", table_row[0], table_name);
                             }
                         }
                     }
@@ -78,7 +78,7 @@ impl Database {
                         // column does not exist in db, Remove
                         let query = format!("ALTER TABLE `crm` . `{table_name}` DROP COLUMN `{}`", rows[i].get::<&str, &str>("Field"));
                         if let Err(err) = sqlx::query(&query).execute(pool).await {
-                            panic!("ERROR: Could not drop column {} on table: {table_name}, {err}", rows[i].get::<&str, &str>("Field"))
+                            panic!("ERROR: Could not drop column '{}' on table: {table_name}, {err}", rows[i].get::<&str, &str>("Field"))
                         } 
                     }
                 }
