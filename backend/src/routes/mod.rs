@@ -6,6 +6,7 @@ mod meetings;
 mod entries;
 mod tasks;
 mod employees;
+mod time_reports;
 mod companies;
 mod test;
 
@@ -21,6 +22,7 @@ use entries::entries;
 use tasks::tasks;
 use test::test;
 use employees::employees;
+use time_reports::time_reports;
 use companies::companies;
 use self::crm::crm_from_employee_user;
 use self::{customers::customers, crm::{create_crm, all_crms_by_user}};
@@ -115,9 +117,14 @@ pub fn routes(conf: &mut ServiceConfig) {
     conf.service(customers());
     conf.service(meetings());
     conf.service(entries());
+
     conf.service(tasks());
-    conf.service(employees());
+    
     conf.service(companies());
+
+    conf.service(employees());
+    conf.service(time_reports());
+
     conf.service(test());
 }
 

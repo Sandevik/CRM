@@ -144,7 +144,7 @@ export default function Index() {
 
       <div className={`relative ${expand ? "min-h-[calc(100dvh-23.95em)]" : "min-h-[calc(100dvh-17.35em)]"} `}>
         <EmployeeTasks tasks={tasks} selectedTab={selectedTab} loading={loading} fetchTasks={fetchTasks} setFocusTask={setFocusTask} setAddTask={setAddTask} />
-        <EmployeeTimeReports selectedTab={selectedTab} />
+        <EmployeeTimeReports employee={employee} selectedTab={selectedTab} />
         <EmployeeSettings employee={employee} fetchEmployee={fetchEmployee} selectedTab={selectedTab}/>
       </div>
       

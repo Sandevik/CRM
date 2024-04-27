@@ -1,15 +1,20 @@
 import Input from '@/components/Input';
 import Text from '@/components/Text'
-import React, { useEffect, useState } from 'react'
+import { CurrentCrmContext } from '@/context/CurrentCrmContext';
+import request from '@/utils/request';
+import React, { useContext, useEffect, useState } from 'react'
 import { BsChevronLeft, BsChevronRight } from 'react-icons/bs';
 import { IoIosTimer } from 'react-icons/io'
 
-export default function EmployeeTimeReports({selectedTab}: {selectedTab: "tasks" | "time" | "settings"}) {
+export default function EmployeeTimeReports({selectedTab, employee}: {selectedTab: "tasks" | "time" | "settings", employee: Employee}) {
+  const {crm} = useContext(CurrentCrmContext);
   const [selectedPeriod, setSelectedPeriod] = useState<"monthly" | "weekly">("weekly");
   const [selectedWeek, setSelectedWeek] = useState<string>(getDateWeek(new Date()).toString());
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth()+1);
-
+  const [timeReports, setTimeReports] = useState<TimeReport[]>([])
+  const [totalHoursReported, setTotalHoursReported] = useState<number>(0);
+  const [totalMinutesReported, setTotalMinutesReported] = useState<number>(0);
 
   function getDateWeek(date: Date) {
     const currentDate = date;
@@ -20,7 +25,36 @@ export default function EmployeeTimeReports({selectedTab}: {selectedTab: "tasks"
   }
 
 
+  const getTimeReports = async () => {
+    if (crm?.crmUuid && employee.uuid && selectedPeriod === "weekly") {
+      const res = await request<TimeReport[]>(`/time-reports?crmUuid=${crm.crmUuid}&employeeUuid=${employee.uuid}&week=${selectedWeek}&year=${selectedYear}`, {}, "GET");
+      if (res.code === 200) {
+        setTimeReports(res.data || [])
+        let totalHours: number = 0;
+        let totalMin: number = 0;
+        res.data?.forEach(timeReport => {
+          if (timeReport.startDateTime && timeReport.endDateTime) {
+            totalHours += new Date(new Date(timeReport.startDateTime).getTime() - new Date(timeReport.startDateTime).getTime()).getHours() 
+            totalMin += new Date(new Date(timeReport.startDateTime).getTime() - new Date(timeReport.startDateTime).getTime()).getMinutes() 
+          } 
+          
+        })
+        setTotalHoursReported(totalHours);
+        setTotalMinutesReported(totalMin);
+      }
+    }
+  }
+
+  const changeWeek = (newWeekNum: number, year: number) => {
+    const currentMonth = new Date(year, (0), (1 + (newWeekNum - 1)*7)).getMonth()+1;
+    setSelectedMonth(currentMonth);
+    setSelectedWeek(newWeekNum.toString());
+  }
   
+
+  useEffect(()=>{
+    getTimeReports();
+  },[employee, selectedWeek, selectedYear])
 
   return (
     <div className={`p-2 ${selectedTab === "time" ? "translate-x-0 opacity-100 pointer-events-auto " : "translate-x-5 opacity-0 pointer-events-none"} absolute top-4 w-full h-full transition-all bg-background-light bg-opacity-50 rounded-md overflow-y-scroll scrollthumb overflow-x-hidden `}>
@@ -41,9 +75,9 @@ export default function EmployeeTimeReports({selectedTab}: {selectedTab: "tasks"
           {selectedPeriod === "weekly" && <div className="flex flex-col gap-1">
             <label htmlFor="week" className='flex justify-center'><Text text={{swe: "Vecka", eng: "Week"}} /></label>
             <div className="flex items-center gap-2">
-              <button onClick={() => selectedWeek !== "" ? +selectedWeek >= 2 ? setSelectedWeek((+selectedWeek-1).toString()) : 1 : setSelectedWeek((getDateWeek(new Date())-1).toString())}><BsChevronLeft/></button>
-              <Input type="number" name='week' className="w-10" value={+selectedWeek} onChange={(e) => setSelectedWeek(Number(e.target.value) > 52 ? "52" : e.target.value.length > 1 && e.target.value[0] === "0" ? e.target.value.substring(1) : Number(e.target.value).toString())}/>
-              <button onClick={() => selectedWeek !== "" ? +selectedWeek <= 51 ? setSelectedWeek((+selectedWeek+1).toString()) : 52 : setSelectedWeek((getDateWeek(new Date())+1).toString())}><BsChevronRight/></button>
+              <button onClick={() => selectedWeek !== "" ? +selectedWeek >= 2 ? changeWeek((+selectedWeek-1), selectedYear) : 1 : changeWeek((getDateWeek(new Date())-1), selectedYear)}><BsChevronLeft/></button>
+              <Input type="number" name='week' className="w-10" value={+selectedWeek} onChange={(e) => changeWeek(Number(e.target.value) > 52 ? 52 : e.target.value.length > 1 && e.target.value[0] === "0" ? +e.target.value.substring(1) : Number(e.target.value), selectedYear)}/>
+              <button onClick={() => selectedWeek !== "" ? +selectedWeek <= 51 ? changeWeek((+selectedWeek+1), selectedYear) : 52 : changeWeek((getDateWeek(new Date())+1), selectedYear)}><BsChevronRight/></button>
             </div>
           </div>}
 
@@ -54,7 +88,7 @@ export default function EmployeeTimeReports({selectedTab}: {selectedTab: "tasks"
 
           <div className='flex flex-col gap-1'>
             <label htmlFor="year" className="ml-2"><Text text={{swe: "År", eng: "Year"}} /></label>
-            <Input name="year" value={selectedYear}/>
+            <Input name="year" type='number' value={selectedYear} onChange={(e) => setSelectedYear(+e.target.value)}/>
           </div>
 
         </div>
@@ -76,21 +110,21 @@ export default function EmployeeTimeReports({selectedTab}: {selectedTab: "tasks"
         </div>
 
         <div className="flex flex-col">
-          <div>Totalrapporterad tid vecka {selectedWeek}: 16h 53min </div>
+          <div>Totalrapporterad tid vecka {selectedWeek}: {totalHoursReported}h {totalMinutesReported}min </div>
           <div>Totalrapporterad tid månad {selectedMonth}: 26h 34min </div>
         </div>
 
       </div>
 
       <div className="flex justify-center  flex-wrap gap-6 mt-6 w-full">
-        {Array<string>(7).fill("").map((item, index) => 
-          <div className="bg-background-dark rounded-md p-2">
+        {timeReports.map((timeReport) => 
+          <div key={timeReport.uuid} className="bg-background-dark rounded-md p-2">
             <div className='min-h-32 min-w-32'>
-              Måndag 15 / 4
+              {timeReport.scheduleDate}
               <br />
               Tid rapporterad
               <br />
-              12h 35min 
+              {timeReport.startDateTime || "00:00"} - {timeReport.endDateTime || "00:00"} 
               <br /> 
               Rapporterad Rast / Frånvaro
               <br />

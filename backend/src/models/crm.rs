@@ -4,7 +4,7 @@ use serde::{Serialize, Deserialize};
 use sqlx::{mysql::{MySqlQueryResult, MySqlRow}, MySql, Pool, Row};
 use uuid::Uuid;
 use crate::{controllers::database::Database, models::user::User, routes::{Limit, MeetingsOption}, AppState};
-use super::{customer::Customer, employee::Employee, meeting::Meeting, Model};
+use super::{customer::Customer, employee::Employee, meeting::Meeting, time_report::TimeReport, Model};
 
 
 
@@ -260,8 +260,18 @@ impl CRM {
             }
     }
 
-    pub async fn user_can_report_time(user: &User, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<bool, sqlx::Error> {
-        match sqlx::query("SELECT can_report_time FROM `crm` . `user_employee` WHERE `user_uuid` = ? AND `crm_uuid` = ?")
+    pub async fn user_can_report_time(user: &User, crm_uuid: &Uuid, employee_uuid: &Uuid, data: &web::Data<AppState>) -> Result<bool, sqlx::Error> {
+        // if user.uuid gives the same employee_uuid as employee_uuid arg -> continue
+        let employee_opt = Employee::get_by_uuid(employee_uuid, crm_uuid, data).await;
+        if let Err(err) = employee_opt {
+            return Err(err);
+        }
+
+        match employee_opt.unwrap() {
+           None => Err(sqlx::Error::ColumnNotFound("employee could not be found".to_string())),
+           Some(emp) => {
+            if emp.user_uuid == Some(user.uuid) {
+                match sqlx::query("SELECT can_report_time FROM `crm` . `user_employee` WHERE `user_uuid` = ? AND `crm_uuid` = ?")
                 .bind(&user.uuid.hyphenated().to_string())
                 .bind(&crm_uuid.hyphenated().to_string())
                 .fetch_optional(&data.pool)
@@ -281,6 +291,14 @@ impl CRM {
                         }
                     }
                 }
+            } else {
+                return Ok(false);
+            }
+           }
+        }
+
+        
+        
     }
 
     pub async fn user_can_access_crm(user: &User, crm_uuid: &Uuid, data: &web::Data<AppState>) -> Result<bool, sqlx::Error> {
