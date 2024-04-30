@@ -1,6 +1,8 @@
 import Input from '@/components/Input';
+import SmallTimeReportBox from '@/components/SmallTimeReportBox';
 import Text from '@/components/Text'
 import { CurrentCrmContext } from '@/context/CurrentCrmContext';
+import { matchWeekDay } from '@/utils/matchWeekDay';
 import request from '@/utils/request';
 import React, { useContext, useEffect, useState } from 'react'
 import { BsChevronLeft, BsChevronRight } from 'react-icons/bs';
@@ -50,7 +52,6 @@ export default function EmployeeTimeReports({selectedTab, employee}: {selectedTa
     setSelectedMonth(currentMonth);
     setSelectedWeek(newWeekNum.toString());
   }
-  
 
   useEffect(()=>{
     getTimeReports();
@@ -116,22 +117,9 @@ export default function EmployeeTimeReports({selectedTab, employee}: {selectedTa
 
       </div>
 
-      <div className="flex justify-center  flex-wrap gap-6 mt-6 w-full">
+      <div className="flex justify-center flex-wrap gap-6 mt-6 w-full">
         {timeReports.map((timeReport) => 
-          <div key={timeReport.uuid} className="bg-background-dark rounded-md p-2">
-            <div className='min-h-32 min-w-32'>
-              {timeReport.scheduleDate}
-              <br />
-              Tid rapporterad
-              <br />
-              {timeReport.startDateTime || "00:00"} - {timeReport.endDateTime || "00:00"} 
-              <br /> 
-              Rapporterad Rast / Frånvaro
-              <br />
-              45min
-              <BsChevronRight />
-            </div> 
-          </div>
+          <SmallTimeReportBox timeReport={timeReport}/>
         )}
       
       </div>

@@ -10,10 +10,15 @@ use super::Model;
 
 #[derive(Serialize, Deserialize)]
 pub struct Break {
+    #[serde(rename(serialize = "crmUuid", deserialize = "crmUuid"))]
     pub crm_uuid: Uuid,
+    #[serde(rename(serialize = "timeReportUuid", deserialize = "timeReportUuid"))]
     pub time_report_uuid: Uuid,
+    #[serde(rename(serialize = "breakUuid", deserialize = "breakUuid"))]
     pub break_uuid: Uuid,
+    #[serde(rename(serialize = "startDateTime", deserialize = "startDateTime"))]
     pub start_date_time: NaiveTime,
+    #[serde(rename(serialize = "endDateTime", deserialize = "endDateTime"))]
     pub end_date_time: NaiveTime,
     pub note: Option<String>,
     pub added: DateTime<Utc>,
