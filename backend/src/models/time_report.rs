@@ -9,7 +9,7 @@ use crate::{controllers::database::Database, AppState};
 
 use super::{Model, _break::Break};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TimeReport {
     #[serde(rename(serialize = "crmUuid", deserialize = "crmUuid"))]
     pub crm_uuid: Uuid,
@@ -25,6 +25,7 @@ pub struct TimeReport {
     pub note: Option<String>,
     #[serde(rename(serialize = "workTasks", deserialize = "workTasks"))]
     pub work_tasks: Option<Uuid>,
+    pub accepted: bool,
     pub added: DateTime<Utc>,
     pub updated: DateTime<Utc>,
 
@@ -43,6 +44,7 @@ impl Model for TimeReport {
             ["end_date_time", "DATETIME"],
             ["note", "TEXT"],
             ["work_tasks", "VARCHAR(36)"],
+            ["accepted", "BOOL DEFAULT FALSE"],
             ["added", "DATETIME"],
             ["updated", "DATETIME"]
         ]
@@ -70,6 +72,7 @@ impl Model for TimeReport {
             end_date_time: row.get("end_date_time"),
             note: row.get("note"),
             work_tasks: row.get("work_tasks"),
+            accepted: row.get("accepted"),
             added: row.get("added"),
             updated: row.get("updated"),
 
@@ -97,16 +100,36 @@ impl Model for TimeReport {
     }
 
     async fn update(&self, data: &actix_web::web::Data<crate::AppState>) -> Result<(), sqlx::Error> {
-        match sqlx::query("INSERT INTO `crm` . `time_reports` SET employee_uuid = ?, schedule_date = ?, start_date_time = ?, end_date_time = ?, note = ?, work_tasks = ?, updated = ?) WHERE crm_uuid = ? AND uuid = ?")
-        .bind(&self.employee_uuid.hyphenated().to_string())
-        .bind(&self.schedule_date)
+        let row = sqlx::query("SELECT * FROM `crm`.`time_reports` WHERE `uuid` = ? AND `crm_uuid` = ?")
+        .bind(&self.uuid.hyphenated().to_string())
+        .bind(&self.crm_uuid.hyphenated().to_string())
+        .fetch_optional(&data.pool).await;
+       
+        let existing: TimeReport = match row {
+            Err(_) => {
+                let _ = Self::insert(&self, data).await;
+                self.clone()
+            },
+            Ok(row_opt) => match row_opt {
+                Some(row) => {
+                    Self::from_row(&row)
+                },
+                None => {
+                    let _ = Self::insert(&self, data).await;
+                    self.clone()
+                }
+            }
+        };
+        
+        match sqlx::query("UPDATE `crm` . `time_reports` SET `start_date_time` = ?, `end_date_time` = ?, `note` = ?, `work_tasks` = ?, `updated` = ? WHERE `crm_uuid` = ? AND `uuid` = ? AND `schedule_date` = ?")
         .bind(&self.start_date_time)
         .bind(&self.end_date_time)
         .bind(&self.note)
         .bind(&self.work_tasks)
         .bind(Utc::now())
-        .bind(&self.crm_uuid.hyphenated().to_string())
-        .bind(&self.uuid.hyphenated().to_string())
+        .bind(existing.crm_uuid.hyphenated().to_string())
+        .bind(existing.uuid.hyphenated().to_string())
+        .bind(existing.schedule_date)
         .execute(&data.pool)
         .await {
             Err(err) => Err(err), 
@@ -161,6 +184,24 @@ impl TimeReport {
 
 
 
+    pub async fn delete(&self, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+        match Break::delete_by_time_report_uuid(&self.uuid, data).await {
+            Err(err) => Err(err),
+            Ok(_) => {
+                match sqlx::query("DELETE FROM `crm` . `time_reports` WHERE `uuid` = ? AND `crm_uuid` = ?")
+                .bind(&self.uuid.hyphenated().to_string())
+                .bind(&self.crm_uuid.hyphenated().to_string())
+                .execute(&data.pool)
+                .await {
+                    Err(err) => Err(err),
+                    Ok(_) => Ok(())
+                }
+            }
+        }
+    }
+    
+
+
 
 
 
@@ -175,6 +216,7 @@ impl TimeReport {
             end_date_time: None, 
             note: None, 
             work_tasks: None, 
+            accepted: false,
             added: Utc::now(), 
             updated: Utc::now(),
 

@@ -33,11 +33,7 @@ async fn main() -> std::io::Result<()> {
         panic!("ERROR Connecting to DB, {err}, DATABASE_URL: {:?}", env::var("DATABASE_URL"))
     } else {
         let pool = pool_res.unwrap();
-
-        Database::setup_tables(&pool)
-            .await
-            .expect("Could not setup tables");
-
+        Database::setup_tables(&pool).await.expect("ERROR: Could not setup tables");
         println!(
             "Server running on http://{}:{}",
             server_address, server_port

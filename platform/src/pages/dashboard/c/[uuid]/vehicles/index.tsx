@@ -54,6 +54,11 @@ export default function Index() {
       <br />
       <div>Kalkylerad maxlast: {bkSum}kg</div>
 
+      <div>Beräkna max antal pallplatser på fordon eller ekipage ex endast bil eller bil + släp</div>
+      <div>Beräknad överlastavgift på fordon eller ekipage</div>
+
+      <div>Planera körning på specifikt ekipage</div>
+
 
     </Screen>
 

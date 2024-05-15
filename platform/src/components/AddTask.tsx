@@ -66,7 +66,7 @@ export default function AddTask({active, setActive, customer, employee, refetchT
     return (
         <div className={`${active ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"} transition-all z-10 absolute top-0 left-0 h-full ${open ? "w-[calc(100dvw-23em)] " : "w-[100vw]"} bg-background-dark bg-opacity-40 backdrop-blur-md grid place-items-center`}>
         <form className=" w-[40em] bg-background-light p-4 rounded-md relative flex flex-col gap-5">
-            <h3 className="text-2xl font-semibold"><Text text={{eng: "Create a new task with", swe: "Skapa en ny uppgift för"}} /> {customer?.firstName || <Text text={{eng: "unknown", swe: "okänd"}} />}</h3>
+            <h3 className="text-2xl font-semibold"><Text text={{eng: "Create a new task with", swe: "Skapa en ny uppgift för"}} /> {customer?.firstName || employee?.firstName || <Text text={{eng: "unknown", swe: "okänd"}} />}</h3>
             <IoClose onClick={() => close()} className="absolute top-2 right-2 text-4xl cursor-pointer"/>
             
             <div className="flex flex-col gap-2">

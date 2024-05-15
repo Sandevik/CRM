@@ -24,6 +24,8 @@ import AdditionalEmployeeDetails from '@/components/AdditionalEmployeeDetails';
 import EmployeeSettings from '@/views/EmployeeSettings';
 import EmployeeTasks from '@/views/EmployeeTasks';
 import EmployeeTimeReports from '@/views/EmployeeTimeReports';
+import ExpandedTimeReport from '@/components/ExpandedTimeReport';
+import getDateWeek from '@/utils/getDateWeek';
 
 
 export default function Index() {
@@ -38,9 +40,27 @@ export default function Index() {
   const [loading, setLoading] = useState<boolean>(true);
   const [expand, setExpand] = useState<boolean>(false);
   const [selectedTab, setSelectedTab] = useState<"time" | "settings" | "tasks">("tasks");
+  const [expandedTimeReport, setExpandedTimeReport] = useState<TimeReport | null>(null);
 
+  const [timeReports, setTimeReports] = useState<TimeReport[]>([]);
+  const [selectedPeriod, setSelectedPeriod] = useState<"monthly" | "weekly">("weekly");
+  const [selectedWeek, setSelectedWeek] = useState<string>(getDateWeek(new Date()).toString());
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth()+1);
  
+  const getTimeReports = async () => {
+    if (crm?.crmUuid && employee.uuid && selectedPeriod === "weekly") {
+      const res = await request<TimeReport[]>(`/time-reports?crmUuid=${crm.crmUuid}&employeeUuid=${employee.uuid}&week=${selectedWeek}&year=${selectedYear}`, {}, "GET");
+      if (res.code === 200) {
+        setTimeReports(res.data || [])
+      }
+    }
+  }
 
+  
+  useEffect(()=>{
+    getTimeReports();
+  },[employee, selectedWeek, selectedYear])
 
   useEffect(()=>{
     fetchEmployee();
@@ -100,7 +120,6 @@ export default function Index() {
     setEdit(!edit);
   }
 
-
   return (
     <Screen>
 
@@ -144,12 +163,13 @@ export default function Index() {
 
       <div className={`relative ${expand ? "min-h-[calc(100dvh-23.95em)]" : "min-h-[calc(100dvh-17.35em)]"} `}>
         <EmployeeTasks tasks={tasks} selectedTab={selectedTab} loading={loading} fetchTasks={fetchTasks} setFocusTask={setFocusTask} setAddTask={setAddTask} />
-        <EmployeeTimeReports employee={employee} selectedTab={selectedTab} />
+        <EmployeeTimeReports timeReports={timeReports} selectedMonth={selectedMonth} selectedPeriod={selectedPeriod} selectedWeek={selectedWeek} selectedYear={selectedYear} setSelectedMonth={setSelectedMonth} setSelectedPeriod={setSelectedPeriod} setSelectedWeek={setSelectedWeek} setSelectedYear={setSelectedYear} employee={employee} selectedTab={selectedTab} setExpandedTimeReport={setExpandedTimeReport} />
         <EmployeeSettings employee={employee} fetchEmployee={fetchEmployee} selectedTab={selectedTab}/>
       </div>
       
       <AddTask active={addTask} setActive={setAddTask} refetchTasks={fetchTasks} employee={employee} />
 
+      <ExpandedTimeReport refetchTimeReport={getTimeReports} employee={employee} timeReport={expandedTimeReport} setExpandedTimeReport={setExpandedTimeReport} />
       
       </Screen>
   )

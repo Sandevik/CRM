@@ -2,60 +2,39 @@ import Input from '@/components/Input';
 import SmallTimeReportBox from '@/components/SmallTimeReportBox';
 import Text from '@/components/Text'
 import { CurrentCrmContext } from '@/context/CurrentCrmContext';
+import getDateWeek from '@/utils/getDateWeek';
 import { matchWeekDay } from '@/utils/matchWeekDay';
 import request from '@/utils/request';
+import timeStringFromMs from '@/utils/timeStringFromMs';
 import React, { useContext, useEffect, useState } from 'react'
 import { BsChevronLeft, BsChevronRight } from 'react-icons/bs';
 import { IoIosTimer } from 'react-icons/io'
 
-export default function EmployeeTimeReports({selectedTab, employee}: {selectedTab: "tasks" | "time" | "settings", employee: Employee}) {
+export default function EmployeeTimeReports({selectedTab, employee, setExpandedTimeReport, timeReports, selectedPeriod, selectedMonth, setSelectedMonth, selectedWeek, setSelectedWeek, selectedYear, setSelectedYear, setSelectedPeriod}:{setSelectedPeriod: React.Dispatch<React.SetStateAction<"weekly" | "monthly">>, selectedYear: number, setSelectedYear: React.Dispatch<React.SetStateAction<number>>,selectedWeek: string, setSelectedWeek: React.Dispatch<React.SetStateAction<string>>, selectedMonth: number, setSelectedMonth: React.Dispatch<React.SetStateAction<number>>, selectedPeriod: "monthly" | "weekly",selectedTab: "tasks" | "time" | "settings", employee: Employee, setExpandedTimeReport: React.Dispatch<React.SetStateAction<TimeReport | null>>, timeReports: TimeReport[]}) {
   const {crm} = useContext(CurrentCrmContext);
-  const [selectedPeriod, setSelectedPeriod] = useState<"monthly" | "weekly">("weekly");
-  const [selectedWeek, setSelectedWeek] = useState<string>(getDateWeek(new Date()).toString());
-  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
-  const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth()+1);
-  const [timeReports, setTimeReports] = useState<TimeReport[]>([])
-  const [totalHoursReported, setTotalHoursReported] = useState<number>(0);
-  const [totalMinutesReported, setTotalMinutesReported] = useState<number>(0);
+  
+  const [totalTimeReported, setTotalTimeReported] = useState<number>(0);
 
-  function getDateWeek(date: Date) {
-    const currentDate = date;
-    const januaryFirst = new Date(currentDate.getFullYear(), 0, 1);
-    const daysToNextMonday = (januaryFirst.getDay() === 1) ? 0 : (7 - januaryFirst.getDay()) % 7;
-    const nextMonday = new Date(currentDate.getFullYear(), 0, januaryFirst.getDate() + daysToNextMonday);
-    return (currentDate < nextMonday) ? 52 : (currentDate > nextMonday ? Math.ceil((currentDate.getTime() - nextMonday.getTime()) / (24 * 3600 * 1000) / 7) : 1);
+  
+  const calcTime = () => {
+    let totalTime: number = 0;
+    timeReports.forEach(timeReport => {
+      if (timeReport.startDateTime && timeReport.endDateTime) {
+        totalTime += (new Date(timeReport.endDateTime).getTime() - new Date(timeReport.startDateTime).getTime()) / 1000 / 60;
+      } 
+    })
+    setTotalTimeReported(totalTime);
   }
 
-
-  const getTimeReports = async () => {
-    if (crm?.crmUuid && employee.uuid && selectedPeriod === "weekly") {
-      const res = await request<TimeReport[]>(`/time-reports?crmUuid=${crm.crmUuid}&employeeUuid=${employee.uuid}&week=${selectedWeek}&year=${selectedYear}`, {}, "GET");
-      if (res.code === 200) {
-        setTimeReports(res.data || [])
-        let totalHours: number = 0;
-        let totalMin: number = 0;
-        res.data?.forEach(timeReport => {
-          if (timeReport.startDateTime && timeReport.endDateTime) {
-            totalHours += new Date(new Date(timeReport.startDateTime).getTime() - new Date(timeReport.startDateTime).getTime()).getHours() 
-            totalMin += new Date(new Date(timeReport.startDateTime).getTime() - new Date(timeReport.startDateTime).getTime()).getMinutes() 
-          } 
-          
-        })
-        setTotalHoursReported(totalHours);
-        setTotalMinutesReported(totalMin);
-      }
-    }
-  }
+  useEffect(()=>{
+    calcTime();
+  },[timeReports])
 
   const changeWeek = (newWeekNum: number, year: number) => {
     const currentMonth = new Date(year, (0), (1 + (newWeekNum - 1)*7)).getMonth()+1;
     setSelectedMonth(currentMonth);
     setSelectedWeek(newWeekNum.toString());
   }
-
-  useEffect(()=>{
-    getTimeReports();
-  },[employee, selectedWeek, selectedYear])
 
   return (
     <div className={`p-2 ${selectedTab === "time" ? "translate-x-0 opacity-100 pointer-events-auto " : "translate-x-5 opacity-0 pointer-events-none"} absolute top-4 w-full h-full transition-all bg-background-light bg-opacity-50 rounded-md overflow-y-scroll scrollthumb overflow-x-hidden `}>
@@ -111,15 +90,15 @@ export default function EmployeeTimeReports({selectedTab, employee}: {selectedTa
         </div>
 
         <div className="flex flex-col">
-          <div>Totalrapporterad tid vecka {selectedWeek}: {totalHoursReported}h {totalMinutesReported}min </div>
-          <div>Totalrapporterad tid månad {selectedMonth}: 26h 34min </div>
+          <div>Totalrapporterad tid vecka {selectedWeek}: {totalTimeReported < 0 ? "0h 0 min" : timeStringFromMs(totalTimeReported)} </div>
+          <div>Totalrapporterad tid månad {selectedMonth}: 0h 0 min </div>
         </div>
 
       </div>
 
       <div className="flex justify-center flex-wrap gap-6 mt-6 w-full">
         {timeReports.map((timeReport) => 
-          <SmallTimeReportBox timeReport={timeReport}/>
+          <SmallTimeReportBox key={timeReport.uuid} timeReport={timeReport} setExpandedTimeReport={setExpandedTimeReport} />
         )}
       
       </div>
