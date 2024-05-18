@@ -9,6 +9,7 @@ import { IoMdSettings } from 'react-icons/io';
 export default function EmployeeSettings({selectedTab, employee, fetchEmployee}: {selectedTab: "tasks" | "settings" | "time", employee: Employee, fetchEmployee: () => Promise<void>}) {
     const {crm} = useContext(CurrentCrmContext);
     const [isAdmin, setIsAdmin] = useState<boolean>(employee.isAdmin || false);
+    const [trusted, setTrusted] = useState<boolean>(employee.trusted);
     const [canReportTime, setCanReportTime] = useState<boolean>(employee.canReportTime || false);
     const [canHandleCustomers, setCanHandleCustomers] = useState<boolean>(employee.canHandleCustomers || false);
     const [canHandleEmployees, setCanHandleEmployees] = useState<boolean>(employee.canHandleEmployees || false);
@@ -22,6 +23,7 @@ export default function EmployeeSettings({selectedTab, employee, fetchEmployee}:
         setCanReportTime(employee.canReportTime || false)
         setIsAdmin(employee.isAdmin || false)
         setCanAccessCrm(employee.canAccessCrm || false);
+        setTrusted(employee.trusted);
       },[employee])
     
     const handlePermissionChange = async () => {
@@ -47,6 +49,19 @@ export default function EmployeeSettings({selectedTab, employee, fetchEmployee}:
             employeeUuid: employee.uuid,
             crmUuid: crm.crmUuid,
             isAdmin
+          }, "PUT");
+          if (res.code === 200) {
+            await fetchEmployee();
+          } 
+        }
+      }
+
+      const changeTrust = async () => {
+        if (employee.uuid && crm?.crmUuid && trusted !== null) {
+          let res = await request(`/employees/set-trusted`, {
+            employeeUuid: employee.uuid,
+            crmUuid: crm.crmUuid,
+            trusted: !trusted
           }, "PUT");
           if (res.code === 200) {
             await fetchEmployee();
@@ -126,6 +141,7 @@ export default function EmployeeSettings({selectedTab, employee, fetchEmployee}:
         </div>
 
         <div className='flex gap-2'>
+          <Button onClick={() => changeTrust()}>{trusted ?<Text text={{eng: "Distrust", swe: "Avförtro"}} /> : <Text text={{eng: "Entrust", swe: "Förtro"}}/>}</Button>
           <Button red={true} onClick={() => disassociateAccount()}><Text text={{eng: "Disassociate Account", swe: "Avlänka konto"}}/></Button>
           <Button red={true} onClick={() => disassociateAndRemoveAccount()} className='bg-light-red'><Text text={{eng: "Disassociate and remove account", swe: "Avlänka och ta bort konto"}}/></Button>
         </div>

@@ -43,6 +43,7 @@ pub struct Employee {
     pub note: Option<String>,
     #[serde(rename(serialize = "accessLevel", deserialize = "accessLevel"))]
     pub access_level: Option<i32>,
+    pub trusted: bool,
     #[serde(rename(serialize = "canReportTime", deserialize = "canReportTime"))]
     pub can_report_time: Option<bool>,
     #[serde(rename(serialize = "isAdmin", deserialize = "isAdmin"))]
@@ -84,6 +85,7 @@ impl Model for Employee {
             ["email", "VARCHAR(40) NOT NULL"],
             ["contract_uuid", "VARCHAR(36)"],
             ["note", "TEXT"],
+            ["trusted", "BOOL NOT NULL DEFAULT FALSE"],
             ["added", "DATETIME"],
             ["updated", "DATETIME"]
         ]
@@ -123,6 +125,7 @@ impl Model for Employee {
             driving_license_class: row.get("driving_license_class"),
             driver_card_number: row.get("driver_card_number"),
             note: row.get("note"),
+            trusted: row.get("trusted"),
             added: row.get("added"),
             updated: row.get("updated"),
             access_level: None,
@@ -217,6 +220,7 @@ impl Employee {
             driving_license_class: None,
             driver_card_number: None,
             note: None,
+            trusted: false,
             added: Utc::now(),
             updated: Utc::now(),
             can_report_time: Some(true),
@@ -504,4 +508,17 @@ impl Employee {
             Ok(_) => Ok(())
         }
     }
+
+    pub async fn set_trusted(&self, trust: bool, data: &web::Data<AppState>) -> Result<(), sqlx::Error> {
+        match sqlx::query("UPDATE `crm` . `employees` SET `trusted` = ? WHERE `crm_uuid` = ? AND `uuid` = ?")
+        .bind(trust)
+        .bind(&self.crm_uuid.hyphenated().to_string())
+        .bind(&self.uuid.hyphenated().to_string())
+        .execute(&data.pool)
+        .await {
+            Err(err) => Err(err),
+            Ok(_) => Ok(())
+        }
+    }
+
 }

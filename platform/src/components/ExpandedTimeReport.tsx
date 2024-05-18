@@ -90,6 +90,8 @@ export default function ExpandedTimeReport({timeReport, employee, setExpandedTim
         }
     }
 
+    
+
     const addBreak = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();
         if (crm?.crmUuid && employee.uuid && newBreak) {
@@ -146,7 +148,10 @@ export default function ExpandedTimeReport({timeReport, employee, setExpandedTim
                                 <span><Text text={{swe: "Total rasttid", eng: "Total break time"}}/>: {totalBreakTime < 0 ? "0h 0 min" : timeStringFromMs(totalBreakTime)}</span>
                                 <span><Text text={{swe: "Betald tid", eng: "Compensated time"}}/>: {totalWorkTime - totalBreakTime < 0 ? "0h 0 min" : timeStringFromMs((totalWorkTime - totalBreakTime))}</span>
                             </div>
-                            <Button><Text text={{eng: "Accept reported time", swe: "Acceptera rapporterad tid"}} /></Button>
+                            {!employee.trusted 
+                            ? <Button><Text text={{eng: "Accept reported time", swe: "Acceptera rapporterad tid"}} /></Button>
+                            : <Text text={{eng:"Employee is entrusted with their time reports - to change this, navigate to the employee settings tab.", swe: "Den anställde har förtroende för sina tidsrapporter - för att ändra detta, navigera till anställningsinställningstabben"}}/>
+                            }
                         </div>
                     </div>
 

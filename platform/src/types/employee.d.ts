@@ -25,6 +25,7 @@ interface Employee {
     canHandleEmployees: boolean | null,
     canHandleVehicles: boolean | null,
     canAccessCrm: boolean | null,
+    trusted: boolean,
     added: string,
     updated: string
 }

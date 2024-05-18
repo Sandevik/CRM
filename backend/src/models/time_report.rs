@@ -7,7 +7,7 @@ use uuid::Uuid;
 
 use crate::{controllers::database::Database, AppState};
 
-use super::{Model, _break::Break};
+use super::{Model, _break::Break, employee::Employee};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TimeReport {
@@ -121,11 +121,22 @@ impl Model for TimeReport {
             }
         };
         
-        match sqlx::query("UPDATE `crm` . `time_reports` SET `start_date_time` = ?, `end_date_time` = ?, `note` = ?, `work_tasks` = ?, `updated` = ? WHERE `crm_uuid` = ? AND `uuid` = ? AND `schedule_date` = ?")
+        let trusted: bool = match Employee::get_by_uuid(&self.employee_uuid, &self.crm_uuid, data).await {
+            Err(_) => false,
+            Ok(emp) => {
+                match emp {
+                    None => false,
+                    Some(emp) => emp.trusted 
+                }
+            }
+        };
+
+        match sqlx::query("UPDATE `crm` . `time_reports` SET `start_date_time` = ?, `end_date_time` = ?, `note` = ?, `work_tasks` = ?, `accepted` = ?, `updated` = ? WHERE `crm_uuid` = ? AND `uuid` = ? AND `schedule_date` = ?")
         .bind(&self.start_date_time)
         .bind(&self.end_date_time)
         .bind(&self.note)
         .bind(&self.work_tasks)
+        .bind(trusted)
         .bind(Utc::now())
         .bind(existing.crm_uuid.hyphenated().to_string())
         .bind(existing.uuid.hyphenated().to_string())

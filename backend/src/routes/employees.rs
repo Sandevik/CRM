@@ -22,6 +22,7 @@ pub fn employees() -> Scope<impl ServiceFactory<ServiceRequest, Config = (), Res
         .service(disassociate_employee_account)
         .service(update_account_permissions)
         .service(set_admin)
+        .service(set_trusted)
         ;
         
     scope
@@ -299,5 +300,28 @@ async fn set_admin(data: web::Data<AppState>, body: web::Json<SetAdmin>) -> impl
     match emp.update_admin(&data).await {
         Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
         Ok(_) => HttpResponse::Ok().json(Response::<String>::ok("Successfully updated employee admin state", None))
+    }
+}
+#[derive(Serialize, Deserialize)]
+struct SetTrusted {
+    #[serde(rename(serialize = "crmUuid", deserialize = "crmUuid"))]
+    crm_uuid: String,
+    #[serde(rename(serialize = "employeeUuid", deserialize = "employeeUuid"))]
+    employee_uuid: String,
+    trusted: bool
+}
+
+#[put("/set-trusted")]
+async fn set_trusted(data: web::Data<AppState>, body: web::Json<SetTrusted>) -> impl Responder {
+    let current_emp = Employee::get_by_uuid(&Uuid::parse_str(&body.employee_uuid).expect("Could not parse employee_uuid"), &Uuid::parse_str(&body.crm_uuid).expect("Could not parse crm_uuid"), &data).await.expect("Could not find employee");
+    if let None = current_emp {
+        return HttpResponse::NotFound().json(Response::<String>::not_found("Could not find employee"));
+    }
+    let emp: Employee = Employee {
+        ..current_emp.unwrap()
+    };
+    match emp.set_trusted(body.trusted, &data).await {
+        Err(err) => HttpResponse::InternalServerError().json(Response::<String>::internal_server_error(&err.to_string())),
+        Ok(_) => HttpResponse::Ok().json(Response::<String>::ok("Successfully updated trust", None))
     }
 }
