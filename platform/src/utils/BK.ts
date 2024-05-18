@@ -377,26 +377,26 @@ export function maxWeightPerAxle(axleCount: number, bioFuel: boolean, hasGoodSus
 export function calculateMaxLoadWeight(truck: Truck, bkNum: 1|2|3|4): number {
     let totalAxleDistance: number =  0; 
     truck.axleDistances?.split("/").forEach((v) => totalAxleDistance += Number(v));
-    
     let maxVehicleWeight = 0;
     let maxBkWeight = bk(totalAxleDistance, bkNum, false);
-
     const axleGroups = determineAxleGroups(truck);
-    let garanteedAxleLoads: number[] = [];
-    truck.garanteedAxleLoad?.split("+").forEach(weight => garanteedAxleLoads.push(Number(weight))); 
+    let garanteedAxleLoads: number[] = truck.garanteedAxleLoad?.split("+").map(weight => Number(weight)); 
     let biggestAxleDistance = Number(truck.axleDistances.split("/").sort((a,b) => Number(b)-Number(a))[0]);
-
     let currentAxleIsFrontGroup: boolean = true;
     const groupWeights: number[] = []
     axleGroups.forEach((group, i) => {
-        if (Number(truck.axleDistances.split("/")[i]) === biggestAxleDistance) currentAxleIsFrontGroup = false;
+        if ((Number(truck.axleDistances.split("/")[i]) === biggestAxleDistance) || truck.axleCount === 2) currentAxleIsFrontGroup = false;
         switch (group.axleGroup) {
             case 1: 
                 if (!currentAxleIsFrontGroup) {
                     if (groupWeights.length === 0) {
                         groupWeights.push(singleAxlePressure(bkNum, axleGroups.length === 2 && i == 1));
                     } else {
-                        groupWeights[groupWeights.length - 1] += singleAxlePressure(bkNum, axleGroups.length === 2 && i == 1);
+                        if (truck.axleCount !== 2) {
+                            groupWeights[groupWeights.length - 1] += singleAxlePressure(bkNum, axleGroups.length === 2 && i == 1);
+                        } else {
+                            groupWeights.push(singleAxlePressure(bkNum, axleGroups.length === 2 && i == 1));
+                        }
                     }
                 } else {
                     groupWeights.push(singleAxlePressure(bkNum, axleGroups.length === 2 && i == 1));
@@ -408,24 +408,27 @@ export function calculateMaxLoadWeight(truck: Truck, bkNum: 1|2|3|4): number {
             case 3:
                 groupWeights.push(trippleAxlePressure(group.axleDistanceBoggiOrTriple, bkNum))
         }
-
-
     })
-
-    for (let i = 0; i < groupWeights.length; i++) {
-        const garanteedAxleLoad = Number(truck.garanteedAxleLoad?.split("+")[i]);
-        if (groupWeights[i] > garanteedAxleLoad) {
-            maxVehicleWeight += garanteedAxleLoad
+    if (axleGroups.length === 1 && axleGroups[0].axleGroup === 3) {
+        if (groupWeights[0] > garanteedAxleLoads[1]) {
+            maxVehicleWeight += garanteedAxleLoads[1];
         } else {
-            maxVehicleWeight += groupWeights[i];
+            maxVehicleWeight += groupWeights[0];
+        }
+    } else {
+        for (let i = 0; i < groupWeights.length; i++) {
+            const garanteedAxleLoad = garanteedAxleLoads[i];
+            if (groupWeights[i] > garanteedAxleLoad) {
+                maxVehicleWeight += garanteedAxleLoad
+            } else {
+                maxVehicleWeight += groupWeights[i];
+            }
         }
     }
-
     let finalMax = maxVehicleWeight;
     if (finalMax > maxBkWeight) finalMax = maxBkWeight;
     if (finalMax > truck.taxWeight) finalMax = truck.taxWeight;
     if (finalMax > maxWeightPerAxle(truck.axleCount, truck.fuel === "Biodiesel", truck.addtitionalData.goodSuspension)) finalMax = maxWeightPerAxle(truck.axleCount, truck.fuel === "Biodiesel", truck.addtitionalData.goodSuspension);
-
     return finalMax-truck.serviceWeight;
 }
 
@@ -446,9 +449,8 @@ export function determineAxleGroups(truck: Truck): {axleGroup: number, axleDista
     if (numOfAxleDistances === 1) {
         axleGroups.push(1);
         axleGroups.push(1);
-        let t = 0;
         return axleGroups.map(group => { 
-            return {axleGroup: group, axleDistanceBoggiOrTriple: group === 1 ? 0 : totalAxleDistance}
+            return {axleGroup: group, axleDistanceBoggiOrTriple: 0}
         }) 
         
     }

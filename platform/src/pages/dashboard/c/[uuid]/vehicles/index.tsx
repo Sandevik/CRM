@@ -3,6 +3,7 @@ import Navbar from '../../../../../components/Navbar'
 import { calculateMaxLoadWeight } from '@/utils/BK';
 import Input from '@/components/Input';
 import Screen from '@/components/Screen';
+import Text from '@/components/Text';
 
 export default function Index() {
   
@@ -153,26 +154,46 @@ export default function Index() {
     return truck.addtitionalData.dValue >= trailer.additionalData.dValue
   }  
 
-  
-  
-
 
 
   return (
     <Screen>
-      Hanera lager men också bilar och lastbilar m.m (service och uppgifter)
-      Automatisk bk klass uträknare med transportstyrelsens api & bk klass uppgifter
+
+      <div className="flex gap-4">
+        <div className="flex flex-col gap-1">
+          <label htmlFor="vehicle"><Text text={{eng: "Current vehicle", swe: "Nuvarande fordon"}}/></label>
+          <select className='bg-background-light max-w-32 p-1 text-lg' name="vehicle" onChange={(e) => setSelectedVehicle(vehicles.find(vehicle => vehicle.licensePlateNum === e.target.value) as Truck)}>
+            {vehicles.map(vehicle => (<option value={vehicle.licensePlateNum} className="">{vehicle.licensePlateNum}</option>))}
+
+          </select>
+        </div>
+
+        <div className="flex flex-col gap-1">
+        <label htmlFor="bk">Bärighets klass:</label>
+          <select onChange={(e) => setBkNum(+e.target.value as 1|2|3|4)} className='bg-background-light p-1 max-w-11' name="bk" id="">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+          </select>
+        </div>
+      </div>
+
       <br />
-      <label htmlFor="Bk">Bärighets klass:</label>
-      <Input type="number" placeholder='Bk' value={bkNum} onChange={(e)=>setBkNum(+e.target.value as 1|2|3|4)} />
+     
       
+
       <br />
-      <div>Kalkylerad maxlast: {bkSum}kg</div>
+      <div>Kalkylerad maxlast på bk{bkNum}: {bkSum > 0 ? bkSum + "kg" : "Ej körbart"}</div>
 
       <div>Beräkna max antal pallplatser på fordon eller ekipage ex endast bil eller bil + släp</div>
       <div>Beräknad överlastavgift på fordon eller ekipage</div>
 
       <div>Planera körning på specifikt ekipage</div>
+
+      Hanera lager men också bilar och lastbilar m.m (service och uppgifter)
+      Automatisk bk klass uträknare med transportstyrelsens api & bk klass uppgifter
+      <br />
 
 
     </Screen>
