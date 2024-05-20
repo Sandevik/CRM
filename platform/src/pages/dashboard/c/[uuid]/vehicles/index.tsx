@@ -1,18 +1,21 @@
 import React, { useEffect, useState } from 'react'
 import Navbar from '../../../../../components/Navbar'
-import { calculateMaxLoadWeight } from '@/utils/BK';
+import { calculateMaxLoadWeight, calculateOverWeightFee, calculatePalletNumber } from '@/utils/VehicleCalculations';
 import Input from '@/components/Input';
 import Screen from '@/components/Screen';
 import Text from '@/components/Text';
+import TruckGraphic from '@/components/TruckGraphic';
 
 export default function Index() {
   
-  const [vehicles, setVehicles] = useState<(Trailer | Truck)[]>([{
+  const [vehicles, setVehicles] = useState<Truck[]>([{
     licensePlateNum: "STR007",
-    overhangFrontBack: "2610",
+    overhangFrontBack: "1630/3550",
     width: 2550,
     length: 10150,
     vehicleCategory: "Lastbil",
+    cargoLength: 8030,
+    
 
     serviceWeight: 25825,
     totalWeight: 39000,
@@ -36,10 +39,10 @@ export default function Index() {
 
   } as Truck, {
     licensePlateNum: "STR005",
-    overhangFrontBack: "2610",
     width: 2550,
     length: 10150,
     vehicleCategory: "Lastbil",
+    
 
     serviceWeight: 11660,
     totalWeight: 27000,
@@ -63,10 +66,11 @@ export default function Index() {
 
   } as Truck, {
     licensePlateNum: "STR002",
-    overhangFrontBack: "2610",
+    overhangFrontBack: "/2750",
     width: 2550,
-    length: 10150,
+    length: 8550,
     vehicleCategory: "Lastbil",
+    cargoLength: 6650,
 
     serviceWeight: 6880,
     totalWeight: 11990,
@@ -90,7 +94,7 @@ export default function Index() {
 
   } as Truck, {
     licensePlateNum: "STR009",
-    overhangFrontBack: "2610",
+    overhangFrontBack: "+1350/+940",
     width: 2550,
     length: 10150,
     vehicleCategory: "Lastbil",
@@ -115,38 +119,15 @@ export default function Index() {
       dValue: 190
     }
 
-  } as Truck, {
-    licensePlateNum: "STR023",
-    year: 2009,
-    width: 2600,
-    cargoLength: 12400,
-    vehicleCategory: "Släpvagn",
-    overhangFrontBack: "/+1470",
-    length: 14550,
-
-    serviceWeight: 9590,
-    totalWeight: 36000,
-    taxWeight: 36000,
-    garanteedAxleLoad: "18000+18000",
-    maxLoad: 26410,
-    highestTotalWeightForBk1: 36000,
-    allowedLoadWeight: 26410,
-
-    axleCount: 4,
-    axleDistances: "1340/7320/1360",
-
-    additionalData: {
-      dValue: 167
-    }
-} as Trailer])
-  const [selectedVehicle, setSelectedVehicle] = useState<Truck | Trailer>(vehicles[0]);
+  } as Truck])
+  const [selectedVehicle, setSelectedVehicle] = useState<Truck>(vehicles[0]);
   const [bkNum, setBkNum] = useState<1|2|3|4>(1);
-  const [bkSum, setBkSum] = useState(0)
+  const [truckMaxWeight, setTruckMaxWeight] = useState(0)
+  const [loadedWeight, setLoadedWeight] = useState<number>(0);
   
   useEffect(()=>{
-    setBkSum(calculateMaxLoadWeight(selectedVehicle as Truck, bkNum))
+    setTruckMaxWeight(calculateMaxLoadWeight(selectedVehicle as Truck, bkNum))
   },[selectedVehicle, bkNum])
-
 
   
   const conjoinableVehicles = (truck: Truck, trailer: Trailer): boolean => {
@@ -154,7 +135,7 @@ export default function Index() {
     return truck.addtitionalData.dValue >= trailer.additionalData.dValue
   }  
 
-
+  
 
   return (
     <Screen>
@@ -164,7 +145,6 @@ export default function Index() {
           <label htmlFor="vehicle"><Text text={{eng: "Current vehicle", swe: "Nuvarande fordon"}}/></label>
           <select className='bg-background-light max-w-32 p-1 text-lg' name="vehicle" onChange={(e) => setSelectedVehicle(vehicles.find(vehicle => vehicle.licensePlateNum === e.target.value) as Truck)}>
             {vehicles.map(vehicle => (<option value={vehicle.licensePlateNum} className="">{vehicle.licensePlateNum}</option>))}
-
           </select>
         </div>
 
@@ -177,15 +157,34 @@ export default function Index() {
             <option value="4">4</option>
           </select>
         </div>
+
+        <div className="flex flex-col gap-1 h-10">
+          <label htmlFor="loadedWeight"><Text text={{swe: "Lastad vikt (kg)", eng: "Loaded weight (kg)"}}/></label>
+          <Input value={loadedWeight} type='number' onChange={(e) => setLoadedWeight(+e.target.value)} />
+        </div>
+
+        <div className='flex flex-col gap-1'>
+          <span>{calculatePalletNumber(selectedVehicle as Truck) ? "Estimerade pallplatser " + calculatePalletNumber(selectedVehicle as Truck) : "Kunde inte estimera pallplatser"}</span>
+           
+          <div className='absolute right-20 top-8'>
+            <TruckGraphic truck={selectedVehicle} loadedWeight={loadedWeight} overLoaded={loadedWeight > truckMaxWeight}/>
+          </div>          
+          
+        </div>
+
       </div>
+
 
       <br />
      
       
+      
 
       <br />
-      <div>Kalkylerad maxlast på bk{bkNum}: {bkSum > 0 ? bkSum + "kg" : "Ej körbart"}</div>
-
+      <div>Kalkylerad maxlast på bk{bkNum}: {truckMaxWeight > 0 ? truckMaxWeight + "kg" : "Ej körbart"}</div>
+      <br />
+      <div className="text-light-red">{truckMaxWeight - loadedWeight < 0 ? "Estimerad överlastavgift: " + calculateOverWeightFee(truckMaxWeight - loadedWeight) + "kr" : ""}</div>
+      <br />
       <div>Beräkna max antal pallplatser på fordon eller ekipage ex endast bil eller bil + släp</div>
       <div>Beräknad överlastavgift på fordon eller ekipage</div>
 

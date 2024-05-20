@@ -478,3 +478,29 @@ export function determineAxleGroups(truck: Truck): {axleGroup: number, axleDista
         return ret;
     })
 }
+
+export function calculateOverWeightFee(overWeight: number): number {
+    let overWeightFeeSum = 2000;
+    if (Math.abs(overWeight) <= 0) {
+        return 0;
+    }
+    if (Math.abs(overWeight) <= 2000) {
+        overWeightFeeSum += (Math.abs(overWeight) / 100) * 400;
+    } else if (Math.abs(overWeight) <= 4000) {
+        overWeightFeeSum += ((Math.abs(overWeight)) / 100) * 600;
+    } else if (Math.abs(overWeight) <= 6000) {
+        overWeightFeeSum += ((Math.abs(overWeight)) / 100) * 800;
+    } else if (Math.abs(overWeight) > 6000) {
+        overWeightFeeSum += (Math.abs(overWeight) / 100) * 1000;
+    }
+    return overWeightFeeSum;
+}
+
+export function calculatePalletNumber(truck: Truck): number {
+    // denna funktion är inkorrekt
+    if (!truck.cargoLength) return -1;
+    let palletLength = Number((truck.cargoLength / 1200).toFixed(0));
+    if (Number(((truck.cargoLength - 400) / 1200).toFixed(0)) > palletLength) palletLength = Number(((truck.cargoLength - 400) / 1200).toFixed(0));
+    return palletLength * 3 -3;
+
+}

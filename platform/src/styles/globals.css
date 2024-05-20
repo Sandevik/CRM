@@ -204,3 +204,7 @@ input:checked + .slider:before {
 .slider.round:before {
   border-radius: 50%;
 }
+
+.truck-clip-path {
+  clip-path: polygon(24% 0, 100% 0, 86% 100%, 0% 100%);
+}

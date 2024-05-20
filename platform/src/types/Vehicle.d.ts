@@ -2,7 +2,7 @@ interface Vehicle {
     //fordonsidentitet och kaross
     licensePlateNum?: string,
     year?: number,
-    width?: number,
+    width: number,
     cargoLength?: number,
     make?: string,
     vehicleCategory?: string,
@@ -10,7 +10,7 @@ interface Vehicle {
     equipment?: string,
     overhangFrontBack?: string,
     tradeName?: string,
-    length?: number,
+    length: number,
     seats?: number,
     bodyWorkType?: string,
     identificationNum?: string,
