@@ -38,6 +38,34 @@ export default function Index() {
     }
 
   } as Truck, {
+    licensePlateNum: "STR004",
+    overhangFrontBack: "+1400/+1200",
+    width: 2550,
+    length: 8350,
+    vehicleCategory: "Lastbil",
+    
+
+    serviceWeight: 12190,
+    totalWeight: 26000,
+    taxWeight: 25000,
+    garanteedAxleLoad: "8000+21000",
+    maxLoad: 13810,
+    highestTotalWeightForBk1: 25000,
+    allowedLoadWeight: 12810,
+    highestWeightSläpkärra: 26000,
+    
+    axleCount: 3,
+    axleDistances: "4600/1370",
+    wheelCount: 10,
+    couplingType: "Bygel",
+    highestWeightBreakingTrailer: 44000,
+    couplingLoad: "Tryckluft",
+
+    addtitionalData: {
+      dValue: 190
+    }
+
+  } as Truck, {
     licensePlateNum: "STR005",
     width: 2550,
     length: 10150,
@@ -96,7 +124,7 @@ export default function Index() {
     licensePlateNum: "STR009",
     overhangFrontBack: "+1350/+940",
     width: 2550,
-    length: 10150,
+    length: 6300,
     vehicleCategory: "Lastbil",
 
     serviceWeight: 9045,
@@ -119,7 +147,112 @@ export default function Index() {
       dValue: 190
     }
 
+  } as Truck, {
+    licensePlateNum: "STR002",
+    overhangFrontBack: "/2750",
+    width: 2550,
+    length: 8550,
+    vehicleCategory: "Lastbil",
+    cargoLength: 6650,
+
+    serviceWeight: 6880,
+    totalWeight: 11990,
+    taxWeight: 11990,
+    garanteedAxleLoad: "4480+8480",
+    maxLoad: 5110,
+    highestTotalWeightForBk1: 28000,
+    allowedLoadWeight: 14710,
+    highestWeightSläpkärra: 26000,
+    
+    axleCount: 2,
+    axleDistances: "4700",
+    wheelCount: 10,
+    couplingType: "Bygel",
+    highestWeightBreakingTrailer: 44000,
+    couplingLoad: "Tryckluft",
+
+    addtitionalData: {
+      dValue: 190
+    }
+
+  } as Truck, {
+    licensePlateNum: "STR017",
+    overhangFrontBack: "",
+    width: 2500,
+    length: 5950,
+    vehicleCategory: "Lastbil",
+
+    serviceWeight: 7800,
+    totalWeight: 16900,
+    taxWeight: 16900,
+    garanteedAxleLoad: "7100+11500",
+    maxLoad: 9100,
+    highestTotalWeightForBk1: 16900,
+    allowedLoadWeight: 9100,
+    
+    axleCount: 2,
+    axleDistances: "3700",
+    wheelCount: 6,
+    couplingType: "Vändskiva",
+    highestWeightBreakingTrailer: 44000,
+    couplingDistance: 3070,
+    couplingLoad: "Tryckluft",
+
+    addtitionalData: {
+      dValue: 190,
+      goodSuspension: true,
+    }
+
+  } as Truck, {
+    licensePlateNum: "AOW417",
+    overhangFrontBack: "",
+    width: 2600,
+    length: 9750,
+    vehicleCategory: "Lastbil",
+
+    serviceWeight: 10230,
+    totalWeight: 27000,
+    taxWeight: 27000,
+    garanteedAxleLoad: "8000+19000",
+    maxLoad: 16770,
+    highestTotalWeightForBk1: 16900,
+    allowedLoadWeight: 9100,
+    cargoLength: 7200,
+    
+    axleCount: 3,
+    axleDistances: "4900/1360",
+    wheelCount: 6,
+    couplingType: "Bygel",
+    highestWeightBreakingTrailer: 44000,
+    couplingDistance: 3070,
+    couplingLoad: "Tryckluft",
+
+    addtitionalData: {
+      dValue: 190,
+      goodSuspension: true,
+    }
+
   } as Truck])
+
+  const [trailers, setTrailers] = useState<Trailer[]>([
+    {
+      licensePlateNum: "TRA016",
+      width: 2550,
+      length: 9900,
+      vehicleCategory: "Släpvagn",
+      serviceWeight: 4320,
+      totalWeight: 38000,
+      taxWeight: 36000,
+      garanteedAxleLoad: "18000+20000",
+      maxLoad: 33680,
+      couplingDistance: 8590,
+      couplingType: "Tapp",
+      axleCount: 2,
+      axleDistances: "5840/1990"
+    } as Trailer
+  ])
+
+
   const [selectedVehicle, setSelectedVehicle] = useState<Truck>(vehicles[0]);
   const [bkNum, setBkNum] = useState<1|2|3|4>(1);
   const [truckMaxWeight, setTruckMaxWeight] = useState(0)

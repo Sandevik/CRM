@@ -48,7 +48,7 @@ export default function EmployeeTimeReports({selectedTab, employee, setExpandedT
             <label htmlFor="time_period" className="ml-2"><Text text={{swe: "Tidsperiod", eng: "Time Period"}} /></label>
             <select name="time_period" className="bg-background-light text-lg p-1 rounded-md" value={selectedPeriod} onChange={(e) => setSelectedPeriod(e.target.value as "monthly" | "weekly")}>
               <option value="weekly"><Text text={{swe: "Veckovis", eng: "Weekly"}} /></option>
-              <option value="monthly"><Text text={{swe: "Månadsvis", eng: "Monthly"}} /></option>
+              {/* <option value="monthly"><Text text={{swe: "Månadsvis", eng: "Monthly"}} /></option> */}
             </select>
           </div>
 

@@ -502,5 +502,9 @@ export function calculatePalletNumber(truck: Truck): number {
     let palletLength = Number((truck.cargoLength / 1200).toFixed(0));
     if (Number(((truck.cargoLength - 400) / 1200).toFixed(0)) > palletLength) palletLength = Number(((truck.cargoLength - 400) / 1200).toFixed(0));
     return palletLength * 3 -3;
-
 }
+
+export function calculateTruckAndTrailerMaxWeight(truck: Truck, trailer: Trailer) {
+
+} 
+

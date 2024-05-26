@@ -17,11 +17,17 @@
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  font-family: "Bellerose";
+}
+html {
+  scroll-behavior: smooth;
+}
+
+.clip-path {
+  clip-path: polygon(0 0, 100% 7%, 100% 100%, 0% 100%);
+}
+
+@font-face {
+  font-family: "Bellerose";
+  src: url("Bellerose.woff2") format("woff2");
 }

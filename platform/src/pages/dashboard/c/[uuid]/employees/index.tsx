@@ -19,6 +19,7 @@ import Screen from '@/components/Screen';
 export default function Index() {
   const {data: userData} = useContext(AuthContext);
   const [createCustomerActive, setCreateEmployeeActive] = useState<boolean>(false);
+  const [selectedTab, setSelectedTab] = useState<"employees" | "newTimeReports">("employees")
     
     const {data, refetch, nextResult, prevResult, setSearchQuery, searchQuery, searchResult, currentPage, loading, notAllowed} = useReq<Employee>({
       fetchUriNoParams: "/employees/all",
@@ -30,10 +31,21 @@ export default function Index() {
       refetch();
     }
 
+    const getNewTimeReports = async () => {
+      
+    }
+
 
   return (
     <Screen>
-        <h1 className="text-3xl flex justify-center py-2 font-semibold"><Text text={{eng: "Employees", swe: "Anställda"}}/></h1>
+        <nav className="flex gap-2">
+          <button onClick={() => setSelectedTab("employees")} className={`p-1 ${selectedTab === "employees" ? " " : "bg-opacity-55" } bg-accent-color text-black`}><Text text={{eng: "Employees", swe: "Anställda"}} /></button>
+          <button onClick={() => setSelectedTab("newTimeReports")} className={`p-1 ${selectedTab === "newTimeReports" ? " " : "bg-opacity-55" } bg-accent-color text-black`}><Text text={{eng: "New time reports", swe: "Nya tidsrapporteringar"}}/></button>
+        </nav>
+
+       {selectedTab === "employees" && 
+       <>
+       <h1 className="text-3xl flex justify-center py-2 font-semibold"><Text text={{eng: "Employees", swe: "Anställda"}}/></h1>
         {notAllowed 
         ? <NotAllowed /> 
         : <>
@@ -62,6 +74,8 @@ export default function Index() {
             <Button onClick={() => nextResult()}><FaChevronRight /></Button>
           </div>
           </>
+        }
+        </>
         }
     </Screen>
   )
