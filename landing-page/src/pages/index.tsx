@@ -22,10 +22,11 @@ export default function Home() {
         </ul>
       </div>
 
-      <div id='vision' className='h-[100dvh] pt-[80px] bg-background-light flex flex-col-reverse md:grid md:grid-cols-2 text-white p-4 clip-path'>
-        <div className='flex flex-col flex-1 justify-center gap-2 text-2xl tracking-wider'>
+      <div id='vision' className='h-[70dvh] pt-[80px] bg-background-light flex flex-col-reverse md:grid md:grid-cols-2 text-white p-4 clip-path'>
+        <div className='flex flex-col flex-1 justify-end gap-6 mb-12 text-2xl tracking-wider'>
           <p className="font-semibold">Allowing <span className='underline'>you</span> to run your business as smoothly and inexpensively as possible while using a simple system that removes redundant and tedious work.</p>
           <p>Focus on the work that actually <span className='underline'>matters</span> instead trying to manage an old, slow and ugly system!</p>
+          <p>Our focus is to implement the functionality and features that <span className='underline'>you</span> need!</p>
         </div>
         <h2 className='flex justify-end text-6xl font-semibold tracking-widest'>The Vision</h2>
       </div>

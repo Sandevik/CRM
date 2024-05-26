@@ -5,7 +5,7 @@ export default function Navbar() {
   return (
     <div className='flex justify-between px-5  bg-background-light text-white h-16 sticky top-0 z-10'>
         <Link href="#" className='text-4xl tracking-wider font-bold flex h-full'>Coneqt</Link>
-        <nav className='flex h-full items-center gap-10 text-2xl font-semibold tracking-wider'>
+        <nav className='hidden h-full items-center gap-10 text-2xl font-semibold tracking-wider md:flex'>
             <Link className="hover:tracking-widest transition-all hover:text-accent-color" href="#vision">The Vision</Link>
             <Link className="hover:tracking-widest transition-all hover:text-accent-color" href="#functionality">Functionality</Link>
             <Link className="hover:tracking-widest transition-all hover:text-accent-color" href="#">Why Coneqt</Link>
